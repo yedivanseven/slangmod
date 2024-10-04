@@ -1,8 +1,8 @@
-![GitHub Pages](https://github.com/<USER>/<PACKAGE>/actions/workflows/publish-documentation.yml/badge.svg)
-![PyPI](https://github.com/<USER>/<PACKAGE>/actions/workflows/publish-package.yml/badge.svg)
+![GitHub Pages](https://github.com/yedivanseven/slangmod/actions/workflows/publish-documentation.yml/badge.svg)
+![PyPI](https://github.com/yedivanseven/slangmod/actions/workflows/publish-package.yml/badge.svg)
 
-# `<PACKAGE>`
-_One-line description of `<PACKAGE>`._
+# slangmod
+_One-line description of slangmod._
 
 ## Usage
 Use this repository as a template when using the [swak](https://github.com/yedivanseven/swak) package.
@@ -21,11 +21,11 @@ Next, look for and replace other occurrences of
 Finally, take a good look at the files in the `.github/` folder and taylor them to your needs.
 
 ## Useful Links
-[PyPI](https://pypi.org/project/<PACKAGE>/)
+[PyPI](https://pypi.org/project/slangmod/)
 
-[Pipfile](https://github.com/<USER>/<PACKAGE>/blob/main/Pipfile)
+[Pipfile](https://github.com/yedivanseven/slangmod/blob/main/Pipfile)
 
-[repository](https://github.com/<USER>/<PACKAGE>)
+[repository](https://github.com/yedivanseven/slangmod)
 
 ## Documentation
-The API documentation to `<PACKAGE>` is hosted on [GitHub Pages](https://<USER>.github.io/<PACKAGE>/).
+The API documentation to `slangmod` is hosted on [GitHub Pages](https://yedivanseven.github.io/<PACKAGE>/).

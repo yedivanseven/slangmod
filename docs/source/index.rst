@@ -1,6 +1,6 @@
-Welcome to <PACKAGE>'s documentation!
+Welcome to slangmod's documentation!
 =================================
-*One-line description of <PACKAGE>.*
+*One-line description of slangmod.*
 
 
 .. toctree::
@@ -9,7 +9,7 @@ Welcome to <PACKAGE>'s documentation!
    :caption: API Reference
 
    files
-   to 
+   to
    include
 
 

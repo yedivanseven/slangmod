@@ -35,7 +35,7 @@ jobs:
 #        run: pipenv sync -categories="extra"
       - name: Install sphinx
         run: pipenv install --dev sphinx sphinx-rtd-theme
-#      - name: Install package
+#      - name: Install slangmod
 #        run: pipenv run pip install .[like]
       - name: Build the docs
         run: |

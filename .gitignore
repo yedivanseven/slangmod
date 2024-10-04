@@ -140,3 +140,6 @@ version.env
 
 # Ruff
 .ruff_cache/
+
+# Data
+data/

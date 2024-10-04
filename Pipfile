@@ -6,8 +6,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[[source]]
+url = "https://download.pytorch.org/whl/cpu"
+verify_ssl = true
+name = "cpu"
+
 [packages]
 swak = "*"
+tokenizers = "*"
 
 [dev-packages]
 jupyter = "*"
@@ -16,9 +22,5 @@ sphinx = "*"
 sphinx-rtd-theme = "*"
 build = "*"
 
-# [extra]
-# category = "dependencies"
-# go = "here"
-
-# [like]
-# this = {version="*", index="pypi"}
+[cpu]
+torch = {version="*", index="cpu"}

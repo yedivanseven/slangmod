@@ -6,42 +6,37 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "package"
+name = "slangmod"
 dynamic = ["version"]
 requires-python = ">=3.12"
 dependencies = [
   "swak",
+  "tokenizers"
 ]
-authors = [{name = "<AUTHOR>", email = "your@email.com"}]
-description = "One-line description of <PACKAGE>."
+authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]
+description = "Small language model."
 readme = "README.md"
 keywords = [
-    "some",
-    "keywords",
+    "natural language",
+    "generative AI",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Utilities",
     "License :: OSI Approved :: MIT License",
-]
-# https://pypi.org/classifiers/
-
-[project.urls]
-Documentation = "https://<USER>.github.io/<PACKAGE>/"
-Repository = "https://github.com/<USER>/<PACKAGE>.git"
-Issues = "https://github.com/<USER>/<PACKAGE>/issues"
-Changelog = "https://github.com/<USER>/<PACKAGE>/blob/main/CHANGELOG.md"
-
-[project.optional-dependencies]
-extras = [
-  "go",
-  "here",
 ]
 
 [project.scripts]
-package = "package.main:run"
+slangmod = "slangmod.main:run"
+
+[project.urls]
+Documentation = "https://yedivanseven.github.io/slangmod/"
+Repository = "https://github.com/yedivanseven/slangmod.git"
+Issues = "https://github.com/yedivanseven/slangmod/issues"
+Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages]
+find = {exclude = ["data"]}
 
 [tool.setuptools_scm]
 version_file = "version.env"
