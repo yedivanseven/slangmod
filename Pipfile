@@ -1,0 +1,24 @@
+[requires]
+python_version = "3.12"
+
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+swak = "*"
+
+[dev-packages]
+jupyter = "*"
+ruff = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+build = "*"
+
+# [extra]
+# category = "dependencies"
+# go = "here"
+
+# [like]
+# this = {version="*", index="pypi"}

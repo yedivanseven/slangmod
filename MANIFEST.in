@@ -1,0 +1,8 @@
+prune tests
+prune Notebooks
+prune docs
+prune site
+prune .ruff_cache
+prune *.egg-info
+prune .github
+exclude .gitignore .python_version version.env Pipfile Pipfile.lock

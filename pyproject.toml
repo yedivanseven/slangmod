@@ -1,0 +1,83 @@
+[build-system]
+requires = [
+    "setuptools>=75",
+    "setuptools_scm>=8.1",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "package"
+dynamic = ["version"]
+requires-python = ">=3.12"
+dependencies = [
+  "swak",
+]
+authors = [{name = "<AUTHOR>", email = "your@email.com"}]
+description = "One-line description of <PACKAGE>."
+readme = "README.md"
+keywords = [
+    "some",
+    "keywords",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: MIT License",
+]
+# https://pypi.org/classifiers/
+
+[project.urls]
+Documentation = "https://<USER>.github.io/<PACKAGE>/"
+Repository = "https://github.com/<USER>/<PACKAGE>.git"
+Issues = "https://github.com/<USER>/<PACKAGE>/issues"
+Changelog = "https://github.com/<USER>/<PACKAGE>/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+extras = [
+  "go",
+  "here",
+]
+
+[project.scripts]
+package = "package.main:run"
+
+[tool.setuptools_scm]
+version_file = "version.env"
+version_file_template = "SETUPTOOLS_SCM_PRETEND_VERSION={version}"
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+ignore = ["PLR"]
+select = [
+    "F",
+    "E",
+    "W",
+    "N",
+    "T",
+    "UP",
+    "YTT",
+    "ASYNC",
+    "C4",
+    "T100",
+    "EXE",
+    "ISC",
+    "ICN",
+    "PIE",
+    "PYI",
+    "RSE",
+    "SLOT",
+    "SIM",
+    "INT",
+    "PTH",
+    "PL",
+    "NPY",
+    "PERF",
+    "FURB"
+]
