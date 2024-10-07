@@ -1,4 +1,4 @@
-from .books import books
+from .books import BookLoader, load_books
 from .tokenizer import (
     TokenizerSaver,
     save_tokenizer,
@@ -7,7 +7,8 @@ from .tokenizer import (
 )
 
 __all__ = [
-    'books',
+    'BookLoader',
+    'load_books',
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',
