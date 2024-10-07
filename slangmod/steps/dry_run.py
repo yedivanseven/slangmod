@@ -1,4 +1,4 @@
 from ..config import config
 
 def dry_run() -> None:
-    print(repr(config))
+    print(repr(config))  # noqa: T201
