@@ -29,8 +29,8 @@ class Main(JsonObject):
     learning_rate: float = 0.0001
     gamma: float = 0.99
     max_epochs: int = 100
-    warmup: int = 5
-    patience: int = 5
+    warmup: int = 1
+    patience: int = 2
     max_n: int = 1024 * 8
 
     @property
