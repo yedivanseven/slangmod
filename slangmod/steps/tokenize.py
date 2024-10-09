@@ -8,6 +8,7 @@ from ..ml import train_tokenizer
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 tokenize = Pipe[tuple[()], [tuple[()]]](
+    LOGGER.info('Starting step "tokenize".'),
     LOGGER.debug(f'Scanning folder "{config.books}" for books.'),
     LOGGER.debug(f'Found books:\n{load_books}\nlogging from module'),
     LOGGER.info('Training tokenizer.'),
@@ -15,7 +16,7 @@ tokenize = Pipe[tuple[()], [tuple[()]]](
         train_tokenizer,
         load_books.books
     ),
-    LOGGER.info(f'Saving trained tokenizer to "{config.tokenizer_file}"'),
+    LOGGER.debug(f'Saving trained tokenizer to "{config.tokenizer_file}"'),
     save_tokenizer,
-    LOGGER.info('Done training tokenizer.')
+    LOGGER.info('Finished step "tokenize".')
 )

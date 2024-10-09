@@ -47,17 +47,10 @@ tokenizer.add_special_tokens(special_tokens)
 tokenizer.normalizer = normalizer
 tokenizer.pre_tokenizer = pre_tokenizer
 tokenizer.decoder = decoder
-# Switch on padding and truncation
-tokenizer.enable_padding(
-    direction='left',
-    pad_token='[PAD]',
-    length=config.context
-)
-tokenizer.enable_truncation(config.context)
 
 # Trainer matching the Tokenizer
 trainer = tokenizers.trainers.BpeTrainer(
-    vocab_size=config.vocab,
+    vocab_size=config.vocab_size,
     special_tokens=special_tokens,
     end_of_word_suffix='</w>'
 )
