@@ -12,5 +12,5 @@ __all__ = [
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',
-    'load_tokenizer'
+    'load_tokenizer',
 ]

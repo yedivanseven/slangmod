@@ -7,7 +7,7 @@ from ..ml import train_tokenizer
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-tokenize = Pipe[tuple[()], [tuple[()]]](
+tokenize = Pipe[[tuple[()]], tuple[()]](
     LOGGER.info('Starting step "tokenize".'),
     LOGGER.debug(f'Scanning folder "{config.books}" for books.'),
     LOGGER.debug(f'Found books:\n{load_books}\nlogging from module'),

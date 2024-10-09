@@ -1,4 +1,6 @@
+import torch as pt
 import torch.nn as ptn
+from swak.funcflow import Partial
 from swak.pt import device
 from swak.pt.types import Tensor, Tensors1T, Dtype, Device
 from .positions import Positional, Sinusoidal
@@ -98,7 +100,7 @@ class Model(ptn.Module):
         )
 
 
-model = Model(
+_model = Model(
     config.mod_dim,
     config.context,
     config.vocab_size,
@@ -111,3 +113,5 @@ model = Model(
     config.dtype,
     device
 )
+model = pt.compile(_model)
+compile_model = Partial[Model](pt.compile, _model)

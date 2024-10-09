@@ -8,7 +8,8 @@ from .data import (
     make_test_data,
     make_validation_data,
 )
-from .model import Model, model
+from .model import Model, model, compile_model
+from .trainer import Trainer, train_model
 
 __all__ = [
     'train_tokenizer',
@@ -21,5 +22,8 @@ __all__ = [
     'make_test_data',
     'make_validation_data',
     'Model',
-    'model'
+    'model',
+    'compile_model',
+    'Trainer',
+    'train_model'
 ]
