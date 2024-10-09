@@ -10,8 +10,8 @@ name = "slangmod"
 dynamic = ["version"]
 requires-python = ">=3.12"
 dependencies = [
-  "swak",
-  "tokenizers"
+  "swak >= 0.1.2",
+  "tokenizers >= 0.20"
 ]
 authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]
 description = "Small language model."

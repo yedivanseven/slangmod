@@ -14,8 +14,6 @@ name = "cpu"
 [packages]
 swak = "*"
 tokenizers = "*"
-matplotlib = "*"
-ipympl = "*"
 
 [dev-packages]
 jupyter = "*"

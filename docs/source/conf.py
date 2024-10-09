@@ -6,8 +6,8 @@ PACKAGE = find_packages('../..', exclude=['test*', 'Notebook*'])[0]
 project = PACKAGE
 copyright = '2024, Georg Heimel'
 author = 'Georg Heimel'
-version = meta.version(PACKAGE)
-release = version
+release = meta.version(PACKAGE)
+version = '.'.join(release.split('.')[:2])
 
 extensions = [
     'sphinx.ext.autodoc',
