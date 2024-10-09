@@ -20,7 +20,7 @@ loss = ptn.CrossEntropyLoss(
 optimizer = Curry[pto.Adam](pto.Adam, config.learning_rate)
 scheduler = Curry[pts.ExponentialLR](pts.ExponentialLR, config.gamma)
 
-train_model = Trainer(
+trainer = Trainer(
     config.batch_size,
     config.max_epochs,
     loss,
