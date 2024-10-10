@@ -5,7 +5,7 @@ from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
 from swak.funcflow.loggers import PassThroughStdOut
-from swak.funcflow.misc import identity
+from swak.funcflow import identity
 from ..config import config
 from ..io import load_books, load_tokenizer
 from ..ml import Encoder
@@ -22,7 +22,8 @@ LOGGER = PassThroughStdOut(__name__, config.log_level)
 load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     LOGGER.debug(f'Loading books from folder "{config.books}".'),
     load_books,
-    LOGGER.debug('Loading pre-trained tokenizer and encoding books.'),
+    LOGGER.debug(f'Loading pre-trained tokenizer "{config.tokenizer_file}".'),
+    LOGGER.debug('Encoding books.'),
     Encoder(load_tokenizer()),
     Create(pt.int64, device),
     LOGGER.debug('Splitting into train, test, and validation data.'),
