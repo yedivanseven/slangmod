@@ -49,6 +49,7 @@ class Model(ptn.Module):
             nhead=n_heads,
             dim_feedforward=4 * mod_dim,
             dropout=dropout,
+            activation='gelu',
             batch_first=True,
             norm_first=False,
             bias=bias,
@@ -100,7 +101,7 @@ class Model(ptn.Module):
         )
 
 
-_model = Model(
+model = Model(
     config.mod_dim,
     config.context,
     config.vocab_size,
@@ -113,5 +114,5 @@ _model = Model(
     config.dtype,
     device
 )
-model = pt.compile(_model)
-compile_model = Partial[Model](pt.compile, _model)
+compiled_model = pt.compile(model)
+compile_model = Partial[Model](pt.compile, model)
