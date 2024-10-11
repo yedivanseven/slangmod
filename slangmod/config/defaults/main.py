@@ -1,6 +1,7 @@
 import importlib.metadata as meta
 import torch as pt
 from swak.jsonobject import JsonObject
+from swak.jsonobject.fields import Maybe
 from swak.pt import device
 from swak.pt.types import Dtype
 
@@ -31,7 +32,7 @@ class Main(JsonObject):
     max_epochs: int = 100
     warmup: int = 1
     patience: int = 2
-    max_n: int = 1024 * 8
+    max_n: Maybe[int] = None
 
     @property
     def tokenizer_file(self) -> str:
