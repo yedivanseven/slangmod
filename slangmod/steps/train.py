@@ -14,7 +14,8 @@ from ..ml import TrainData, TestData
 from ..ml import make_train_data, make_test_data, make_validation_data
 from ..ml import Model, compile_model
 from ..ml import trainer
-from .log_messages.train import log_data_sizes
+from ..ml import validate
+from .log_messages.train import log_data_sizes, log_validation_metrics
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
@@ -61,4 +62,7 @@ train = Pipe[[tuple[()]], tuple[Model, TrainData, TestData, TestData]](
         identity,
     ),
     LOGGER.info('Validating model ...'),
+    validate,
+    LOGGER.info(log_validation_metrics),
+    LOGGER.info('Finished step "train".'),
 )

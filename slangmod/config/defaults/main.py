@@ -20,14 +20,14 @@ class Main(JsonObject):
     frac_test: float = 0.1
     frac_validate: float = 0.1
     mod_dim: int = 8
-    n_heads: int = 4
+    n_heads: int = 2
     n_layers: int = 1
     scale_grad_by_freq: bool = True
     dropout: float = 0.1
     bias: bool = True
     batch_size: int = 512
     label_smoothing: float = 0.0
-    learning_rate: float = 0.0001
+    learning_rate: float = 0.001
     gamma: float = 0.99
     max_epochs: int = 100
     warmup: int = 1

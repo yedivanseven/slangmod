@@ -10,6 +10,7 @@ from .data import (
 )
 from .model import Model, model, compile_model, compiled_model
 from .trainer import Trainer, trainer
+from .validator import validate
 
 __all__ = [
     'train_tokenizer',
@@ -26,5 +27,6 @@ __all__ = [
     'compile_model',
     'compiled_model',
     'Trainer',
-    'trainer'
+    'trainer',
+    'validate'
 ]
