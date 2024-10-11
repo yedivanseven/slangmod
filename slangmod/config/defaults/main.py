@@ -32,7 +32,7 @@ class Main(JsonObject):
     max_epochs: int = 100
     warmup: int = 1
     patience: int = 2
-    max_n: Maybe[int] = None
+    max_n: Maybe[int](int) = None
 
     @property
     def tokenizer_file(self) -> str:
