@@ -1,4 +1,4 @@
-from .tokenizer import train_tokenizer
+from .tokenizers import train_tokenizer
 from .encoder import Encoder
 from .splitter import TrainTestValidationSplitter, split_train_test_validation
 from .data import (

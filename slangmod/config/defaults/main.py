@@ -1,5 +1,6 @@
 import importlib.metadata as meta
 import torch as pt
+from pathlib import Path
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Maybe
 from swak.pt import device
@@ -13,8 +14,9 @@ class Main(JsonObject):
     package: str = PACKAGE
     version: str = VERSION
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
-    books: str = '/home/georg/Projects/slangmod/data/books'
-    workdir: str = '/home/georg/Projects/slangmod/data'
+    books: Path = '/home/georg/Projects/slangmod/data/books'
+    workdir: Path = '/home/georg/Projects/slangmod/data'
+    tokenizer: str = 'bpe'  # 'bpe' or 'wordpiece'
     vocab_size: int = 512
     context: int = 128
     frac_test: float = 0.1
@@ -26,25 +28,25 @@ class Main(JsonObject):
     dropout: float = 0.1
     bias: bool = True
     batch_size: int = 512
-    label_smoothing: float = 0.0
+    label_smoothing: float = 0.1
     learning_rate: float = 0.001
     gamma: float = 0.99
-    max_epochs: int = 100
+    max_epochs: int = 64
     warmup: int = 1
-    patience: int = 2
+    patience: Maybe[int](int) = 2
     max_n: Maybe[int](int) = None
 
     @property
     def tokenizer_file(self) -> str:
-        return '/' + self.workdir.strip(' /') + '/' + 'tokenizer.json'
+        return str((self.workdir / 'tokenizer.json').resolve())
 
     @property
     def checkpoint_file(self) -> str:
-        return '/' + self.workdir.strip(' /') + '/' + 'checkpoint.pt'
+        return str((self.workdir / 'checkpoint.pt').resolve())
 
     @property
     def model_file(self) -> str:
-        return '/' + self.workdir.strip(' /') + '/' + 'model.pt'
+        return str((self.workdir / 'model.pt').resolve())
 
     @property
     def dtype(self) -> Dtype:

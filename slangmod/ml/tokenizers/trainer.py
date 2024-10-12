@@ -1,14 +1,18 @@
 from tokenizers import Tokenizer
 from tokenizers.trainers import Trainer
+from swak.misc import ArgRepr
+from .tokenizer import tokenizer
+from .algos import algo
 
 
-class TokenizerTrainer:
+class TokenizerTrainer(ArgRepr):
 
     def __init__(
             self,
             tokenizer: Tokenizer,
             trainer: Trainer
     ) -> None:
+        super().__init__(tokenizer, trainer)
         self.tokenizer = tokenizer
         self.trainer = trainer
 
@@ -19,3 +23,6 @@ class TokenizerTrainer:
     def __call__(self, files: list[str]) -> Tokenizer:
         self.tokenizer.train(files, self.trainer)
         return self.tokenizer
+
+
+train_tokenizer = TokenizerTrainer(tokenizer, algo.trainer)
