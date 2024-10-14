@@ -1,20 +1,23 @@
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Tensor
+from swak.pt.types import Tensor, Dtype
 from swak.pt.train import TestDataBase, TrainDataBase
-from swak.funcflow import Partial
+from swak.funcflow import Curry
 from ..config import config
 from .types import Batch, Batches
 
 
 class TestData(TestDataBase):
 
-    def __init__(self, context: int, data: Tensor) -> None:
-        self.context = context
+    def __init__(self, data: Tensor, context: int, dtype: Dtype) -> None:
         self.data = data.unfold(0, context + 1, 1)
+        self.context = context
+        self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            context
-        ).to(data.device)
+            context,
+            device=data.device,
+            dtype=dtype
+        )
         self.__indices = pt.randperm(self.n - self.context)
 
     def __repr__(self) -> str:
@@ -34,12 +37,15 @@ class TestData(TestDataBase):
 
 class TrainData(TrainDataBase):
 
-    def __init__(self, context: int, data: Tensor) -> None:
-        self.context = context
+    def __init__(self, data: Tensor, context: int, dtype: Dtype) -> None:
         self.data = data.unfold(0, context + 1, 1)
+        self.context = context
+        self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            context
-        ).to(data.device)
+            context,
+            device=data.device,
+            dtype=dtype
+        )
         self.__indices = pt.randperm(self.n - self.context)
 
     def __repr__(self) -> str:
@@ -64,6 +70,18 @@ class TrainData(TrainDataBase):
         return iter(((src, self.mask, None, True), tgt) for src, tgt in zipped)
 
 
-make_train_data = Partial[TrainData](TrainData, config.context)
-make_test_data = Partial[TestData](TestData, config.context)
-make_validation_data = Partial[TestData](TestData, config.context)
+make_train_data = Curry[TrainData](
+    TrainData,
+    config.context,
+    config.dtype
+)
+make_test_data = Curry[TestData](
+    TestData,
+    config.context,
+    config.dtype
+)
+make_validation_data = Curry[TestData](
+    TestData,
+    config.context,
+    config.dtype
+)

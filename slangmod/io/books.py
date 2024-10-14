@@ -7,7 +7,7 @@ class BookLoader(ArgRepr):
 
     def __init__(self, path: str) -> None:
         super().__init__(path)
-        self.path = str(Path(config.books).resolve())
+        self.path = str(Path(path).resolve())
 
     def __str__(self) -> str:
         return '\n'.join([f'"{book}"' for book in self.books])
@@ -27,7 +27,7 @@ class BookLoader(ArgRepr):
         return text
 
     def __call__(self) -> str:
-        return '\n\n'.join(map(self.read, self.books))
+        return ' [EOS] '.join(map(self.read, self.books))
 
 
 load_books = BookLoader(config.books)

@@ -17,7 +17,8 @@ loss = ptn.CrossEntropyLoss(
     ignore_index=0,
     label_smoothing=config.label_smoothing
 )
-optimizer = Curry[pto.Adam](pto.Adam, config.learning_rate)
+#optimizer = Curry[pto.Adam](pto.Adam, config.learning_rate)
+optimizer = Curry[pto.Adadelta](pto.Adadelta, 1.0)
 scheduler = Curry[pts.ExponentialLR](pts.ExponentialLR, config.gamma)
 
 trainer = Trainer(

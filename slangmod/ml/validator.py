@@ -17,13 +17,13 @@ class Validator:
 
         model.eval()
         with pt.no_grad():
-            (pred,) = model(*src)
+            (prediction,) = model(*src)
 
-        validation_loss = self.loss(pred, tgt).item()
+        validation_loss = self.loss(prediction, tgt).item()
 
-        top1 = pred[:, :, -1].topk(1, -1).indices
-        top2 = pred[:, :, -1].topk(2, -1).indices
-        top5 = pred[:, :, -1].topk(5, -1).indices
+        top1 = prediction[:, :, -1].topk(1, -1).indices
+        top2 = prediction[:, :, -1].topk(2, -1).indices
+        top5 = prediction[:, :, -1].topk(5, -1).indices
 
         acc1 = (tgt[:, -1:].expand_as(top1) == top1).float().mean().item()
         acc2 = (tgt[:, -1:].expand_as(top2) == top2).float().mean().item()

@@ -2,6 +2,9 @@ from tokenizers import Tokenizer
 from .algos import algo
 from .common import special_tokens, normalizer, pre_tokenizer
 
+__all__ = ['tokenizer']
+
+
 # Actual tokenizer pipeline
 tokenizer = Tokenizer(algo.model)
 tokenizer.add_tokens(special_tokens)

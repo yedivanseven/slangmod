@@ -4,6 +4,11 @@ from swak.misc import ArgRepr
 from .tokenizer import tokenizer
 from .algos import algo
 
+__all__ = [
+    'TokenizerTrainer',
+    'train_tokenizer'
+]
+
 
 class TokenizerTrainer(ArgRepr):
 

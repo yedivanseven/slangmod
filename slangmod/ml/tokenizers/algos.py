@@ -12,7 +12,9 @@ from .common import special_tokens
 __all__ = [
     'BPETokenizer',
     'WordPieceTokenizer',
-    'algo'
+    'bpe',
+    'wordpiece',
+    'algo',
 ]
 
 
@@ -74,7 +76,7 @@ class WordPieceTokenizer(ArgRepr):
             continuing_subword_prefix='##'
         )
 
-algo = {
-    'bpe': BPETokenizer(config.vocab_size, special_tokens, config.dropout),
-    'wordpiece': WordPieceTokenizer(config.vocab_size, special_tokens)
-}[config.tokenizer.strip().lower()]
+
+bpe = BPETokenizer(config.vocab_size, special_tokens, config.dropout)
+wordpiece = WordPieceTokenizer(config.vocab_size, special_tokens)
+algo = {'bpe': bpe, 'wordpiece':wordpiece}[config.tokenizer.strip().lower()]
