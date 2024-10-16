@@ -5,7 +5,7 @@ from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
 from swak.funcflow.loggers import PassThroughStdOut
-from swak.funcflow import identity
+from swak.funcflow import identity, apply
 from ..config import config
 from ..io import load_books, load_tokenizer
 from ..ml import Encoder
@@ -19,13 +19,21 @@ from .log_messages.train import log_data_sizes, log_validation_metrics
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-
 load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
-    LOGGER.debug(f'Loading books from folder "{config.books}".'),
-    load_books,
-    LOGGER.debug(f'Loading pre-trained tokenizer "{config.tokenizer_file}".'),
+    Fork[[tuple[()]], tuple[Encoder, str]](
+        Pipe[[tuple[()]], Encoder](
+            LOGGER.debug(f'Loading tokenizer "{config.tokenizer_file}".'),
+            load_tokenizer,
+            Encoder
+        ),
+        Pipe[[tuple[()]], str](
+            LOGGER.debug(f'Loading books from folder "{config.books}".'),
+            load_books
+        )
+    ),
     LOGGER.debug('Encoding books.'),
-    Encoder(load_tokenizer()),
+    apply,
+    LOGGER.debug(f'Converting to tensor on device "{device.type}".'),
     Create(pt.int64, device),
     LOGGER.debug('Splitting into train, test, and validation data.'),
     split_train_test_validation,
@@ -37,7 +45,6 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     ),
     LOGGER.info(log_data_sizes)
 )
-
 
 train_model = Pipe[[Model, TrainData, TestData], Model](
     LOGGER.info('Training model.'),
@@ -61,7 +68,7 @@ train = Pipe[[tuple[()]], tuple[Model, TrainData, TestData, TestData]](
         train_model,
         identity,
     ),
-    LOGGER.info('Validating model ...'),
+    LOGGER.info('Validating model.'),
     validate,
     LOGGER.info(log_validation_metrics),
     LOGGER.info('Finished step "train".'),

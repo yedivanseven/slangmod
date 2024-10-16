@@ -6,7 +6,7 @@ from tokenizers.decoders import (
 )
 from tokenizers.trainers import Trainer, BpeTrainer, WordPieceTrainer
 from swak.misc import ArgRepr
-from ...config import config
+from ...config import config, Tokenizers
 from .common import special_tokens
 
 __all__ = [
@@ -79,4 +79,4 @@ class WordPieceTokenizer(ArgRepr):
 
 bpe = BPETokenizer(config.vocab_size, special_tokens, config.dropout)
 wordpiece = WordPieceTokenizer(config.vocab_size, special_tokens)
-algo = {'bpe': bpe, 'wordpiece':wordpiece}[config.tokenizer.strip().lower()]
+algo = {Tokenizers.BPE: bpe, Tokenizers.WORDPIECE :wordpiece}[config.tokenizer]

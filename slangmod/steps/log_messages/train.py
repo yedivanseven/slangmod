@@ -10,11 +10,5 @@ def log_data_sizes(
             f'test={test.n}, and validation={validation.n}.')
 
 
-def log_validation_metrics(
-        loss: float,
-        acc1: float,
-        acc2: float,
-        acc5: float
-) -> str:
-    return (f'Loss: {loss:7.5f} | accuracy: {acc1:7.5f} | top-2 accuracy: '
-            f'{acc2:7.5f} | top-5 accuracy {acc5:7.5f}')
+def log_validation_metrics(loss: float) -> str:
+    return f'Validation loss: {loss:7.5f}'

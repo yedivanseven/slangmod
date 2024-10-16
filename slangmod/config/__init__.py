@@ -1,10 +1,13 @@
 from swak.cli import EnvParser, ArgParser, EPILOG
 from .defaults import main, Main
+from .enums import Tokenizers, Generators
 
 __all__ = [
     'Main',
     'config',
     'actions',
+    'Tokenizers',
+    'Generators'
 ]
 
 # Parse the environment and update the default config accordingly
