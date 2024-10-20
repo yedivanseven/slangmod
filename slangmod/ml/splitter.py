@@ -11,21 +11,22 @@ class TrainTestValidationSplitter(ArgRepr):
         self.context = context
         self.test = test
         self.validation = validation
-        self.__perm = None
+        self.__rand = None
 
     @property
     def train(self) -> float:
         return 1.0 - self.test - self.validation
 
     def __call__(self, data: Tensor) -> Tensors3T:
-        n = data.shape[0]
-        self.__perm = pt.randperm(n) if self.__perm is None else self.__perm
+        sequences = data.unfold(0, self.context + 1, 1)
+        n = sequences.shape[0]
+        self.__rand = pt.randperm(n) if self.__rand is None else self.__rand
         test_index = int(n * self.train)
         validation_index = int(n * (self.train + self.test))
         return (
-            data[self.__perm][:test_index + self.context],
-            data[self.__perm][test_index + 1:validation_index + self.context],
-            data[self.__perm][validation_index + 1:]
+            sequences[self.__rand][:test_index],
+            sequences[self.__rand][test_index:validation_index],
+            sequences[self.__rand][validation_index:]
         )
 
 

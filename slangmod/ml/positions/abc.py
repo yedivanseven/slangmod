@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from swak.pt.types import Device, Dtype
+from swak.pt.types import Device, Dtype, Tensor
 
 
 class Positional(ABC):
@@ -16,5 +16,5 @@ class Positional(ABC):
 
     @property
     @abstractmethod
-    def encodings(self) -> int:
+    def encodings(self) -> Tensor:
         ...

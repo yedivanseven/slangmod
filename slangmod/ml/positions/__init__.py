@@ -5,3 +5,5 @@ __all__ = [
     'Positional',
     'Sinusoidal',
 ]
+
+# ToDo: Add learnable encodings and refactor

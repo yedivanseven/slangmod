@@ -14,7 +14,7 @@ class Model(ptn.Module):
             mod_dim: int,
             context: int,
             vocab_size: int,
-            pos_enc_cls: type[Positional],
+            positional: type[Positional],
             n_heads: int,
             n_layers: int,
             scale_grad_by_freq: bool,
@@ -27,7 +27,7 @@ class Model(ptn.Module):
         self.mod_dim = mod_dim
         self.context = context
         self.vocab_size = vocab_size
-        self.pos_enc_cls = pos_enc_cls
+        self.positional = positional(mod_dim, context, dtype, device)
         self.n_heads = n_heads
         self.n_layers = n_layers
         self.scale_grad_by_freq = scale_grad_by_freq
@@ -43,7 +43,6 @@ class Model(ptn.Module):
             dtype=dtype,
             device=device,
         )
-        self.positional = pos_enc_cls(mod_dim, context, dtype, device)
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=mod_dim,
             nhead=n_heads,

@@ -17,24 +17,24 @@ class Main(JsonObject):
     books: resolve = '/home/georg/Projects/slangmod/data/books'
     workdir: resolve = '/home/georg/Projects/slangmod/data'
     tokenizer: Lower() = 'bpe'  # 'bpe' or 'wordpiece'
-    vocab_size: int = 512
-    context: int = 128
+    vocab_size: int = 1024
+    context: int = 256
     frac_test: float = 0.1
     frac_validate: float = 0.1
-    mod_dim: int = 8
+    mod_dim: int = 16
     n_heads: int = 2
-    n_layers: int = 1
+    n_layers: int = 2
     scale_grad_by_freq: bool = True
     dropout: float = 0.1
     bias: bool = True
-    batch_size: int = 512
+    batch_size: int = 256
     label_smoothing: float = 0.1
     learning_rate: float = 0.001
     gamma: float = 0.99
-    max_epochs: int = 64
-    warmup: int = 1
-    patience: Maybe[int](int) = 2
-    max_n: Maybe[int](int) = 2048
+    max_epochs: int = 256
+    warmup: int = 5
+    patience: Maybe[int](int) = 5
+    max_n: Maybe[int](int) = 4096
 
     @property
     def tokenizer_file(self) -> str:
