@@ -1,9 +1,16 @@
-from .abc import Positional
-from .sinusoidal import Sinusoidal
+from .sinusoidal import Sinusoidal, sinusoidal
+from .learnable import Learnable, learnable
+from ...config import config, Positions
 
 __all__ = [
-    'Positional',
     'Sinusoidal',
+    'sinusoidal',
+    'Learnable',
+    'learnable',
+    'positions'
 ]
 
-# ToDo: Add learnable encodings and refactor
+positions = {
+    Positions.SINUSOIDAL: sinusoidal,
+    Positions.LEARNABLE: learnable
+}[config.model.positions]

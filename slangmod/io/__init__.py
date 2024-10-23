@@ -1,4 +1,4 @@
-from .books import BookLoader, load_books
+from .corpus import CorpusDiscovery, CorpusLoader, discover_corpus, load_corpus
 from .tokenizer import (
     TokenizerSaver,
     save_tokenizer,
@@ -7,8 +7,10 @@ from .tokenizer import (
 )
 
 __all__ = [
-    'BookLoader',
-    'load_books',
+    'CorpusDiscovery',
+    'discover_corpus',
+    'CorpusLoader',
+    'load_corpus',
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',

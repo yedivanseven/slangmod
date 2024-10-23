@@ -9,12 +9,11 @@ from .types import Batches
 
 class TestData(TestDataBase):
 
-    def __init__(self, sequences: Tensor, context: int, dtype: Dtype) -> None:
+    def __init__(self, sequences: Tensor, dtype: Dtype) -> None:
         self.sequences = sequences
-        self.context = context  # ToDo: this can go. It's sequence length - 1
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            context,
+            self.context,
             device=sequences.device,
             dtype=dtype
         )
@@ -27,6 +26,10 @@ class TestData(TestDataBase):
     @property
     def n(self) -> int:
         return self.sequences.shape[0]
+
+    @property
+    def context(self) -> int:
+        return self.sequences.shape[1] - 1
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
@@ -38,12 +41,11 @@ class TestData(TestDataBase):
 
 class TrainData(TrainDataBase):
 
-    def __init__(self, sequences: Tensor, context: int, dtype: Dtype) -> None:
+    def __init__(self, sequences: Tensor, dtype: Dtype) -> None:
         self.sequences = sequences
-        self.context = context  # ToDo: this can go. It's sequence length - 1
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            context,
+            self.context,
             device=sequences.device,
             dtype=dtype
         )
@@ -56,6 +58,10 @@ class TrainData(TrainDataBase):
     @property
     def n(self) -> int:
         return self.sequences.shape[0]
+
+    @property
+    def context(self) -> int:
+        return self.sequences.shape[1] - 1
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
@@ -74,16 +80,13 @@ class TrainData(TrainDataBase):
 
 make_train_data = Curry[TrainData](
     TrainData,
-    config.context,
-    config.dtype
+    config.data.dtype
 )
 make_test_data = Curry[TestData](
     TestData,
-    config.context,
-    config.dtype
+    config.data.dtype
 )
 make_validation_data = Curry[TestData](
     TestData,
-    config.context,
-    config.dtype
+    config.data.dtype
 )

@@ -2,8 +2,8 @@ import torch as pt
 import torch.nn as ptn
 from swak.funcflow import Partial
 from swak.pt import device
-from swak.pt.types import Tensor, Tensors1T, Dtype, Device
-from .positions import Positional, Sinusoidal
+from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
+from .positions import positions
 from ..config import config
 
 
@@ -14,7 +14,7 @@ class Model(ptn.Module):
             mod_dim: int,
             context: int,
             vocab_size: int,
-            positional: type[Positional],
+            positions: Module,
             n_heads: int,
             n_layers: int,
             scale_grad_by_freq: bool,
@@ -27,7 +27,7 @@ class Model(ptn.Module):
         self.mod_dim = mod_dim
         self.context = context
         self.vocab_size = vocab_size
-        self.positional = positional(mod_dim, context, dtype, device)
+        self.positions = positions
         self.n_heads = n_heads
         self.n_layers = n_layers
         self.scale_grad_by_freq = scale_grad_by_freq
@@ -58,6 +58,7 @@ class Model(ptn.Module):
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
             num_layers=n_layers,
+            enable_nested_tensor=False,
             mask_check=False
         )
         self.finalize = ptn.Linear(
@@ -75,12 +76,13 @@ class Model(ptn.Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
-        embedded = self.embed(src) + self.positional.encodings
+        embedded = self.positions(self.embed(src))
         transformed = self.transform(embedded, mask, padding_mask, is_causal)
         return self.finalize(transformed).transpose(-1, -2).contiguous(),
 
     def reset_parameters(self) -> None:
         self.embed.reset_parameters()
+        self.positions.reset_parameters()
         self.finalize.reset_parameters()
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=self.mod_dim,
@@ -96,22 +98,24 @@ class Model(ptn.Module):
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
             num_layers=self.n_layers,
+            enable_nested_tensor=False,
             mask_check=False
         )
 
 
 model = Model(
-    config.mod_dim,
-    config.context,
-    config.vocab_size,
-    Sinusoidal,
-    config.n_heads,
-    config.n_layers,
-    config.scale_grad_by_freq,
-    config.dropout,
-    config.bias,
-    config.dtype,
+    config.model.mod_dim,
+    config.data.context,
+    config.tokenizer.vocab_size,
+    positions,
+    config.model.n_heads,
+    config.model.n_layers,
+    config.model.scale_grad_by_freq,
+    config.model.dropout,
+    config.model.bias,
+    config.data.dtype,
     device
 )
+
 compiled_model = pt.compile(model)
 compile_model = Partial[Model](pt.compile, model)

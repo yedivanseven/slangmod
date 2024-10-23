@@ -25,4 +25,4 @@ class Validator:
         # ToDo: Add batch-wise, accumulated accuracy (top-1, top-2, top-5)
 
 
-validate = Validator(loss, config.batch_size)
+validate = Validator(loss, config.train.batch_size)

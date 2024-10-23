@@ -1,11 +1,11 @@
 import math
-from functools import cached_property
 import torch as pt
+from swak.pt import device
 from swak.pt.types import Tensor, Device, Dtype
-from .abc import Positional
+from ...config import config
 
 
-class Sinusoidal(Positional):
+class Sinusoidal(pt.nn.Module):
 
     def __init__(
             self,
@@ -14,15 +14,12 @@ class Sinusoidal(Positional):
             dtype: Dtype,
             device: Device,
     ) -> None:
+        super().__init__()
         self.mod_dim = mod_dim
         self.context = context
         self.dtype = dtype
         self.device = device
-
-    def __repr__(self) -> str:
-        cls = self.__class__.__name__
-        args = f'{self.mod_dim}, {self.context}, {self.dtype}, {self.device}'
-        return f'{cls}({args})'
+        self.register_buffer('positional_encodings', self._encodings)
 
     @property
     def _span(self) -> Tensor:
@@ -51,8 +48,8 @@ class Sinusoidal(Positional):
     def _arguments(self) -> Tensor:
         return self._positions * self._divisors
 
-    @cached_property
-    def encodings(self) -> Tensor:
+    @property
+    def _encodings(self) -> Tensor:
         p = pt.empty(
             self.context,
             self.mod_dim,
@@ -62,3 +59,17 @@ class Sinusoidal(Positional):
         p[:, 0::2] = pt.sin(self._arguments)
         p[:, 1::2] = pt.cos(self._arguments)
         return p.unsqueeze(0)
+
+    def forward(self, src: Tensor) -> Tensor:
+        return src + self.positional_encodings
+
+    def reset_parameters(self) -> None:
+        pass
+
+
+sinusoidal = Sinusoidal(
+    config.model.mod_dim,
+    config.data.context,
+    config.data.dtype,
+    device
+)

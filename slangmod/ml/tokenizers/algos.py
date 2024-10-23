@@ -77,6 +77,16 @@ class WordPieceTokenizer(ArgRepr):
         )
 
 
-bpe = BPETokenizer(config.vocab_size, special_tokens, config.dropout)
-wordpiece = WordPieceTokenizer(config.vocab_size, special_tokens)
-algo = {Tokenizers.BPE: bpe, Tokenizers.WORDPIECE :wordpiece}[config.tokenizer]
+bpe = BPETokenizer(
+    config.tokenizer.vocab_size,
+    special_tokens,
+    config.tokenizer.dropout
+)
+wordpiece = WordPieceTokenizer(
+    config.tokenizer.vocab_size,
+    special_tokens
+)
+algo = {
+    Tokenizers.BPE: bpe,
+    Tokenizers.WORDPIECE :wordpiece
+}[config.tokenizer.algo]

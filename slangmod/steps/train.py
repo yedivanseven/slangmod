@@ -7,7 +7,7 @@ from swak.pt.io import ModelSaver
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity, apply
 from ..config import config
-from ..io import load_books, load_tokenizer
+from ..io import discover_corpus, load_corpus, load_tokenizer
 from ..ml import Encoder
 from ..ml import split_train_test_validation
 from ..ml import TrainData, TestData
@@ -27,8 +27,10 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
             Encoder
         ),
         Pipe[[tuple[()]], str](
-            LOGGER.debug(f'Loading books from folder "{config.books}".'),
-            load_books
+            LOGGER.debug(f'Scanning folder "{config.corpus}" for books.'),
+            discover_corpus,
+            LOGGER.debug(f'Loading books from folder "{config.corpus}".'),
+            load_corpus
         )
     ),
     LOGGER.debug('Encoding books.'),

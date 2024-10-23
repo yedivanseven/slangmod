@@ -10,15 +10,16 @@ name = "slangmod"
 dynamic = ["version"]
 requires-python = ">=3.12"
 dependencies = [
-  "swak >= 0.1.4",
+  "swak >= 0.1.5",
   "tokenizers >= 0.20"
 ]
 authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]
 description = "Small language model."
 readme = "README.md"
 keywords = [
-    "natural language",
-    "generative AI",
+    "Natural Language Processing",
+    "Generative AI",
+    "Transformer"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

@@ -24,3 +24,7 @@ build = "*"
 
 [cpu]
 torch = {version="*", index="cpu"}
+
+[cuda]
+torch = "*"
+nvitop = "*"

@@ -31,7 +31,7 @@ class TrainTestValidationSplitter(ArgRepr):
 
 
 split_train_test_validation = TrainTestValidationSplitter(
-    config.context,
-    config.frac_test,
-    config.frac_validate
+    config.data.context,
+    config.data.frac_test,
+    config.data.frac_validate
 )
