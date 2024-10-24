@@ -5,7 +5,7 @@ from swak.pt.types import Dtype
 
 
 class Data(JsonObject):
-    context: int = 512  # 1024
+    context: int = 1024  # 512  # 1024
     frac_test: float = 0.05
     frac_validate: float = 0.05
 

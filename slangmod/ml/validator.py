@@ -1,28 +1,53 @@
 import torch as pt
-from swak.pt.types import Module
+from swak.misc import ArgRepr
+from swak.pt.types import Module, Tensor
 from ..config import config
 from .data import TestData
 from .trainer import loss
+from .types import Validation
 
 
-class Validator:
+class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:
+        super().__init__(loss, batch_size)
         self.loss = loss
         self.batch_size = batch_size
 
-    def __call__(self, model: Module, data: TestData) -> float:
+    @staticmethod
+    def top(k: int, out: Tensor, target: Tensor) -> float:
+        matches = out[:, :, -1].topk(k, dim=-1).indices == target[:, -1:]
+        return (matches.sum() / target.shape[0]).item()
+
+    def __call__(self, model: Module, data: TestData) -> Validation:
         n = 0
+        top_1 = 0
+        top_2 = 0
+        top_5 = 0
         val_loss = 0.0
+
         model.eval()
         with pt.no_grad():
             for features, target in data.sample(self.batch_size):
-                n_new = target.shape[0]
-                loss = self.loss(*model(*features), target).item()
-                val_loss += n_new * (loss - val_loss) / (n + n_new)
-                n += n_new
-        return val_loss
-        # ToDo: Add batch-wise, accumulated accuracy (top-1, top-2, top-5)
+                batch_n = target.shape[0]
+
+                (out,) = model(*features)
+
+                batch_loss = self.loss(out, target).item()
+                val_loss += batch_n * (batch_loss - val_loss) / (n + batch_n)
+
+                batch_top_1 = self.top(1, out, target)
+                top_1 += batch_n * (batch_top_1 - top_1) / (n + batch_n)
+
+                batch_top_2 = self.top(2, out, target)
+                top_2 += batch_n * (batch_top_2 - top_2) / (n + batch_n)
+
+                batch_top_5 = self.top(5, out, target)
+                top_5 += batch_n * (batch_top_5 - top_5) / (n + batch_n)
+
+                n += batch_n
+
+        return val_loss, top_1, top_2, top_5
 
 
 validate = Validator(loss, config.train.batch_size)

@@ -6,6 +6,7 @@ from .tokenizer import Tokenizer
 from .data import Data
 from .model import Model
 from .train import Train
+from .chat import Chat
 
 __all__ = ['Main']
 
@@ -23,6 +24,7 @@ class Main(JsonObject):
     data: Data = Data()
     model: Model = Model()
     train: Train = Train()
+    chat: Chat = Chat()
 
     @property
     def tokenizer_file(self) -> str:

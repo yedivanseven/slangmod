@@ -25,5 +25,5 @@ normalizer = NormalizerSequence([
 ])
 pre_tokenizer = PreTokenizerSequence([
     WhitespaceSplit(),
-    Digits(individual_digits=True),
+    Digits(),
 ])

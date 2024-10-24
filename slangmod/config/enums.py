@@ -3,8 +3,10 @@ from enum import StrEnum
 __all__ = [
     'Tokenizers',
     'Positions',
+    'Wrappers',
     'Generators'
 ]
+
 
 class Tokenizers(StrEnum):
     BPE = 'bpe'
@@ -14,6 +16,13 @@ class Tokenizers(StrEnum):
 class Positions(StrEnum):
     SINUSOIDAL = 'sinusoidal'
     LEARNABLE = 'learnable'
+
+
+class Wrappers(StrEnum):
+    SIMPLE = 'simple'
+    PARAGRAPH = 'paragraph'
+    QUOTE = 'quote'
+    DIALOGUE = 'dialogue'
 
 
 class Generators(StrEnum):

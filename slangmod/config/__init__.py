@@ -1,6 +1,6 @@
 from swak.cli import EnvParser, ArgParser, EPILOG
 from .defaults import main, Main
-from .enums import Tokenizers, Positions, Generators
+from .enums import Tokenizers, Positions, Wrappers, Generators
 
 __all__ = [
     'Main',
@@ -8,6 +8,7 @@ __all__ = [
     'actions',
     'Tokenizers',
     'Positions',
+    'Wrappers',
     'Generators'
 ]
 

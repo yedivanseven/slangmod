@@ -1,5 +1,5 @@
 import torch as pt
-from swak.funcflow import Pipe, Fork, Route
+from swak.funcflow import Pipe, Fork, Route, unit
 from swak.pt import device
 from swak.pt.create import Create
 from swak.pt.types import Tensor
@@ -74,4 +74,5 @@ train = Pipe[[tuple[()]], tuple[Model, TrainData, TestData, TestData]](
     validate,
     LOGGER.info(log_validation_metrics),
     LOGGER.info('Finished step "train".'),
+    unit
 )
