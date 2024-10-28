@@ -1,3 +1,4 @@
+import readline  # noqa: F401
 from typing import Self
 from ...config import config
 from ...ml.generators import Generator

@@ -5,7 +5,7 @@ from .greedy import Greedy
 from .random import Random
 from .top_k import TopK
 from .top_p import TopP
-from .wrappers import Wrapper, wrapper, simple, paragraph, quote, dialogue
+from .styles import Style, style, simple, paragraph, quote, dialogue
 
 generator_type = {
     Generators.GREEDY: Greedy,
@@ -16,7 +16,7 @@ generator_type = {
 
 create_generator = Curry(
     generator_type,
-    wrapper,
+    style,
     k=config.chat.k,
     p=config.chat.p
 )
@@ -28,8 +28,8 @@ __all__ = [
     'TopK',
     'TopP',
     'create_generator',
-    'Wrapper',
-    'wrapper',
+    'Style',
+    'style',
     'simple',
     'paragraph',
     'quote',

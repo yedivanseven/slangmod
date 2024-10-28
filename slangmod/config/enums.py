@@ -4,7 +4,7 @@ __all__ = [
     'Tokenizers',
     'Devices',
     'Positions',
-    'Wrappers',
+    'Styles',
     'Generators'
 ]
 
@@ -25,7 +25,7 @@ class Positions(StrEnum):
     LEARNABLE = 'learnable'
 
 
-class Wrappers(StrEnum):
+class Styles(StrEnum):
     SIMPLE = 'simple'
     PARAGRAPH = 'paragraph'
     QUOTE = 'quote'

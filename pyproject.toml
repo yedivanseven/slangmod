@@ -37,7 +37,7 @@ Issues = "https://github.com/yedivanseven/slangmod/issues"
 Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages]
-find = {exclude = ["data"]}
+find = {exclude = ["data", "Notebooks"]}
 
 [tool.setuptools_scm]
 version_file = "version.env"
