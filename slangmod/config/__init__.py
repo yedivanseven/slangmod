@@ -21,3 +21,6 @@ updated = main(env_vars)
 parse_args = ArgParser(epilog=EPILOG.format(updated))
 actions, params = parse_args()
 config = updated(params)
+
+# ToDo: Add a TOML config file!
+# ToDo: Add TOML alternatives for model sizes

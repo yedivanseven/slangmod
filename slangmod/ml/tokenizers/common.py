@@ -1,29 +1,23 @@
 from tokenizers import AddedToken
-from tokenizers.normalizers import Sequence as NormalizerSequence
+from tokenizers.normalizers import Sequence
 from tokenizers.normalizers import Strip, NFD, StripAccents, Replace
-from tokenizers.pre_tokenizers import Sequence as PreTokenizerSequence
-from tokenizers.pre_tokenizers import WhitespaceSplit, Digits
 
 __all__ = [
-    'special_tokens',
+    'PAD',
+    'UNK',
+    'EOS',
     'normalizer',
-    'pre_tokenizer'
 ]
 
 # Special tokens
-pad = AddedToken('[PAD]', single_word=True, special=True)
-unk = AddedToken('[UNK]', single_word=True, special=True)
-eos = AddedToken('[EOS]', single_word=True, special=True, normalized=True)
-special_tokens = [pad, unk, eos]
+PAD = AddedToken('[PAD]', single_word=True, special=True)
+UNK = AddedToken('[UNK]', single_word=True, special=True)
+EOS = AddedToken('[EOS]', single_word=True, special=True, normalized=True)
 
-# Pipeline steps
-normalizer = NormalizerSequence([
+# Normalizer
+normalizer = Sequence([
     Strip(),
     NFD(),
     StripAccents(),
-    Replace('\n\n', ' [EOS] '),
-])
-pre_tokenizer = PreTokenizerSequence([
-    WhitespaceSplit(),
-    Digits(),
+    Replace('\n\n', f' {EOS.content} '),
 ])

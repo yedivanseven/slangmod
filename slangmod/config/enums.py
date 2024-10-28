@@ -2,6 +2,7 @@ from enum import StrEnum
 
 __all__ = [
     'Tokenizers',
+    'Devices',
     'Positions',
     'Wrappers',
     'Generators'
@@ -11,6 +12,12 @@ __all__ = [
 class Tokenizers(StrEnum):
     BPE = 'bpe'
     WORDPIECE = 'wordpiece'
+    UNIGRAM = 'unigram'
+
+
+class Devices(StrEnum):
+    CPU = 'cpu'
+    CUDA = 'cuda'
 
 
 class Positions(StrEnum):

@@ -1,8 +1,7 @@
 import importlib.metadata as meta
-from pathlib import Path
 from swak.jsonobject import JsonObject
-from swak.jsonobject.fields import resolve
-from .tokenizer import Tokenizer
+from .files import Files
+from .tokens import Tokens
 from .data import Data
 from .model import Model
 from .train import Train
@@ -18,22 +17,9 @@ class Main(JsonObject):
     package: str = PACKAGE
     version: str = VERSION
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
-    corpus: resolve = '/home/georg/Projects/slangmod/data/corpus'
-    workdir: resolve = '/home/georg/Projects/slangmod/data'
-    tokenizer: Tokenizer = Tokenizer()
+    files: Files = Files()
+    tokens: Tokens = Tokens()
     data: Data = Data()
     model: Model = Model()
     train: Train = Train()
     chat: Chat = Chat()
-
-    @property
-    def tokenizer_file(self) -> str:
-        return str((Path(self.workdir) / 'tokenizer.json').resolve())
-
-    @property
-    def checkpoint_file(self) -> str:
-        return str((Path(self.workdir) / 'checkpoint.pt').resolve())
-
-    @property
-    def model_file(self) -> str:
-        return str((Path(self.workdir) / 'model.pt').resolve())

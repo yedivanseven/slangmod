@@ -10,7 +10,7 @@ name = "slangmod"
 dynamic = ["version"]
 requires-python = ">=3.12"
 dependencies = [
-  "swak >= 0.1.5",
+  "swak >= 0.1.6",
   "tokenizers >= 0.20"
 ]
 authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]
@@ -52,6 +52,7 @@ quote-style = "single"
 [tool.ruff.lint]
 ignore = ["PLR"]
 select = [
+    "A",
     "F",
     "E",
     "W",

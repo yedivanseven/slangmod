@@ -25,7 +25,7 @@ class CorpusDiscovery(ArgRepr):
         super().__init__(self.path, self.not_found)
 
     def __call__(self, path: str = '') -> list[str]:
-        path = Path(self.path) / path.strip(' /')
+        path = Path(self.path) / path.strip().strip(' /')
         corpus =  [
             str(item.resolve())
             for item in path.iterdir()
@@ -55,7 +55,7 @@ class CorpusLoader(ArgRepr):
         return text.strip()
 
     def __call__(self, files: list[str]) -> str:
-        corpus = ' [EOS] '.join(map(self.read, files))
+        corpus = '\n\n'.join(map(self.read, files))
         if corpus:
             return corpus
         msg = 'No corpus to load!'
@@ -67,5 +67,5 @@ class CorpusLoader(ArgRepr):
         return corpus
 
 
-discover_corpus = CorpusDiscovery(config.corpus, NotFound.WARN)
+discover_corpus = CorpusDiscovery(config.files.corpus, NotFound.WARN)
 load_corpus = CorpusLoader(NotFound.RAISE)

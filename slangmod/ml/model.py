@@ -1,7 +1,6 @@
 import torch as pt
 import torch.nn as ptn
 from swak.funcflow import Partial
-from swak.pt import device
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
 from .positions import positions
 from ..config import config
@@ -13,35 +12,35 @@ class Model(ptn.Module):
             self,
             mod_dim: int,
             context: int,
-            vocab_size: int,
+            vocab: int,
             positions: Module,
             n_heads: int,
             n_layers: int,
             scale_grad_by_freq: bool,
             dropout: float,
             bias: bool,
-            dtype: Dtype,
-            device: Device
+            device: Device,
+            dtype: Dtype
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
         self.context = context
-        self.vocab_size = vocab_size
+        self.vocab = vocab
         self.positions = positions
         self.n_heads = n_heads
         self.n_layers = n_layers
         self.scale_grad_by_freq = scale_grad_by_freq
         self.dropout = dropout
         self.bias = bias
-        self.dtype = dtype
         self.device = device
+        self.dtype = dtype
         self.embed = ptn.Embedding(
-            num_embeddings=vocab_size,
+            num_embeddings=vocab,
             embedding_dim=mod_dim,
             padding_idx=0,
             scale_grad_by_freq=scale_grad_by_freq,
-            dtype=dtype,
             device=device,
+            dtype=dtype
         )
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=mod_dim,
@@ -52,8 +51,8 @@ class Model(ptn.Module):
             batch_first=True,
             norm_first=False,
             bias=bias,
-            dtype=dtype,
             device=device,
+            dtype=dtype
         )
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
@@ -63,10 +62,10 @@ class Model(ptn.Module):
         )
         self.finalize = ptn.Linear(
             in_features=mod_dim,
-            out_features=vocab_size,
+            out_features=vocab,
             bias=bias,
-            dtype=dtype,
             device=device,
+            dtype=dtype
         )
 
     def forward(
@@ -76,7 +75,7 @@ class Model(ptn.Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
-        embedded = self.positions(self.embed(src))
+        embedded = self.positions(self.embed(src.to(self.device)))
         transformed = self.transform(embedded, mask, padding_mask, is_causal)
         return self.finalize(transformed).transpose(-1, -2).contiguous(),
 
@@ -92,8 +91,8 @@ class Model(ptn.Module):
             batch_first=True,
             norm_first=False,
             bias=self.bias,
-            dtype=self.dtype,
             device=self.device,
+            dtype=self.dtype
         )
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
@@ -104,17 +103,17 @@ class Model(ptn.Module):
 
 
 model = Model(
-    config.model.mod_dim,
-    config.data.context,
-    config.tokenizer.vocab_size,
-    positions,
-    config.model.n_heads,
-    config.model.n_layers,
-    config.model.scale_grad_by_freq,
-    config.model.dropout,
-    config.model.bias,
-    config.data.dtype,
-    device
+    mod_dim=config.model.mod_dim,
+    context=config.data.context,
+    vocab=config.tokens.vocab,
+    positions=positions,
+    n_heads=config.model.n_heads,
+    n_layers=config.model.n_layers,
+    scale_grad_by_freq=config.model.scale_grad_by_freq,
+    dropout=config.model.dropout,
+    bias=config.model.bias,
+    device=config.data.device,
+    dtype=config.data.dtype
 )
 
 compiled_model = pt.compile(model)

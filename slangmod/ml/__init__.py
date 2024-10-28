@@ -1,6 +1,5 @@
-from .tokenizers import train_tokenizer
-from .encoder import Encoder
-from .splitter import TrainTestValidationSplitter, split_train_test_validation
+from .tokenizers import Algo, tokenizer
+from .splitter import DataSplitter, split_data
 from .data import (
     TrainData,
     TestData,
@@ -10,13 +9,13 @@ from .data import (
 )
 from .model import Model, model, compile_model, compiled_model
 from .trainer import Trainer, trainer
-from .validator import validate
+from .validator import Validator, validate
 
 __all__ = [
-    'train_tokenizer',
-    'Encoder',
-    'TrainTestValidationSplitter',
-    'split_train_test_validation',
+    'Algo',
+    'tokenizer',
+    'DataSplitter',
+    'split_data',
     'TrainData',
     'TestData',
     'make_train_data',
@@ -28,5 +27,6 @@ __all__ = [
     'compiled_model',
     'Trainer',
     'trainer',
-    'validate'
+    'Validator',
+    'validate',
 ]

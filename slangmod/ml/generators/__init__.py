@@ -5,7 +5,7 @@ from .greedy import Greedy
 from .random import Random
 from .top_k import TopK
 from .top_p import TopP
-from .wrapper import Wrapper, wrapper, simple, paragraph, quote, dialogue
+from .wrappers import Wrapper, wrapper, simple, paragraph, quote, dialogue
 
 generator_type = {
     Generators.GREEDY: Greedy,

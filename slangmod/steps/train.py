@@ -1,6 +1,5 @@
 import torch as pt
 from swak.funcflow import Pipe, Fork, Route, unit
-from swak.pt import device
 from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
@@ -8,8 +7,8 @@ from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity, apply
 from ..config import config
 from ..io import discover_corpus, load_corpus, load_tokenizer
-from ..ml import Encoder
-from ..ml import split_train_test_validation
+from ..ml import Algo
+from ..ml import split_data
 from ..ml import TrainData, TestData
 from ..ml import make_train_data, make_test_data, make_validation_data
 from ..ml import Model, compile_model
@@ -20,25 +19,24 @@ from .log_messages.train import log_data_sizes, log_validation_metrics
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
-    Fork[[tuple[()]], tuple[Encoder, str]](
-        Pipe[[tuple[()]], Encoder](
-            LOGGER.debug(f'Loading tokenizer "{config.tokenizer_file}".'),
-            load_tokenizer,
-            Encoder
+    Fork[[tuple[()]], tuple[Algo, str]](
+        Pipe[[tuple[()]], Algo](
+            LOGGER.debug(f'Loading tokenizer "{config.files.tokenizer}".'),
+            load_tokenizer
         ),
         Pipe[[tuple[()]], str](
-            LOGGER.debug(f'Scanning folder "{config.corpus}" for books.'),
+            LOGGER.debug(f'Scanning folder "{config.files.corpus}" for books.'),
             discover_corpus,
-            LOGGER.debug(f'Loading books from folder "{config.corpus}".'),
+            LOGGER.debug(f'Loading books from folder "{config.files.corpus}".'),
             load_corpus
         )
     ),
     LOGGER.debug('Encoding books.'),
     apply,
-    LOGGER.debug(f'Converting to tensor on device "{device.type}".'),
-    Create(pt.int64, device),
+    LOGGER.debug(f'Converting to CPU tensor.'),
+    Create(pt.int64, 'cpu'),
     LOGGER.debug('Splitting into train, test, and validation data.'),
-    split_train_test_validation,
+    split_data,
     Route[[Tensor], tuple[TrainData, TestData, TestData]](
         [0, 1, 2],
         make_train_data,
@@ -54,7 +52,7 @@ train_model = Pipe[[Model, TrainData, TestData], Model](
     LOGGER.debug('Saving model.'),
     Fork[[Model], Model](
         identity,
-        ModelSaver(config.model_file)
+        ModelSaver(config.files.model)
     )
 )
 

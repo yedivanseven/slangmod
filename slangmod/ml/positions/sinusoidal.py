@@ -1,7 +1,7 @@
 import math
 import torch as pt
-from swak.pt import device
-from swak.pt.types import Tensor, Device, Dtype
+from swak.pt.types import Tensor, Dtype
+from ..types import Device
 from ...config import config
 
 
@@ -11,14 +11,14 @@ class Sinusoidal(pt.nn.Module):
             self,
             mod_dim: int,
             context: int,
-            dtype: Dtype,
             device: Device,
+            dtype: Dtype
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
         self.context = context
-        self.dtype = dtype
         self.device = device
+        self.dtype = dtype
         self.register_buffer('positional_encodings', self._encodings)
 
     @property
@@ -27,8 +27,8 @@ class Sinusoidal(pt.nn.Module):
             start=0,
             end=self.mod_dim,
             step=2,
-            dtype=self.dtype,
-            device=self.device
+            device=self.device,
+            dtype=self.dtype
         )
 
     @property
@@ -40,8 +40,8 @@ class Sinusoidal(pt.nn.Module):
         return pt.arange(
             start=0,
             end=self.context,
-            dtype=self.dtype,
-            device=self.device
+            device=self.device,
+            dtype=self.dtype
         ).unsqueeze(1)
 
     @property
@@ -53,8 +53,8 @@ class Sinusoidal(pt.nn.Module):
         p = pt.empty(
             self.context,
             self.mod_dim,
-            dtype=self.dtype,
-            device=self.device
+            device=self.device,
+            dtype=self.dtype
         )
         p[:, 0::2] = pt.sin(self._arguments)
         p[:, 1::2] = pt.cos(self._arguments)
@@ -68,8 +68,8 @@ class Sinusoidal(pt.nn.Module):
 
 
 sinusoidal = Sinusoidal(
-    config.model.mod_dim,
-    config.data.context,
-    config.data.dtype,
-    device
+    mod_dim=config.model.mod_dim,
+    context=config.data.context,
+    device=config.data.device,
+    dtype=config.data.dtype
 )

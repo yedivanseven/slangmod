@@ -8,7 +8,7 @@ from ..config import config
 
 LOGGER = StdOutLogger(__name__, config.log_level)
 
-checkpoint = OnDisk(config.checkpoint_file)
+checkpoint = OnDisk(config.files.checkpoint)
 epoch_cb = EpochPrinter(LOGGER.debug)
 train_cb = TrainPrinter(LOGGER.info)
 
