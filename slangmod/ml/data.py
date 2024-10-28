@@ -59,10 +59,17 @@ class TestData(TestDataBase):
 
 class TrainData(TrainDataBase):
 
-    def __init__(self, seqs: Tensor, device: Device, dtype: Dtype) -> None:
+    def __init__(
+            self,
+            seqs: Tensor,
+            device: Device,
+            dtype: Dtype,
+            drop_last: bool
+    ) -> None:
         self.seqs = seqs
         self.device = device
         self.dtype = dtype
+        self.drop_last = drop_last
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.context,
             device=pt.device(device),
@@ -124,13 +131,15 @@ class TrainData(TrainDataBase):
                 tgt.to(self.device, non_blocking=True)
             )
             for src, tgt in zip(srcs, tgts)
+            if src.shape[0] == batch_size or not self.drop_last
         )
 
 
 make_train_data = Curry[TrainData](
     TrainData,
     config.data.device,
-    config.data.dtype
+    config.data.dtype,
+    config.train.drop_last
 )
 make_test_data = Curry[TestData](
     TestData,

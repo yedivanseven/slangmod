@@ -25,15 +25,15 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
             load_tokenizer
         ),
         Pipe[[tuple[()]], str](
-            LOGGER.debug(f'Scanning folder "{config.files.corpus}" for books.'),
+            LOGGER.debug(f'Scanning "{config.files.corpus}" for books.'),
             discover_corpus,
-            LOGGER.debug(f'Loading books from folder "{config.files.corpus}".'),
+            LOGGER.debug(f'Loading books from "{config.files.corpus}".'),
             load_corpus
         )
     ),
     LOGGER.debug('Encoding books.'),
     apply,
-    LOGGER.debug(f'Converting to CPU tensor.'),
+    LOGGER.debug('Converting to CPU tensor.'),
     Create(pt.int64, 'cpu'),
     LOGGER.debug('Splitting into train, test, and validation data.'),
     split_data,
