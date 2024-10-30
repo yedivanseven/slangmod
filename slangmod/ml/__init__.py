@@ -28,5 +28,5 @@ __all__ = [
     'Trainer',
     'trainer',
     'Validator',
-    'validate',
+    'validate'
 ]

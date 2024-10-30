@@ -14,6 +14,7 @@ class Validator(ArgRepr):
         self.loss = loss
         self.batch_size = batch_size
 
+    # ToDo: Can we get accuracy across all positions?
     @staticmethod
     def top(k: int, out: Tensor, target: Tensor) -> float:
         matches = out[:, :, -1].topk(k, dim=-1).indices == target[:, -1:]

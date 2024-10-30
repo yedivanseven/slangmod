@@ -4,7 +4,7 @@ from ..enums import Styles
 
 
 class Chat(JsonObject):
-    style: Lower() = Styles.DIALOGUE
+    style: Lower() = Styles.SIMPLE
     generator: Lower() = 'top_p'
     k = 0.1
     p = 0.6

@@ -53,7 +53,15 @@ class Algo:
         return [self.pad, self.unk, *self.extra, self.eos]
 
     @property
-    def n_skip(self) -> int:
+    def pad_id(self) -> int:
+        return 0
+
+    @property
+    def unk_id(self) -> int:
+        return 1
+
+    @property
+    def eos_id(self) -> int:
         return len(self.special) - 1
 
     @property

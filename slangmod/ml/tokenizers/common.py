@@ -1,6 +1,6 @@
-from tokenizers import AddedToken
+from tokenizers import AddedToken, Regex
 from tokenizers.normalizers import Sequence
-from tokenizers.normalizers import Strip, NFD, StripAccents, Replace
+from tokenizers.normalizers import Strip, NFKC, StripAccents, Replace
 
 __all__ = [
     'PAD',
@@ -17,7 +17,11 @@ EOS = AddedToken('[EOS]', single_word=True, special=True, normalized=True)
 # Normalizer
 normalizer = Sequence([
     Strip(),
-    NFD(),
+    NFKC(),
     StripAccents(),
-    Replace('\n\n', f' {EOS.content} '),
+    Replace(Regex(r'\n{2,}'), f' {EOS.content} '),
+    Replace(r'“', r'"'),
+    Replace(r'”', r'"'),
+    Replace(r'‘', r"'"),
+    Replace(r'’', r"'"),
 ])

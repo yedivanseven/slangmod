@@ -9,5 +9,3 @@ __all__ = [
     'train',
     'chat'
 ]
-
-# ToDo. Save config

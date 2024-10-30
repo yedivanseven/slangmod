@@ -3,21 +3,23 @@ import torch.optim as pto
 import torch.optim.lr_scheduler as pts
 from swak.funcflow import Curry
 from swak.pt.train import Trainer, EpochPrinter, TrainPrinter, OnDisk
+from swak.pt.train import LinearInverse
 from swak.misc import StdOutLogger
 from ..config import config
 
 LOGGER = StdOutLogger(__name__, config.log_level)
 
 checkpoint = OnDisk(config.files.checkpoint)
-epoch_cb = EpochPrinter(LOGGER.debug)
+epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)
 
 loss = ptn.CrossEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
-optimizer = Curry[pto.Adam](pto.Adam, config.train.learning_rate, fused=True)
-scheduler = Curry[pts.LambdaLR](pts.LambdaLR, lambda epoch: (1 + epoch)**-0.5)
+optimizer = Curry[pto.Adam](pto.Adam, config.train.lr, fused=True)
+linear_inverse = LinearInverse(config.train.warmup, config.train.power)
+scheduler = Curry[pts.LambdaLR](pts.LambdaLR, linear_inverse)
 
 trainer = Trainer(
     batch_size=config.train.batch_size,

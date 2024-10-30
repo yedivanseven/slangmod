@@ -47,9 +47,9 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
 )
 
 train_model = Pipe[[Model, TrainData, TestData], Model](
-    LOGGER.info('Training model.'),
+    LOGGER.info(f'Training model on {config.data.device.upper()}.'),
     trainer.train,
-    LOGGER.debug('Saving model.'),
+    LOGGER.debug(f'Saving model to "{config.files.model}".'),
     Fork[[Model], Model](
         identity,
         ModelSaver(config.files.model)
