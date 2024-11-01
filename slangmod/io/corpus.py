@@ -20,7 +20,7 @@ class CorpusDiscovery(ArgRepr):
             path: str = '',
             not_found: str = NotFound.RAISE
     ) -> None:
-        self.path = str(Path(path).resolve())
+        self.path = path.strip()
         self.not_found = str(not_found)
         super().__init__(self.path, self.not_found)
 
@@ -55,7 +55,7 @@ class CorpusLoader(ArgRepr):
         return text.strip()
 
     def __call__(self, files: list[str]) -> str:
-        corpus = '\n\n'.join(map(self.read, files))
+        corpus = '\n\n'.join(map(self.read, files)) + '\n\n'
         if corpus:
             return corpus
         msg = 'No corpus to load!'

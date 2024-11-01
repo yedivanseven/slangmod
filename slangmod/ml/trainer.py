@@ -22,15 +22,16 @@ linear_inverse = LinearInverse(config.train.warmup, config.train.power)
 scheduler = Curry[pts.LambdaLR](pts.LambdaLR, linear_inverse)
 
 trainer = Trainer(
-    batch_size=config.train.batch_size,
-    max_epochs=config.train.max_epochs,
     loss=loss,
     optimizer=optimizer,
+    batch_size=config.train.batch_size,
+    max_epochs=config.train.max_epochs,
     scheduler=scheduler,
     warmup=config.train.warmup,
     patience=config.train.patience,
     max_n=config.train.max_n,
     checkpoint=checkpoint,
+    step_freq=config.train.step_freq,
     epoch_cb=epoch_cb,
     train_cb=train_cb
 )
