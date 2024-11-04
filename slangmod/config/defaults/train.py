@@ -12,3 +12,7 @@ class Train(JsonObject):
     max_epochs: int = 1024
     warmup: int = 4000
     patience: Maybe[int](int) = 5
+
+    @property
+    def super_batch(self) -> int:
+        return self.batch_size * self.step_freq
