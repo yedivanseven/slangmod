@@ -8,7 +8,7 @@ from ..enums import Devices
 
 class Data(JsonObject):
     device: Lower() = device.type
-    context: int = 1024  # 512  # 1024
+    seq_len: int = 1024
     test: float = 0.01
     validate: float = 0.01
 

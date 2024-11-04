@@ -1,3 +1,4 @@
+import math
 import importlib.metadata as meta
 from swak.jsonobject import JsonObject
 from .files import Files
@@ -23,3 +24,14 @@ class Main(JsonObject):
     model: Model = Model()
     train: Train = Train()
     chat: Chat = Chat()
+
+    @property
+    def lr(self) -> float:
+        if self.train.learning_rate is None:
+            return 10 * self.train.batch_size * self.model.dim**-1.53 / 256
+        return self.train.learning_rate
+
+    @property
+    def warmup(self) -> int:
+        if self.train.warmup is None:
+            return 1_000 * (round(math.log2(self.model.dim)) - 4)

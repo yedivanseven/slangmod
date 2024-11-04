@@ -29,12 +29,12 @@ class Generator(ABC):
         return f'{self.__class__.__name__}(..., {self.wrap})'
 
     @property
-    def vocab_size(self) -> int:
+    def vocab(self) -> int:
         return self.tokenizer.get_vocab_size()
 
     @property
-    def context(self) -> int:
-        return self.model.context
+    def max_len(self) -> int:
+        return self.model.positions.max_len
 
     @property
     def device(self) -> Device:
@@ -50,8 +50,7 @@ class Generator(ABC):
 
     def __call__(self, prompt: str) -> str:
         encoded = self.tokenizer.encode(self.wrap(prompt))
-        encoded.truncate(self.context, direction='left')
-        encoded.pad(self.context, direction='left')
+        encoded.truncate(self.max_len, direction='left')
 
         src = pt.tensor(encoded.ids, device=self.device).unsqueeze(0)
 

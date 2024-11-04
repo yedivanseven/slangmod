@@ -14,11 +14,14 @@ class Validator(ArgRepr):
         self.loss = loss
         self.batch_size = batch_size
 
-    # ToDo: Can we get accuracy across all positions?
     @staticmethod
     def top(k: int, out: Tensor, target: Tensor) -> float:
-        matches = out[:, :, -1].topk(k, dim=-1).indices == target[:, -1:]
-        return (matches.sum() / target.shape[0]).item()
+        matches = out.topk(k, dim=1).indices == target.unsqueeze(1)
+        return matches.sum(dim=(0, 1)) / target.shape[0]
+
+    @staticmethod
+    def stat(positions: Tensor) -> tuple[float, float]:
+        return positions.mean().item(), 1.96 * positions.std().item()
 
     def __call__(self, model: Module, data: TestData) -> Validation:
         n = 0
@@ -48,7 +51,7 @@ class Validator(ArgRepr):
 
                 n += batch_n
 
-        return val_loss, top_1, top_2, top_5
+        return val_loss, self.stat(top_1), self.stat(top_2), self.stat(top_5)
 
 
 validate = Validator(loss, config.train.batch_size)

@@ -11,11 +11,11 @@ class Model(ptn.Module):
     def __init__(
             self,
             mod_dim: int,
-            context: int,
             vocab: int,
-            positions: Module,
             n_heads: int,
             n_layers: int,
+            positions: Module,
+            feedforward_factor: int,
             scale_grad_by_freq: bool,
             dropout: float,
             bias: bool,
@@ -24,11 +24,11 @@ class Model(ptn.Module):
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
-        self.context = context
         self.vocab = vocab
-        self.positions = positions
         self.n_heads = n_heads
         self.n_layers = n_layers
+        self.positions = positions
+        self.feedforward_factor = feedforward_factor
         self.scale_grad_by_freq = scale_grad_by_freq
         self.dropout = dropout
         self.bias = bias
@@ -45,7 +45,7 @@ class Model(ptn.Module):
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=mod_dim,
             nhead=n_heads,
-            dim_feedforward=4 * mod_dim,
+            dim_feedforward=feedforward_factor * mod_dim,
             dropout=dropout,
             activation='gelu',
             batch_first=True,
@@ -103,12 +103,12 @@ class Model(ptn.Module):
 
 
 model = Model(
-    mod_dim=config.model.mod_dim,
-    context=config.data.context,
+    mod_dim=config.model.dim,
     vocab=config.tokens.vocab,
-    positions=positions,
     n_heads=config.model.n_heads,
     n_layers=config.model.n_layers,
+    positions=positions,
+    feedforward_factor=config.model.feedforward_factor,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
     dropout=config.model.dropout,
     bias=config.model.bias,

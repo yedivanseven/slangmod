@@ -10,13 +10,13 @@ class Sinusoidal(pt.nn.Module):
     def __init__(
             self,
             mod_dim: int,
-            context: int,
+            max_len: int,
             device: Device,
             dtype: Dtype
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
-        self.context = context
+        self.max_len = max_len
         self.device = device
         self.dtype = dtype
         self.register_buffer('positional_encodings', self._encodings)
@@ -33,13 +33,13 @@ class Sinusoidal(pt.nn.Module):
 
     @property
     def _divisors(self) -> Tensor:
-        return pt.exp(-2 * self._span * math.log(self.context) / self.mod_dim)
+        return pt.exp(-2 * self._span * math.log(self.max_len) / self.mod_dim)
 
     @property
     def _positions(self) -> Tensor:
         return pt.arange(
             start=0,
-            end=self.context,
+            end=self.max_len,
             device=self.device,
             dtype=self.dtype
         ).unsqueeze(1)
@@ -51,7 +51,7 @@ class Sinusoidal(pt.nn.Module):
     @property
     def _encodings(self) -> Tensor:
         p = pt.empty(
-            self.context,
+            self.max_len,
             self.mod_dim,
             device=self.device,
             dtype=self.dtype
@@ -61,15 +61,15 @@ class Sinusoidal(pt.nn.Module):
         return p.unsqueeze(0)
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings
+        return src + self.positional_encodings[:, :src.shape[1], :]
 
     def reset_parameters(self) -> None:
         pass
 
 
 sinusoidal = Sinusoidal(
-    mod_dim=config.model.mod_dim,
-    context=config.data.context,
+    mod_dim=config.model.dim,
+    max_len=config.model.max_len,
     device=config.data.device,
     dtype=config.data.dtype
 )

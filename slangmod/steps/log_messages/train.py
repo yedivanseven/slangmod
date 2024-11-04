@@ -12,9 +12,11 @@ def log_data_sizes(
 
 def log_validation_metrics(
         loss: float,
-        acc: float,
-        top_2: float,
-        top_5: float
+        acc: tuple[float, float],
+        top_2: tuple[float, float],
+        top_5: tuple[float, float],
 ) -> str:
-    return (f'Validation loss: {loss:7.5f} | accuracy: {acc:7.5f} | '
-            f'top-2 acc.: {top_2:7.5f} | top-5 acc.: {top_5:7.5f}')
+    return (f'Validation loss: {loss:7.5f} | '
+            f'accuracy: {acc[0]:4.2f}±{acc[1]:4.2f} | '
+            f'top-2 acc.: {top_2[0]:4.2f}±{top_2[1]:4.2f} | '
+            f'top-5 acc.: {top_5[0]:4.2f}±{top_5[1]:4.2f}')

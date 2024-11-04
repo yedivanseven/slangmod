@@ -10,36 +10,29 @@ class Learnable(ptn.Module):
     def __init__(
             self,
             mod_dim: int,
-            context: int,
+            max_len: int,
             device: Device,
             dtype: Dtype
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
-        self.context = context
+        self.max_len = max_len
         self.device = device
         self.dtype = dtype
-        self.register_buffer(
-            'indices',
-            pt.arange(context, device=device, dtype=pt.long)
-        )
-        self.positional_encodings = ptn.Embedding(
-            num_embeddings=context,
-            embedding_dim=mod_dim,
-            device=device,
-            dtype=dtype
+        self.positional_encodings = ptn.Parameter(
+            pt.empty(1, max_len, mod_dim, device=device, dtype=dtype)
         )
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings(self.indices)
+        return src + self.positional_encodings[:, :src.shape[1], :]
 
     def reset_parameters(self) -> None:
-        self.positional_encodings.reset_parameters()
+        ptn.init.normal_(self.positional_encodings)
 
 
 learnable = Learnable(
-    mod_dim=config.model.mod_dim,
-    context=config.data.context,
+    mod_dim=config.model.dim,
+    max_len=config.model.max_len,
     device=config.data.device,
     dtype=config.data.dtype,
 )

@@ -1,3 +1,4 @@
+import math
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype
@@ -14,7 +15,7 @@ class TestData(TestDataBase):
         self.device = device
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            self.context,
+            self.seq_len,
             device=pt.device(device),
             dtype=dtype
         )
@@ -29,7 +30,7 @@ class TestData(TestDataBase):
         return self.seqs.shape[0]
 
     @property
-    def context(self) -> int:
+    def seq_len(self) -> int:
         return self.seqs.shape[1] - 1
 
     @property
@@ -38,22 +39,29 @@ class TestData(TestDataBase):
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
-        srcs = self.seqs[self.__rand[:n], :-1].contiguous().split(batch_size)
-        tgts = self.seqs[self.__rand[:n], 1:].contiguous().split(batch_size)
+        n_batches = math.ceil(n / batch_size)
+        srcs = self.seqs[self.__rand[:n], :-1].contiguous()
+        tgts = self.seqs[self.__rand[:n], 1:].contiguous()
         if self.pin:
-            srcs = tuple(batch.pin_memory(self.device) for batch in srcs)
-            tgts = tuple(batch.pin_memory(self.device) for batch in tgts)
+            srcs = srcs.pin_memory(self.device)
+            tgts = tgts.pin_memory(self.device)
         return iter(
             (
                 (
-                    src.to(self.device, non_blocking=True),
+                    srcs[batch * batch_size:(batch + 1) * batch_size].to(
+                        self.device,
+                        non_blocking=True
+                    ),
                     self.mask,
                     None,
                     True
                 ),
-                tgt.to(self.device, non_blocking=True)
+                tgts[batch * batch_size:(batch + 1) * batch_size].to(
+                    self.device,
+                    non_blocking=True
+                )
             )
-            for src, tgt in zip(srcs, tgts)
+            for batch in range(n_batches)
         )
 
 
@@ -62,16 +70,16 @@ class TrainData(TrainDataBase):
     def __init__(
             self,
             seqs: Tensor,
+            step_freq: int,
             device: Device,
-            dtype: Dtype,
-            drop_last: bool
+            dtype: Dtype
     ) -> None:
         self.seqs = seqs
+        self.step_freq = step_freq
         self.device = device
         self.dtype = dtype
-        self.drop_last = drop_last
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            self.context,
+            self.seq_len,
             device=pt.device(device),
             dtype=dtype
         )
@@ -86,7 +94,7 @@ class TrainData(TrainDataBase):
         return self.seqs.shape[0]
 
     @property
-    def context(self) -> int:
+    def seq_len(self) -> int:
         return self.seqs.shape[1] - 1
 
     @property
@@ -95,51 +103,71 @@ class TrainData(TrainDataBase):
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
-        srcs = self.seqs[self.__rand[:n], :-1].contiguous().split(batch_size)
-        tgts = self.seqs[self.__rand[:n], 1:].contiguous().split(batch_size)
+        n_batches = math.ceil(n / batch_size)
+        srcs = self.seqs[self.__rand[:n], :-1].contiguous()
+        tgts = self.seqs[self.__rand[:n], 1:].contiguous()
         if self.pin:
-            srcs = tuple(batch.pin_memory(self.device) for batch in srcs)
-            tgts = tuple(batch.pin_memory(self.device) for batch in tgts)
+            srcs = srcs.pin_memory(self.device)
+            tgts = tgts.pin_memory(self.device)
         return iter(
             (
                 (
-                    src.to(self.device, non_blocking=True),
+                    srcs[batch * batch_size:(batch + 1) * batch_size].to(
+                        self.device,
+                        non_blocking=True
+                    ),
                     self.mask,
                     None,
                     True
                 ),
-                tgt.to(self.device, non_blocking=True)
+                tgts[batch * batch_size:(batch + 1) * batch_size].to(
+                    self.device,
+                    non_blocking=True
+                )
             )
-            for src, tgt in zip(srcs, tgts)
+            for batch in range(n_batches)
         )
 
+    def _max_n_for(self, batch_size: int) -> int:
+        if self.step_freq <= 1:
+            return self.n
+        super_batch_size = self.step_freq * batch_size
+        return super_batch_size * (self.n // super_batch_size)
+
     def __call__(self, batch_size: int) -> Batches:
+        max_n = self._max_n_for(batch_size)
+        n_batches = math.ceil(max_n / batch_size)
         rand = pt.randperm(self.n, device=self.seqs.device, dtype=pt.long)
-        srcs = self.seqs[rand, :-1].contiguous().split(batch_size)
-        tgts = self.seqs[rand, 1:].contiguous().split(batch_size)
+        srcs = self.seqs[rand[:max_n], :-1].contiguous()
+        tgts = self.seqs[rand[:max_n], 1:].contiguous()
         if self.pin:
-            srcs = tuple(batch.pin_memory(self.device) for batch in srcs)
-            tgts = tuple(batch.pin_memory(self.device) for batch in tgts)
+            srcs = srcs.pin_memory(self.device)
+            tgts = tgts.pin_memory(self.device)
         return iter(
             (
                 (
-                    src.to(self.device, non_blocking=True),
+                    srcs[batch * batch_size:(batch + 1) * batch_size].to(
+                        self.device,
+                        non_blocking=True
+                    ),
                     self.mask,
                     None,
                     True
                 ),
-                tgt.to(self.device, non_blocking=True)
+                tgts[batch * batch_size:(batch + 1) * batch_size].to(
+                    self.device,
+                    non_blocking=True
+                )
             )
-            for src, tgt in zip(srcs, tgts)
-            if src.shape[0] == batch_size or not self.drop_last
+            for batch in range(n_batches)
         )
 
 
 make_train_data = Curry[TrainData](
     TrainData,
+    config.train.step_freq,
     config.data.device,
-    config.data.dtype,
-    config.train.drop_last
+    config.data.dtype
 )
 make_test_data = Curry[TestData](
     TestData,

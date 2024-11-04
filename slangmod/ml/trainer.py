@@ -17,7 +17,7 @@ loss = ptn.CrossEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
-optimizer = Curry[pto.Adam](pto.Adam, config.train.lr, fused=True)
+optimizer = Curry[pto.Adam](pto.Adam, config.lr, fused=True)
 linear_inverse = LinearInverse(config.train.warmup, config.train.power)
 scheduler = Curry[pts.LambdaLR](pts.LambdaLR, linear_inverse)
 
@@ -29,7 +29,6 @@ trainer = Trainer(
     scheduler=scheduler,
     warmup=config.train.warmup,
     patience=config.train.patience,
-    max_n=config.train.max_n,
     checkpoint=checkpoint,
     step_freq=config.train.step_freq,
     epoch_cb=epoch_cb,

@@ -6,9 +6,9 @@ from ..config import config
 
 class DataSplitter(ArgRepr):
 
-    def __init__(self, context: int, test: float, validation: float) -> None:
-        super().__init__(context, test, validation)
-        self.context = context
+    def __init__(self, seq_len: int, test: float, validation: float) -> None:
+        super().__init__(seq_len, test, validation)
+        self.seq_len = seq_len
         self.test = test
         self.validation = validation
 
@@ -17,7 +17,7 @@ class DataSplitter(ArgRepr):
         return 1.0 - self.test - self.validation
 
     def __call__(self, data: Tensor) -> Tensors3T:
-        sequences = data.unfold(0, self.context + 1, 1)
+        sequences = data.unfold(0, self.seq_len + 1, 1)
         n = sequences.shape[0]
         rand = pt.randperm(n, device=sequences.device, dtype=pt.long)
         test_index = int(n * self.train)
@@ -30,7 +30,7 @@ class DataSplitter(ArgRepr):
 
 
 split_data = DataSplitter(
-    context=config.data.context,
+    seq_len=config.data.seq_len,
     test=config.data.test,
     validation=config.data.validate
 )
