@@ -41,8 +41,7 @@ class TestData(TestDataBase):
         n = self.n if max_n is None else min(max_n, self.n)
         n_batches = math.ceil(n / batch_size)
         data = self.seqs[self.__rand[:n]].contiguous()
-        if self.pin:
-            data = data.pin_memory(self.device)
+        data = data.pin_memory(self.device) if self.pin else data
         return iter(
             (
                 (
@@ -101,8 +100,7 @@ class TrainData(TrainDataBase):
         n = self.n if max_n is None else min(max_n, self.n)
         n_batches = math.ceil(n / batch_size)
         data = self.seqs[self.__rand[:n]].contiguous()
-        if self.pin:
-            data = data.pin_memory(self.device)
+        data = data.pin_memory(self.device) if self.pin else data
         return iter(
             (
                 (
@@ -126,8 +124,7 @@ class TrainData(TrainDataBase):
         n = self.n_for(batch_size, step_freq)
         rand = pt.randperm(self.n, device=self.seqs.device, dtype=pt.long)
         data = self.seqs[rand[:n]].contiguous()
-        if self.pin:
-            data = data.pin_memory(self.device)
+        data = data.pin_memory(self.device) if self.pin else data
         return iter(
             (
                 (
