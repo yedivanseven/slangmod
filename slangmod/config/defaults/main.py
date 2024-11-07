@@ -40,15 +40,17 @@ class Main(JsonObject):
 
     @property
     def folder(self) -> str:
-        settings = (
-            str(self.version) +
-            str(self.tokens) +
-            str(self.data) +
-            str(self.model) +
-            str(self.train)
-        )
-        suffix = shake_128(settings.encode()).hexdigest(4)
-        name = self.name + '-' + suffix if self.name else suffix
+        if self.name is None:
+            settings = (
+                str(self.version) +
+                str(self.tokens) +
+                str(self.data) +
+                str(self.model) +
+                str(self.train)
+            )
+            name = shake_128(settings.encode()).hexdigest(4)
+        else:
+            name = self.name
         path = Path(self.workdir) / name
         path.mkdir(parents=False, exist_ok=True)
         return str(path.resolve())
