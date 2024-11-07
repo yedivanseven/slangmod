@@ -1,9 +1,9 @@
 import torch as pt
 import torch.nn as ptn
-from swak.funcflow import Partial
+from swak.pt.misc import Compile
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
 from .positions import positions
-from ..config import config
+from ..config import config, LiteralDevice
 
 
 class Model(ptn.Module):
@@ -19,7 +19,7 @@ class Model(ptn.Module):
             scale_grad_by_freq: bool,
             dropout: float,
             bias: bool,
-            device: Device,
+            device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
         super().__init__()
@@ -32,7 +32,7 @@ class Model(ptn.Module):
         self.scale_grad_by_freq = scale_grad_by_freq
         self.dropout = dropout
         self.bias = bias
-        self.device = device
+        self.device = pt.device(device)
         self.dtype = dtype
         self.embed = ptn.Embedding(
             num_embeddings=vocab,
@@ -116,5 +116,8 @@ model = Model(
     dtype=config.data.dtype
 )
 
-compiled_model = pt.compile(model)
-compile_model = Partial[Model](pt.compile, model)
+compile_model = Compile(
+    inplace=True,
+    model=model,
+    disable=config.model.disable
+)

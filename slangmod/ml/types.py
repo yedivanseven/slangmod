@@ -1,4 +1,3 @@
-from typing import Literal
 from collections.abc import Iterator
 from swak.pt.types import Tensor
 
@@ -10,4 +9,3 @@ type Validation = tuple[
     tuple[float, float],
     tuple[float, float]
 ]
-type Device = Literal['cpu', 'cuda']

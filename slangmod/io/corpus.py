@@ -44,9 +44,22 @@ class CorpusDiscovery(ArgRepr):
 
 class CorpusLoader(ArgRepr):
 
-    def __init__(self, not_found: str = NotFound.RAISE) -> None:
+    def __init__(
+            self,
+            eos_symbol: str,
+            not_found: str = NotFound.RAISE
+    ) -> None:
+        self.eos_symbol = eos_symbol
         self.not_found = str(not_found)
-        super().__init__(self.not_found)
+        super().__init__(eos_symbol, self.not_found)
+
+    @property
+    def sep(self) -> str:
+        return f' {self.eos_symbol} '
+
+    @property
+    def end(self) -> str:
+        return f' {self.eos_symbol}'
 
     @staticmethod
     def read(file: str) -> str:
@@ -55,7 +68,7 @@ class CorpusLoader(ArgRepr):
         return text.strip()
 
     def __call__(self, files: list[str]) -> str:
-        corpus = '\n\n'.join(map(self.read, files)) + '\n\n'
+        corpus = self.sep.join(map(self.read, files)) + self.end
         if corpus:
             return corpus
         msg = 'No corpus to load!'
@@ -67,5 +80,5 @@ class CorpusLoader(ArgRepr):
         return corpus
 
 
-discover_corpus = CorpusDiscovery(config.files.corpus, NotFound.WARN)
-load_corpus = CorpusLoader(NotFound.RAISE)
+discover_corpus = CorpusDiscovery(config.corpus, NotFound.WARN)
+load_corpus = CorpusLoader(config.tokens.eos_symbol, NotFound.RAISE)

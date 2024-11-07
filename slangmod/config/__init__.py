@@ -1,26 +1,45 @@
+import tomllib
 from swak.cli import EnvParser, ArgParser, EPILOG
+from swak.text import TextResourceLoader, TomlReader
 from .defaults import main, Main
-from .enums import Tokenizers, Positions, Styles, Generators
+from .enums import (
+    Devices,
+    LiteralDevice,
+    Tokenizers,
+    Positions,
+    Styles,
+    Generators
+)
 
 __all__ = [
     'Main',
     'config',
     'actions',
+    'Devices',
+    'LiteralDevice',
     'Tokenizers',
     'Positions',
     'Styles',
     'Generators'
 ]
 
-# Parse the environment and update the default config accordingly
+# Parse the environment for config options
 parse_env = EnvParser()
 env_vars = parse_env()
-updated = main(env_vars)
+temporary = main(env_vars)
 
-# Parse the command line and update the updated config accordingly
-parse_args = ArgParser(epilog=EPILOG.format(updated))
-actions, params = parse_args()
-config = updated(params)
+# Parse the command line for config options
+parse_args = ArgParser(epilog=EPILOG.format(temporary))
+actions, args = parse_args()
+temporary = temporary(args)
 
-# ToDo: Add a TOML config file!
-# ToDo: Add TOML alternatives for model sizes
+# Load a config file if given
+toml = {} if temporary.toml is None else TomlReader(temporary.toml)()
+temporary = temporary(toml)
+
+# Load the preset for the model size
+load_preset = TextResourceLoader(__name__, 'presets')
+preset = tomllib.loads(load_preset(temporary.preset))
+
+# Update the original config in order of precedence
+config = main(preset)(toml)(env_vars)(args)

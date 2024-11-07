@@ -1,0 +1,4 @@
+[model]
+dim = 32
+n_heads = 2
+n_layers = 2

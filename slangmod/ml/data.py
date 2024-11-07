@@ -1,22 +1,27 @@
 import math
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Tensor, Dtype
+from swak.pt.types import Tensor, Dtype, Device
 from swak.pt.train import TestDataBase, TrainDataBase
 from swak.funcflow import Curry
-from ..config import config
-from .types import Batches, Device
+from ..config import config, LiteralDevice
+from .types import Batches
 
 
 class TestData(TestDataBase):
 
-    def __init__(self, seqs: Tensor, device: Device, dtype: Dtype) -> None:
+    def __init__(
+            self,
+            seqs: Tensor,
+            device: Device | LiteralDevice,
+            dtype: Dtype
+    ) -> None:
         self.seqs = seqs
-        self.device = device
+        self.device = pt.device(device)
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
-            device=pt.device(device),
+            device=self.device,
             dtype=dtype
         )
         self.__rand = pt.randperm(self.n, device=seqs.device, dtype=pt.long)
@@ -33,15 +38,10 @@ class TestData(TestDataBase):
     def seq_len(self) -> int:
         return self.seqs.shape[1] - 1
 
-    @property
-    def pin(self) -> bool:
-        return self.device == 'cuda'
-
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         n_batches = math.ceil(n / batch_size)
-        data = self.seqs[self.__rand[:n]].contiguous()
-        data = data.pin_memory(self.device) if self.pin else data
+        data = self.seqs[self.__rand[:n]]
         return iter(
             (
                 (
@@ -67,15 +67,15 @@ class TrainData(TrainDataBase):
     def __init__(
             self,
             seqs: Tensor,
-            device: Device,
+            device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.seqs = seqs
-        self.device = device
+        self.device = pt.device(device)
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
-            device=pt.device(device),
+            device=self.device,
             dtype=dtype
         )
         self.__rand = pt.randperm(self.n, device=seqs.device, dtype=pt.long)
@@ -92,15 +92,10 @@ class TrainData(TrainDataBase):
     def seq_len(self) -> int:
         return self.seqs.shape[1] - 1
 
-    @property
-    def pin(self) -> bool:
-        return self.device == 'cuda'
-
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         n_batches = math.ceil(n / batch_size)
-        data = self.seqs[self.__rand[:n]].contiguous()
-        data = data.pin_memory(self.device) if self.pin else data
+        data = self.seqs[self.__rand[:n]]
         return iter(
             (
                 (
@@ -123,8 +118,7 @@ class TrainData(TrainDataBase):
     def __call__(self, batch_size: int, step_freq: int = 1) -> Batches:
         n = self.n_for(batch_size, step_freq)
         rand = pt.randperm(self.n, device=self.seqs.device, dtype=pt.long)
-        data = self.seqs[rand[:n]].contiguous()
-        data = data.pin_memory(self.device) if self.pin else data
+        data = self.seqs[rand[:n]]
         return iter(
             (
                 (

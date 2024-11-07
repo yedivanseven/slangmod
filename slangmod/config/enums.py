@@ -1,12 +1,20 @@
 from enum import StrEnum
+from typing import Literal
 
 __all__ = [
-    'Tokenizers',
     'Devices',
+    'LiteralDevice',
+    'Tokenizers',
     'Positions',
     'Styles',
     'Generators'
 ]
+
+class Devices(StrEnum):
+    CPU = 'cpu'
+    CUDA = 'cuda'
+
+type LiteralDevice = Literal['cpu', 'cuda']
 
 
 class Tokenizers(StrEnum):
@@ -15,18 +23,13 @@ class Tokenizers(StrEnum):
     UNIGRAM = 'unigram'
 
 
-class Devices(StrEnum):
-    CPU = 'cpu'
-    CUDA = 'cuda'
-
-
 class Positions(StrEnum):
     SINUSOIDAL = 'sinusoidal'
     LEARNABLE = 'learnable'
 
 
 class Styles(StrEnum):
-    SIMPLE = 'simple'
+    SPACE = 'space'
     PARAGRAPH = 'paragraph'
     QUOTE = 'quote'
     DIALOGUE = 'dialogue'

@@ -35,5 +35,5 @@ class TokenizerLoader(ArgRepr):
         return self.algo.from_file(str(path.resolve()))
 
 
-save_tokenizer = TokenizerSaver(config.files.tokenizer)
-load_tokenizer = TokenizerLoader(tokenizer, config.files.tokenizer)
+save_tokenizer = TokenizerSaver(config.tokenizer_file)
+load_tokenizer = TokenizerLoader(tokenizer, config.tokenizer_file)

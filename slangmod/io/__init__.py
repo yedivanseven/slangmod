@@ -1,3 +1,4 @@
+from .config import save_config
 from .corpus import CorpusDiscovery, CorpusLoader, discover_corpus, load_corpus
 from .clients import ConsoleClient, console_client
 from .tokenizer import (
@@ -8,6 +9,7 @@ from .tokenizer import (
 )
 
 __all__ = [
+    'save_config',
     'CorpusDiscovery',
     'discover_corpus',
     'CorpusLoader',

@@ -1,9 +1,10 @@
+from collections.abc import Iterable
 from swak.misc import ArgRepr
 from ...config import config, Styles
 
 __all__ = [
     'Style',
-    'simple',
+    'space',
     'quote',
     'paragraph',
     'dialogue',
@@ -13,21 +14,33 @@ __all__ = [
 
 class Style(ArgRepr):
 
-    def __init__(self, template: str = '{} ') -> None:
-        super().__init__(template)
+    def __init__(
+            self,
+            template: str = '{} ',
+            char: str | Iterable[str] = '"',
+            *chars: str
+    ) -> None:
         self.template = template
+        self.chars = ((char,) if isinstance(char, str) else char) + chars
+        super().__init__(template, *chars)
+
+    def strip(self, prompt: str) -> str:
+        naked = prompt.strip()
+        for char in self.chars:
+            naked = naked.strip(char)
+        return naked.strip()
 
     def __call__(self, prompt: str) -> str:
-        return self.template.format(prompt.strip())
+        return self.template.format(self.strip(prompt))
 
 
-simple = Style()
-paragraph = Style('{}\n\n')
-quote = Style('"{}" ')
-dialogue = Style('"{}"\n\n')
+space = Style('{} ')
+paragraph = Style('{}' + f'{config.tokens.eos_string}')
+quote = Style('"{}," ', ",")
+dialogue = Style('"{}"' + f'{config.tokens.eos_string}')
 
 style = {
-    Styles.SIMPLE: simple,
+    Styles.SPACE: space,
     Styles.PARAGRAPH: paragraph,
     Styles.QUOTE: quote,
     Styles.DIALOGUE: dialogue

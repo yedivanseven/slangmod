@@ -11,3 +11,6 @@ class Tokens(JsonObject):
     max_length: int = 16
     shrink_factor: float = 0.75
     n_iter: int = 2
+    eos_symbol: str = '[EOS]'
+    eos_regex: str = r'\n{2,}'
+    eos_string: str = '\n\n'

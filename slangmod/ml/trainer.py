@@ -9,7 +9,7 @@ from ..config import config
 
 LOGGER = StdOutLogger(__name__, config.log_level)
 
-checkpoint = OnDisk(config.files.checkpoint)
+checkpoint = OnDisk(config.checkpoint_file)
 epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)
 
@@ -17,7 +17,7 @@ loss = ptn.CrossEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
-optimizer = Curry[pto.Adam](pto.Adam, config.lr, fused=True)
+optimizer = Curry[pto.Adam](pto.AdamW, config.lr, fused=True)
 linear_inverse = LinearInverse(config.train.warmup, config.train.power)
 scheduler = Curry[pts.LambdaLR](pts.LambdaLR, linear_inverse)
 
