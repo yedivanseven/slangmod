@@ -10,8 +10,8 @@ class Data(JsonObject):
     device: Lower() = device.type
     seq_len: int = 1024
     step: int = 1
-    test: float = 0.01
-    validate: float = 0.01
+    test: float = 0.005
+    validate: float = 0.005
 
     @property
     def dtype(self) -> Dtype:

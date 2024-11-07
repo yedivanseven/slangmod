@@ -1,4 +1,5 @@
 import importlib.metadata as meta
+import datetime as dt
 from hashlib import shake_128
 from pathlib import Path
 from swak.jsonobject import JsonObject
@@ -48,7 +49,8 @@ class Main(JsonObject):
                 str(self.model) +
                 str(self.train)
             )
-            name = shake_128(settings.encode()).hexdigest(4)
+            date = str(dt.date.today())
+            name = date + '-' + shake_128(settings.encode()).hexdigest(4)
         else:
             name = self.name
         path = Path(self.workdir) / name
