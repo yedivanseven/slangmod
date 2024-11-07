@@ -34,10 +34,10 @@ class ConsoleClient(ArgRepr):
                 continue
             elif prompt == self.stop:
                 break
-            self.history.append((self.user, generate.wrap(prompt)))
+            self.history.append((self.user, generate.style(prompt)))
             answer = generate(self.flat).rstrip() + self.eos_string
             self.history.append((self.bot, answer))
-            print('\nBot:', answer)  # noqa: T201
+            print(f'\n{self.bot}:', answer, end='')  # noqa: T201
         return self.history
 
 

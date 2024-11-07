@@ -1,77 +1,85 @@
 from typing import Any
 from collections.abc import Callable
 from abc import ABC, abstractmethod
+from functools import cached_property
 import torch as pt
-from tokenizers import Tokenizer
-from swak.pt.types import Module, Tensor, Device, Dtype
+from swak.pt.types import Module, Tensor, Tensors2T
+from ..tokenizers import Algo
+
+type Logits = tuple[Tensor, int]
 
 
 class Generator(ABC):
 
     def __init__(
             self,
-            tokenizer: Tokenizer,
+            tokenizer: Algo,
             model: Module,
-            wrap: Callable[[str], str],
+            style: Callable[[str], str],
             max_tokens: int = 1024,
-            unk_id: int = 1,
-            eos_id: int = 2,
             **_: Any
     ) -> None:
         self.tokenizer = tokenizer
         self.model = model
-        self.wrap = wrap
+        self.style = style
         self.max_tokens = max_tokens
-        self.unk_id = unk_id
-        self.eos_id = eos_id
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}(..., {self.wrap})'
+        cls = self.__class__.__name__
+        template = '{}(tokenizer, model, {}, {})'
+        return template.format(cls, self.style, self.max_tokens)
 
     @property
     def vocab(self) -> int:
-        return self.tokenizer.get_vocab_size()
+        return self.tokenizer.vocab
 
     @property
-    def max_len(self) -> int:
-        return self.model.positions.max_len
+    def eos_id(self) -> int:
+        return self.tokenizer.eos_id
 
     @property
-    def device(self) -> Device:
-        return self.model.device
+    def context(self) -> int:
+        return self.model.positions.context
 
-    @property
-    def dtype(self) -> Dtype:
-        return self.model.dtype
-
-    @property
+    @cached_property
     def zero(self) -> Tensor:
-        return pt.zeros(1, 1, dtype=self.dtype, device=self.device)
+        return pt.zeros(1, 1, dtype=self.model.dtype, device=self.model.device)
 
     def __call__(self, prompt: str) -> str:
-        encoded = self.tokenizer.encode(self.wrap(prompt))
-        encoded.truncate(self.max_len, direction='left')
+        encoded = self.tokenizer.encode(self.style(prompt))
+        encoded.truncate(self.context, direction='left')
 
-        src = pt.tensor(encoded.ids, device=self.device).unsqueeze(0)
+        src = pt.tensor(encoded.ids, device=self.model.device).unsqueeze(0)
 
-        padding_mask = pt.tensor(
-            encoded.attention_mask,
-            dtype=self.model.dtype,
-            device=self.model.device
-        ).log(
-        ).unsqueeze(0)
-        unknown_mask = pt.zeros_like(
+        mask = pt.zeros_like(
             src,
             dtype=self.model.dtype,
             device=self.model.device
         ).where(
-            src == self.unk_id,
+            src == self.tokenizer.unk_id,
             1.0
         ).log()
-        mask = padding_mask + unknown_mask
 
-        return self.tokenizer.decode(self.sample(src, mask))
+        self.model.eval()
+        return self.tokenizer.decode(self.predict(src, mask))
 
     @abstractmethod
-    def sample(self, src: Tensor, mask: Tensor) -> list[int]:
+    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
+        ...
+
+
+class NextToken(Generator):
+
+    def logits(self, src: Tensor, mask: Tensor, first: bool = False) -> Logits:
+        with pt.no_grad():
+            (out,) = self.model(src, None, mask, False)
+        return out[0, self.eos_id + first:, -1].float(), self.eos_id + first
+
+    def step(self, token: Tensor, src: Tensor, mask: Tensor) -> Tensors2T:
+        mask = pt.cat([mask, self.zero], dim=-1)[:, -self.context:]
+        src = pt.cat([src, token.view(1, 1)], dim=-1)[:, -self.context:]
+        return src, mask
+
+    @abstractmethod
+    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
         ...

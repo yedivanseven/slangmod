@@ -15,4 +15,4 @@ class Data(JsonObject):
 
     @property
     def dtype(self) -> Dtype:
-        return pt.float32 if self.device.type == Devices.CPU else pt.bfloat16
+        return pt.bfloat16 if self.device == Devices.CUDA else pt.float32

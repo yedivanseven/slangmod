@@ -5,6 +5,7 @@ from .greedy import Greedy
 from .random import Random
 from .top_k import TopK
 from .top_p import TopP
+from .beamsearch import BeamSearch
 from .styles import Style, style, space, paragraph, quote, dialogue
 
 generator_type = {
@@ -12,6 +13,7 @@ generator_type = {
     Generators.RANDOM: Random,
     Generators.TOP_K: TopK,
     Generators.TOP_P: TopP,
+    Generators.BEAM: BeamSearch
 }[config.chat.generator]
 
 create_generator = Curry(
@@ -19,7 +21,8 @@ create_generator = Curry(
     style,
     k=config.chat.k,
     p=config.chat.p,
-    width=config.chat.width
+    width=config.chat.width,
+    penalty=config.chat.penalty
 )
 
 __all__ = [
@@ -28,6 +31,7 @@ __all__ = [
     'Random',
     'TopK',
     'TopP',
+    'BeamSearch',
     'create_generator',
     'Style',
     'style',
