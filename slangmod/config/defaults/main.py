@@ -42,19 +42,19 @@ class Main(JsonObject):
     @property
     def folder(self) -> str:
         if self.name is None:
-            settings = (
-                str(self.version) +
-                str(self.tokens) +
-                str(self.data) +
-                str(self.model) +
+            settings = ''.join([
+                str(self.version),
+                str(self.tokens),
+                str(self.data),
+                str(self.model),
                 str(self.train)
-            )
-            date = str(dt.date.today())
+            ])
+            date = str(dt.date.today())  # ToDo: Rethink the date thingy!
             name = date + '-' + shake_128(settings.encode()).hexdigest(4)
         else:
             name = self.name
         path = Path(self.workdir) / name
-        path.mkdir(parents=False, exist_ok=True)
+        path.mkdir(parents=False, exist_ok=True)  # ToDo: This goes into writers!
         return str(path.resolve())
 
     @property

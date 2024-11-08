@@ -11,10 +11,11 @@ __all__ = [
 ]
 
 
+# ToDo: What happens if the directory does not exist?
 class TokenizerSaver(ArgRepr):
 
     def __init__(self, path: str = '') -> None:
-        self.path = str(Path(path).resolve())
+        self.path = str(Path(path.strip()).resolve())
         super().__init__(self.path)
 
     def __call__(self, algo: Algo, path: str = '') -> tuple[()]:
@@ -27,7 +28,7 @@ class TokenizerLoader(ArgRepr):
 
     def __init__(self, algo: Algo, path: str = '') -> None:
         self.algo = algo
-        self.path = str(Path(path).resolve())
+        self.path = str(Path(path.strip()).resolve())
         super().__init__(self.path)
 
     def __call__(self, path: str = '') -> Algo:

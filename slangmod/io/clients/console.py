@@ -12,9 +12,9 @@ class ConsoleClient(ArgRepr):
             user: str = 'user',
             bot: str = 'bot',
             stop: str = 'Stop!',
-            eos_string: str = '\n\n',
+            eos_string: str = '\n\n'
     ) -> None:
-        super().__init__(system, user, bot, stop, eos_string)
+        super().__init__('...', user, bot, stop, eos_string)
         self.system = system.lstrip()
         self.user = user.strip().capitalize()
         self.bot = bot.strip().capitalize()
