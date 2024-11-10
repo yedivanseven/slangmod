@@ -6,10 +6,11 @@ from ..enums import Styles, Generators
 class Chat(JsonObject):
     style: Lower() = Styles.SPACE
     generator: Lower() = Generators.BEAM
+    temperature: float = 1.0
     k: float = 0.1
     p: float = 0.6
     width: int = 4
-    penalty: float = 0.6
+    penalty: float = 0.6  # ToDo: This is a penalty for shorter sequences!
     user: str = 'user'
     bot: str = 'bot'
     stop: str = 'Stop!'

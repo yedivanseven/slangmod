@@ -11,15 +11,17 @@ __all__ = [
 ]
 
 
-# ToDo: What happens if the directory does not exist?
 class TokenizerSaver(ArgRepr):
 
-    def __init__(self, path: str = '') -> None:
-        self.path = str(Path(path.strip()).resolve())
+    def __init__(self, path: str = '', create: bool = False) -> None:
+        self.path = str(Path(str(path).strip()).resolve())
+        self.create = create
         super().__init__(self.path)
 
     def __call__(self, algo: Algo, path: str = '') -> tuple[()]:
         path = Path(self.path) / path.strip().strip(' /')
+        if self.create:
+            path.parent.mkdir(parents=True, exist_ok=True)
         algo.save(str(path.resolve()))
         return ()
 
@@ -28,7 +30,7 @@ class TokenizerLoader(ArgRepr):
 
     def __init__(self, algo: Algo, path: str = '') -> None:
         self.algo = algo
-        self.path = str(Path(path.strip()).resolve())
+        self.path = str(Path(str(path).strip()).resolve())
         super().__init__(self.path)
 
     def __call__(self, path: str = '') -> Algo:
@@ -36,5 +38,5 @@ class TokenizerLoader(ArgRepr):
         return self.algo.from_file(str(path.resolve()))
 
 
-save_tokenizer = TokenizerSaver(config.tokenizer_file)
+save_tokenizer = TokenizerSaver(config.tokenizer_file, True)
 load_tokenizer = TokenizerLoader(tokenizer, config.tokenizer_file)

@@ -4,20 +4,5 @@ from .abc import NextToken
 
 class Greedy(NextToken):
 
-    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
-        answer = []
-
-        logits, offset = self.logits(src, mask, first=True)
-        next_token = logits.argmax(dim=-1) + offset
-        answer.append(next_token.item())
-        src, mask = self.step(next_token, src, mask)
-
-        for _ in range(self.max_tokens - 1):
-            logits, offset = self.logits(src, mask, first=False)
-            next_token = logits.argmax(dim=-1) + offset
-            answer.append(next_token.item())
-            if next_token.item() == self.eos_id:
-                break
-            src, mask = self.step(next_token, src, mask)
-
-        return answer
+    def next_token_from_logits(self, logits: Tensor) -> Tensor:
+        return logits.argmax(dim=-1)

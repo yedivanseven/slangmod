@@ -62,6 +62,7 @@ class TestData(TestDataBase):
         )
 
 
+# ToDo: Increase sequence length during warmup, then randomize sequence length
 class TrainData(TrainDataBase):
 
     def __init__(

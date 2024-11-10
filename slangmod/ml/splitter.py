@@ -11,17 +11,18 @@ class DataSplitter(ArgRepr):
             seq_len: int,
             step: int = 1,
             test: float = 0.01,
-            validation: float = 0.01
     ) -> None:
-        super().__init__(seq_len, step, test, validation)
         self.seq_len = seq_len
-        self.step = step
+        if step < 1.0:
+            self.step = round(max(1.0, step * seq_len))
+        else:
+            self.step = round(min(step, seq_len))
         self.test = test
-        self.validation = validation
+        super().__init__(seq_len, self.step, test)
 
     @property
     def train(self) -> float:
-        return 1.0 - self.test - self.validation
+        return 1.0 - 2 * self.test
 
     def __call__(self, data: Tensor) -> Tensors3T:
         sequences = data.unfold(0, self.seq_len + 1, self.step)
@@ -39,6 +40,5 @@ class DataSplitter(ArgRepr):
 split_data = DataSplitter(
     seq_len=config.data.seq_len,
     step=config.data.step,
-    test=config.data.test,
-    validation=config.data.validate
+    test=config.data.test
 )

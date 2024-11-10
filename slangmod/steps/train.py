@@ -53,7 +53,7 @@ train_model = Pipe[[Model, TrainData, TestData], Model](
     LOGGER.debug(f'Saving model to "{config.model_file}".'),
     Fork[[Model], Model](
         identity,
-        ModelSaver(config.model_file)
+        ModelSaver(config.model_file, True)
     )
 )
 

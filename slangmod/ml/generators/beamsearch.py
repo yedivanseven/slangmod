@@ -23,21 +23,24 @@ class BeamSearch(Generator):
         self.width = width
         self.penalty = penalty
 
-    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
+    def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
 
         with pt.no_grad():
             (out,) = self.model(src, None, mask, False)
-        logits = out[0, self.eos_id + 1:, -1].float()
+        logits = out[0, self.eos_id + more:, -1].float()
         top_k = ptnf.log_softmax(logits, dim=-1).topk(self.width, dim=-1)
 
-        all_seqs = top_k.indices.view(-1, 1) + self.eos_id + 1
+        all_seqs = top_k.indices.view(-1, 1) + self.eos_id + more
         all_prob = top_k.values
         all_size = pt.ones_like(all_prob).long()
         all_vals = top_k.values
 
-        for _ in range(self.max_tokens - 1):
+        more = False if more else (all_seqs == self.eos_id).any()
+        eos = pt.zeros(all_seqs.shape[0], dtype=pt.bool)
 
-            eos = all_seqs[:, -1] == self.eos_id
+        for _ in range(1, self.max_tokens):
+
+            eos = eos if more else all_seqs[:, -1] == self.eos_id
 
             if eos.all():
                 break
@@ -54,9 +57,9 @@ class BeamSearch(Generator):
 
             with pt.no_grad():
                 (out,) = self.model(inp[:, -self.context:], None, unk, False)
-            logits = out[:, self.eos_id:, -1].float()
+            logits = out[:, self.eos_id + more:, -1].float()
             top_k = ptnf.log_softmax(logits, dim=-1).topk(self.width, dim=-1)
-            next_tokens = top_k.indices.view(-1, 1) + self.eos_id
+            next_tokens = top_k.indices.view(-1, 1) + self.eos_id + more
             log_prob = top_k.values.ravel()
 
             grow_seqs = all_seqs[~eos].repeat_interleave(self.width, dim=0)
@@ -77,5 +80,12 @@ class BeamSearch(Generator):
             all_size = all_size[top_k_indices]
             all_vals = all_vals[top_k_indices]
 
+            more = False
+
         winner = all_vals.argmax()
-        return all_seqs[winner].tolist()
+        answer = all_seqs[winner].tolist()
+        if self.eos_id in answer[1:]:
+            eos_pos = answer[1:].index(2) + 2
+        else:
+            eos_pos = len(answer)
+        return answer[:eos_pos]

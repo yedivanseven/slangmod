@@ -4,11 +4,11 @@ from ..enums import Positions
 
 
 class Model(JsonObject):
-    dim: int = 128
+    dim: int = 32
     positions: Lower() = Positions.SINUSOIDAL
-    context: int = 8192
-    n_heads: int = 4
-    n_layers: int = 4
+    context: int = 1024
+    n_heads: int = 2
+    n_layers: int = 2
     feedforward_factor: int = 4
     scale_grad_by_freq: bool = True
     dropout: float = 0.1

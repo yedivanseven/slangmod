@@ -1,24 +1,25 @@
+from typing import Any
+from collections.abc import Callable
 import torch.distributions as ptd
-from swak.pt.types import Tensor
+from swak.pt.types import Module, Tensor
+from ..tokenizers import Algo
 from .abc import NextToken
 
 
 class Random(NextToken):
+    def __init__(
+            self,
+            tokenizer: Algo,
+            model: Module,
+            style: Callable[[str], str],
+            max_tokens: int = 1024,
+            temperature: float = 1.0,
+            **_: Any
+    ) -> None:
+        super().__init__(tokenizer, model, style, max_tokens)
+        self.temperature = temperature
 
-    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
-        answer = []
 
-        logits, offset = self.logits(src, mask, first=True)
-        next_token = ptd.Categorical(logits=logits).sample() + offset
-        answer.append(next_token.item())
-        src, mask = self.step(next_token, src, mask)
-
-        for _ in range(self.max_tokens - 1):
-            logits, offset = self.logits(src, mask, first=False)
-            next_token = ptd.Categorical(logits=logits).sample() + offset
-            answer.append(next_token.item())
-            if next_token.item() == self.eos_id:
-                break
-            src, mask = self.step(next_token, src, mask)
-
-        return answer
+    def next_token_from_logits(self, logits: Tensor) -> Tensor:
+        scaled = logits / self.temperature
+        return ptd.Categorical(logits=scaled).sample()

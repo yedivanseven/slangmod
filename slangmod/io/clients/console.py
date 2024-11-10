@@ -4,6 +4,7 @@ from ...config import config
 from ...ml.generators import Generator
 
 
+# ToDo Handle empty user input and Max tokens exhausted!
 class ConsoleClient(ArgRepr):
 
     def __init__(
@@ -35,9 +36,11 @@ class ConsoleClient(ArgRepr):
             elif prompt == self.stop:
                 break
             self.history.append((self.user, generate.style(prompt)))
-            answer = generate(self.flat).rstrip() + self.eos_string
+            generated, terminates = generate(self.flat)
+            answer = generated.rstrip() + self.eos_string
+            end = '' if terminates else '...'
             self.history.append((self.bot, answer))
-            print(f'\n{self.bot}:', answer, end='')  # noqa: T201
+            print(f'\n{self.bot}:', answer, end=end)  # noqa: T201
         return self.history
 
 

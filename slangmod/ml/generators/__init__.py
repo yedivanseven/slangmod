@@ -19,6 +19,7 @@ generator_type = {
 create_generator = Curry(
     generator_type,
     style,
+    temperature=config.chat.temperature,
     k=config.chat.k,
     p=config.chat.p,
     width=config.chat.width,

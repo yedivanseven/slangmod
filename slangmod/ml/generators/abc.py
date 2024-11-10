@@ -45,9 +45,11 @@ class Generator(ABC):
     def zero(self) -> Tensor:
         return pt.zeros(1, 1, dtype=self.model.dtype, device=self.model.device)
 
-    def __call__(self, prompt: str) -> str:
+    def __call__(self, prompt: str) -> tuple[str, bool]:
         encoded = self.tokenizer.encode(self.style(prompt))
         encoded.truncate(self.context, direction='left')
+
+        more = encoded.ids[-1] == self.eos_id
 
         src = pt.tensor(encoded.ids, device=self.model.device).unsqueeze(0)
 
@@ -61,25 +63,47 @@ class Generator(ABC):
         ).log()
 
         self.model.eval()
-        return self.tokenizer.decode(self.predict(src, mask))
+        answer = self.predict(src, mask, more)
+        return self.tokenizer.decode(answer), answer[-1] == self.eos_id
 
     @abstractmethod
-    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
+    def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
         ...
 
 
 class NextToken(Generator):
 
-    def logits(self, src: Tensor, mask: Tensor, first: bool = False) -> Logits:
+    def logits(self, src: Tensor, mask: Tensor, more: bool) -> Logits:
         with pt.no_grad():
             (out,) = self.model(src, None, mask, False)
-        return out[0, self.eos_id + first:, -1].float(), self.eos_id + first
+        return out[0, self.eos_id + more:, -1].float(), self.eos_id + more
 
     def step(self, token: Tensor, src: Tensor, mask: Tensor) -> Tensors2T:
         mask = pt.cat([mask, self.zero], dim=-1)[:, -self.context:]
         src = pt.cat([src, token.view(1, 1)], dim=-1)[:, -self.context:]
         return src, mask
 
+    def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
+        answer = []
+
+        logits, offset = self.logits(src, mask, more)
+        next_token = self.next_token_from_logits(logits) + offset
+        answer.append(next_token.item())
+        src, mask = self.step(next_token, src, mask)
+
+        more = False if more else next_token.item() == self.eos_id
+
+        for _ in range(1, self.max_tokens):
+            logits, offset = self.logits(src, mask, more)
+            next_token = self.next_token_from_logits(logits) + offset
+            answer.append(next_token.item())
+            if next_token.item() == self.eos_id:
+                break
+            src, mask = self.step(next_token, src, mask)
+            more = False
+
+        return answer
+
     @abstractmethod
-    def predict(self, src: Tensor, mask: Tensor) -> list[int]:
+    def next_token_from_logits(self, logits: Tensor) -> Tensor:
         ...

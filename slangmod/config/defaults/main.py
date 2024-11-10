@@ -49,12 +49,10 @@ class Main(JsonObject):
                 str(self.model),
                 str(self.train)
             ])
-            date = str(dt.date.today())  # ToDo: Rethink the date thingy!
-            name = date + '-' + shake_128(settings.encode()).hexdigest(4)
+            name = shake_128(settings.encode()).hexdigest(4)
         else:
             name = self.name
         path = Path(self.workdir) / name
-        path.mkdir(parents=False, exist_ok=True)  # ToDo: This goes into writers!
         return str(path.resolve())
 
     @property
