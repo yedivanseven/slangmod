@@ -1,0 +1,8 @@
+[model]
+dim = 1024
+n_heads = 16
+n_layers = 12
+
+[train]
+learning_rate = 0.0003
+batch_size = 24

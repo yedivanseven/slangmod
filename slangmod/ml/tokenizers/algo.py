@@ -70,7 +70,7 @@ class Algo:
 
     def from_file(self, path: str) -> Self:
         tokenizer = Tokenizer.from_file(path)
-        added_tokens =tokenizer.get_added_tokens_decoder()
+        added_tokens = tokenizer.get_added_tokens_decoder()
         sorted_tokens = sorted(added_tokens.items(), key=lambda x: x[0])
         pad, unk, *extra, eos = (token for _, token in sorted_tokens)
         algo = self.__class__(

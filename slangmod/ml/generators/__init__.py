@@ -19,11 +19,12 @@ generator_type = {
 create_generator = Curry(
     generator_type,
     style,
+    config.chat.max_tokens,
     temperature=config.chat.temperature,
     k=config.chat.k,
     p=config.chat.p,
     width=config.chat.width,
-    penalty=config.chat.penalty
+    boost=config.chat.boost
 )
 
 __all__ = [

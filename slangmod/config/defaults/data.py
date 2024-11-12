@@ -9,8 +9,8 @@ from ..enums import Devices
 class Data(JsonObject):
     device: Lower() = device.type
     seq_len: int = 1024
-    step: int = 16
-    test: float = 0.01
+    stride: int = 128
+    test: float = 0.05
 
     @property
     def dtype(self) -> Dtype:

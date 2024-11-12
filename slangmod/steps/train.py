@@ -14,7 +14,11 @@ from ..ml import make_train_data, make_test_data, make_validation_data
 from ..ml import Model, compile_model
 from ..ml import trainer
 from ..ml import validate
-from .log_messages.train import log_data_sizes, log_validation_metrics
+from .log_messages.train import (
+    log_total_number_of_tokens,
+    log_data_sizes,
+    log_validation_metrics
+)
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
@@ -33,7 +37,7 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     ),
     LOGGER.debug('Encoding corpus.'),
     apply,
-    LOGGER.debug('Converting to CPU tensor.'),
+    LOGGER.debug(log_total_number_of_tokens),
     Create(pt.int64, 'cpu'),
     LOGGER.debug('Splitting into train, test, and validation data.'),
     split_data,
@@ -47,8 +51,8 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
 )
 
 train_model = Pipe[[Model, TrainData, TestData], Model](
-    LOGGER.info(f'Training model on {config.data.device.upper()}'
-                f' with a target learning rate of {config.lr:7.5f}'),
+    LOGGER.info(f'Training model on {config.data.device.upper()} with a target'
+                f' learning rate of {config.train.learning_rate:7.5f}'),
     trainer.train,
     LOGGER.debug(f'Saving model to "{config.model_file}".'),
     Fork[[Model], Model](

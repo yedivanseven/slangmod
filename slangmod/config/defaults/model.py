@@ -4,9 +4,9 @@ from ..enums import Positions
 
 
 class Model(JsonObject):
-    dim: int = 32
+    dim: int = 64
     positions: Lower() = Positions.SINUSOIDAL
-    context: int = 1024
+    context: int = 8192
     n_heads: int = 2
     n_layers: int = 2
     feedforward_factor: int = 4

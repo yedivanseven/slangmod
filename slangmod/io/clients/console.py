@@ -4,7 +4,6 @@ from ...config import config
 from ...ml.generators import Generator
 
 
-# ToDo Handle empty user input and Max tokens exhausted!
 class ConsoleClient(ArgRepr):
 
     def __init__(
@@ -15,10 +14,10 @@ class ConsoleClient(ArgRepr):
             stop: str = 'Stop!',
             eos_string: str = '\n\n'
     ) -> None:
-        super().__init__('...', user, bot, stop, eos_string)
+        super().__init__(system[:10], user, bot, stop, eos_string)
         self.system = system.lstrip()
-        self.user = user.strip().capitalize()
-        self.bot = bot.strip().capitalize()
+        self.user = user.strip().upper()
+        self.bot = bot.strip().upper()
         self.stop = stop
         self.eos_string = eos_string
         self.history = [(self.bot, self.system)] if self.system else []
@@ -27,20 +26,36 @@ class ConsoleClient(ArgRepr):
     def flat(self):
         return ''.join([msg[1] for msg in self.history])
 
+    @property
+    def space(self) -> int:
+        return max(len(self.user), len(self.bot))
+
     def __call__(self, generate: Generator) -> list[str]:
         print(self.system)  # noqa: T201
+
+        terminates = True
+
         while True:
-            prompt = input(f'{self.user}: ')
-            if prompt == '':
+            prompt = input(f'[{self.user:>{self.space}}]> ')
+
+            if prompt == '' and terminates:
                 continue
             elif prompt == self.stop:
                 break
+
             self.history.append((self.user, generate.style(prompt)))
             generated, terminates = generate(self.flat)
-            answer = generated.rstrip() + self.eos_string
-            end = '' if terminates else '...'
+
+            if terminates:
+                answer = generated.rstrip() + self.eos_string
+            else:
+                answer = generated
             self.history.append((self.bot, answer))
-            print(f'\n{self.bot}:', answer, end=end)  # noqa: T201
+
+            suffix = '' if terminates else f'...{self.eos_string}'
+            reply = answer + suffix
+
+            print(f'\n[{self.bot:>{self.space}}]> ', reply, end='')  # noqa: T201
         return self.history
 
 

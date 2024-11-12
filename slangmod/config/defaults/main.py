@@ -1,5 +1,4 @@
 import importlib.metadata as meta
-import datetime as dt
 from hashlib import shake_128
 from pathlib import Path
 from swak.jsonobject import JsonObject
@@ -18,8 +17,8 @@ VERSION = meta.version(PACKAGE)
 
 
 class Main(JsonObject):
-    package: str = PACKAGE
-    version: str = VERSION
+    package = PACKAGE
+    version = VERSION
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     corpus: resolve = '/home/georg/Projects/slangmod/data/corpus'
     workdir: resolve = '/home/georg/Projects/slangmod/data'
@@ -70,9 +69,3 @@ class Main(JsonObject):
     @property
     def config_file(self) -> str:
         return str((Path(self.folder) / self.files.config).resolve())
-
-    @property
-    def lr(self) -> float:
-        if self.train.learning_rate is None:
-            return 9 * self.train.super_batch * self.model.dim**-1.53 / 256
-        return self.train.learning_rate

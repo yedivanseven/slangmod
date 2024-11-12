@@ -17,7 +17,7 @@ class Style(ArgRepr):
     def __init__(
             self,
             template: str = '{} ',
-            char: str | Iterable[str] = '"',
+            char: str | Iterable[str] = (),
             *chars: str
     ) -> None:
         self.template = template
@@ -36,8 +36,8 @@ class Style(ArgRepr):
 
 space = Style('{} ')
 paragraph = Style('{}' + f'{config.tokens.eos_string}')
-quote = Style('"{}," ', ",")
-dialogue = Style('"{}"' + f'{config.tokens.eos_string}')
+quote = Style('"{}," ', ",", '"')
+dialogue = Style('"{}"' + f'{config.tokens.eos_string}', '"')
 
 style = {
     Styles.SPACE: space,

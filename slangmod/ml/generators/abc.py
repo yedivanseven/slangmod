@@ -23,6 +23,10 @@ class Generator(ABC):
         self.model = model
         self.style = style
         self.max_tokens = max_tokens
+        # Initialize model buffers with a sequence of maximum length
+        src = pt.randint(0, self.vocab, [self.context], device=model.device)
+        mask = pt.zeros(self.context, dtype=model.dtype, device=model.device)
+        _ = self.model(src.unsqueeze(0), None, mask.unsqueeze(0), False)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -46,7 +50,7 @@ class Generator(ABC):
         return pt.zeros(1, 1, dtype=self.model.dtype, device=self.model.device)
 
     def __call__(self, prompt: str) -> tuple[str, bool]:
-        encoded = self.tokenizer.encode(self.style(prompt))
+        encoded = self.tokenizer.encode(prompt)
         encoded.truncate(self.context, direction='left')
 
         more = encoded.ids[-1] == self.eos_id

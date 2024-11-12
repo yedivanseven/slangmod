@@ -16,12 +16,17 @@ class BeamSearch(Generator):
             style: Callable[[str], str],
             max_tokens: int = 1024,
             width: int = 10,
-            penalty: float = 0.8,
+            boost: float = 0.8,
             **_: Any
     ) -> None:
         super().__init__(tokenizer, model, style, max_tokens)
         self.width = width
-        self.penalty = penalty
+        self.boost = boost
+
+    def __repr__(self) -> str:
+        prefix = super().__repr__()[:-1]
+        suffix = f', width={self.width}, boost={self.boost})'
+        return prefix + suffix
 
     def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
 
@@ -66,7 +71,7 @@ class BeamSearch(Generator):
             grow_seqs = pt.cat([grow_seqs, next_tokens], dim=-1)
             grow_prob = all_prob[~eos].repeat_interleave(self.width) + log_prob
             grow_size = all_size[~eos].repeat_interleave(self.width) + 1
-            grow_vals = grow_prob / grow_size**self.penalty
+            grow_vals = grow_prob / grow_size**self.boost
 
             all_seqs = pt.cat([eos_seqs, grow_seqs], dim=0)
             all_prob = pt.cat([eos_prob, grow_prob], dim=0)

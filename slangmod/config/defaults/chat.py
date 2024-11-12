@@ -1,20 +1,35 @@
+from pathlib import Path
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower
 from ..enums import Styles, Generators
 
 
+def read_system_prompt(text: str) -> str:
+    path = Path(text)
+    try:
+        text_could_be_a_file = path.exists() and path.is_file()
+    except OSError:
+        text_could_be_a_file = False
+    if text_could_be_a_file:
+        with path.open() as file:
+            text = file.read()
+        return text
+    return text
+
+
 class Chat(JsonObject):
     style: Lower() = Styles.SPACE
     generator: Lower() = Generators.BEAM
+    max_tokens: int = 512
     temperature: float = 1.0
     k: float = 0.1
-    p: float = 0.6
-    width: int = 4
-    penalty: float = 0.6  # ToDo: This is a penalty for shorter sequences!
+    p: float = 0.8
+    width: int = 32
+    boost: float = 0.7
     user: str = 'user'
     bot: str = 'bot'
     stop: str = 'Stop!'
-    system: str = '''
+    system: read_system_prompt = '''
 I had seen little of Holmes lately. My marriage had drifted us away
 from each other. My own complete happiness, and the home-centred
 interests which rise up around the man who first finds himself master

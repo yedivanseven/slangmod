@@ -1,7 +1,7 @@
 import warnings
 from pathlib import Path
 from swak.misc import ArgRepr
-from swak.text import NotFound
+from swak.text import NotFound  # ToDo: Import also LiteralNotFound!
 from ..config import config
 
 __all__ = [
@@ -33,7 +33,7 @@ class CorpusDiscovery(ArgRepr):
         ] if path.exists() and path.is_dir() else []
         if corpus:
             return corpus
-        msg = 'No *.txt files found in folder {}!'
+        msg = 'No *.txt files found in folder "{}"!'
         match self.not_found:
             case NotFound.WARN:
                 warnings.warn(msg.format(path.resolve()))
@@ -80,5 +80,5 @@ class CorpusLoader(ArgRepr):
         return corpus
 
 
-discover_corpus = CorpusDiscovery(config.corpus, NotFound.WARN)
-load_corpus = CorpusLoader(config.tokens.eos_symbol, NotFound.RAISE)
+discover_corpus = CorpusDiscovery(config.corpus)
+load_corpus = CorpusLoader(config.tokens.eos_symbol)

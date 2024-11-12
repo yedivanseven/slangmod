@@ -24,7 +24,7 @@ class TopK(NextToken):
         elif k < 1.0:
             self.k = round(max(1.0, k * self.max_k))
         else:
-            self.k = round(k)
+            self.k = round(min(k, self.max_k))
         self.temperature = temperature
 
     def __repr__(self) -> str:

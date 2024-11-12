@@ -1,5 +1,8 @@
 from ...ml import TrainData, TestData
 
+def log_total_number_of_tokens(tokens: list[int]) -> str:
+    return f'Converting {len(tokens)} tokens to CPU tensor.'
+
 
 def log_data_sizes(
         train: TrainData,

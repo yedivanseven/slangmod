@@ -1,0 +1,7 @@
+[model]
+dim = 512
+n_heads = 8
+n_layers = 8
+
+[train]
+learning_rate = 0.001  # 0.0008
