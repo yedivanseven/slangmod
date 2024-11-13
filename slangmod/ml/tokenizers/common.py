@@ -1,6 +1,6 @@
 from tokenizers import AddedToken, Regex
 from tokenizers.normalizers import Sequence
-from tokenizers.normalizers import Strip, NFKC, StripAccents, Replace
+from tokenizers.normalizers import Strip, NFKD, StripAccents, Replace
 from ...config import config
 
 __all__ = [
@@ -23,8 +23,8 @@ EOS = AddedToken(
 # Normalizer
 normalizer = Sequence([
     Strip(),
-    NFKC(),
     StripAccents(),
+    NFKD(),
     Replace(Regex(config.tokens.eos_regex), f' {EOS.content} '),
     Replace(r'“', r'"'),
     Replace(r'”', r'"'),
