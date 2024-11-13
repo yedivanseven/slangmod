@@ -4,5 +4,5 @@ n_heads = 2
 n_layers = 4
 
 [train]
-learning_rate = 0.01
+learning_rate = 0.008
 warmup = 3000

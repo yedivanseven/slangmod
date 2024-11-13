@@ -11,12 +11,12 @@ __all__ = [
     'Generators'
 ]
 
+type LiteralDevice = Literal['cpu', 'cuda']
+
+
 class Devices(StrEnum):
     CPU = 'cpu'
     CUDA = 'cuda'
-
-type LiteralDevice = Literal['cpu', 'cuda']
-
 
 class Tokenizers(StrEnum):
     BPE = 'bpe'
@@ -31,6 +31,7 @@ class Positions(StrEnum):
 
 class Scaling(StrEnum):
     INVERSE = 'inverse'
+    EXPONENTIAL = 'exponential'
     COSINE = 'cosine'
 
 
