@@ -9,36 +9,48 @@ class DataSplitter(ArgRepr):
     def __init__(
             self,
             seq_len: int,
-            stride: int = 1,
             test: float = 0.1,
+            shuffle: bool = True
     ) -> None:
         self.seq_len = seq_len
-        if stride < 1.0:
-            self.stride = round(max(1.0, stride * seq_len))
-        else:
-            self.stride = round(min(stride, seq_len))
         self.test = test
-        super().__init__(seq_len, self.stride, test)
+        self.shuffle = shuffle
+        super().__init__(seq_len, test, shuffle)
+
+    @property
+    def stride(self) -> int:
+        return self.seq_len + 1
 
     @property
     def train(self) -> float:
         return 1.0 - 2 * self.test
 
     def __call__(self, data: Tensor) -> Tensors3T:
-        sequences = data.unfold(0, self.seq_len + 1, self.stride)
-        n = sequences.shape[0]
-        rand = pt.randperm(n, device=sequences.device, dtype=pt.long)
-        test_index = int(n * self.train)
-        validation_index = int(n * (self.train + self.test))
-        return (
-            sequences[rand][:test_index],
-            sequences[rand][test_index:validation_index],
-            sequences[rand][validation_index:]
-        )
+        sequences = data.unfold(0, self.stride, self.stride)
+        n = sequences.size(0)
+        n_train = int(n * self.train)
+        n_test = int(n * self.test)
+
+        max_start = int(2 * n * self.test) + 1
+        if self.shuffle:
+            start = pt.randint(0, max_start, [1], device=sequences.device)
+            indices = pt.randperm(max_start, device=sequences.device)
+        else:
+            start = max_start
+            indices = pt.arange(max_start, device=sequences.device)
+        stop = start + n_train
+
+        train = sequences[start:stop]
+        remainder = pt.cat([sequences[:start], sequences[stop:]], dim=0)
+
+        test = remainder[indices][:n_test]
+        validation = remainder[indices][n_test:]
+
+        return train, test, validation
 
 
 split_data = DataSplitter(
     seq_len=config.data.seq_len,
-    stride=config.data.stride,
-    test=config.data.test
+    test=config.data.test,
+    shuffle=config.data.shuffle
 )

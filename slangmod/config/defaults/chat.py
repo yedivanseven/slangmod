@@ -5,7 +5,7 @@ from ..enums import Styles, Generators
 
 
 def read_system_prompt(text: str) -> str:
-    path = Path(text)
+    path = Path(text.strip())
     try:
         text_could_be_a_file = path.exists() and path.is_file()
     except OSError:

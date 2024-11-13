@@ -1,5 +1,4 @@
 import math
-import random
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
@@ -14,10 +13,12 @@ class TestData(TestDataBase):
     def __init__(
             self,
             seqs: Tensor,
+            shuffle: bool,
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.seqs = seqs
+        self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
@@ -25,7 +26,10 @@ class TestData(TestDataBase):
             device=self.device,
             dtype=dtype
         )
-        self.__rand = pt.randperm(self.n, device=seqs.device, dtype=pt.long)
+        if self.shuffle:
+            self.__indices = pt.randperm(self.n, device=seqs.device)
+        else:
+            self.__indices = pt.arange(self.n, device=seqs.device)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -33,16 +37,16 @@ class TestData(TestDataBase):
 
     @property
     def n(self) -> int:
-        return self.seqs.shape[0]
+        return self.seqs.size(0)
 
     @property
     def seq_len(self) -> int:
-        return self.seqs.shape[1] - 1
+        return self.seqs.size(1) - 1
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
-        n_batches = math.ceil(n / batch_size)
-        seqs = self.seqs[self.__rand[:n]]
+        batches = range(math.ceil(n / batch_size))
+        seqs = self.seqs[self.__indices[:n]]
         return iter(
             (
                 (
@@ -59,7 +63,7 @@ class TestData(TestDataBase):
                     non_blocking=True
                 )
             )
-            for batch in range(n_batches)
+            for batch in batches
         )
 
 
@@ -68,12 +72,17 @@ class TrainData(TrainDataBase):
     def __init__(
             self,
             seqs: Tensor,
-            warmup: int,
+            stride: int,
+            shuffle: bool,
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
-        self.seqs = seqs
-        self.warmup = warmup
+        self.__n = self.__full_n = seqs.size(0)
+        self.__seq_len = seqs.size(1) - 1
+        self.stride = stride
+        self.data = self.fold(seqs)
+        self.seqs = self.data.unfold(0, self.seq_len + 1, self.stride)
+        self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
@@ -81,7 +90,10 @@ class TrainData(TrainDataBase):
             device=self.device,
             dtype=dtype
         )
-        self.__rand = pt.randperm(self.n, device=seqs.device, dtype=pt.long)
+        if self.shuffle:
+            self.__indices = pt.randperm(self.__full_n, device=seqs.device)
+        else:
+            self.__indices = pt.arange(self.__full_n, device=seqs.device)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -89,45 +101,35 @@ class TrainData(TrainDataBase):
 
     @property
     def n(self) -> int:
-        return self.seqs.shape[0]
+        return self.seqs.size(0)
 
     @property
     def seq_len(self) -> int:
-        return self.seqs.shape[1] - 1
+        return self.seqs.size(1) - 1
 
-    def batch_lengths(
-            self,
-            batch_size: int,
-            step_freq: int,
-            epoch: int
-    ) -> list[int]:
-        n_batches = self.n_batches_of(batch_size, step_freq)
-        batches = range(1, n_batches + 1)
-        lengths = [max(1, int(self.seq_len * b / n_batches)) for b in batches]
-        return [self.seq_len] + lengths[1:-1] if epoch == 1 else lengths
+    @property
+    def max_start(self) -> int:
+        return self.seq_len - self.stride
 
-    def slices(
-            self,
-            batch_size: int,
-            step_freq: int,
-            epoch: int
-    ) -> enumerate[tuple[slice, slice, int]]:
-        bls = self.batch_lengths(batch_size, step_freq, epoch)
-        starts = (random.randint(0, self.seq_len - bl) for bl in bls)
-        slices = (
-            (
-                slice(start, start + bls[i]),
-                slice(start + 1, start + 1 + bls[i]),
-                bls[i]
-            )
-            for i, start in enumerate(starts)
-        )
-        return enumerate(slices)
+    def fold(self, seqs: Tensor) -> Tensor:
+        n_tokens = (self.__full_n - 1) * self.stride + self.seq_len + 1
+
+        seq = pt.zeros(n_tokens, dtype=seqs.dtype, device=seqs.device)
+        count = pt.zeros(n_tokens, dtype=seqs.dtype, device=seqs.device)
+
+        for i in range(self.__full_n):
+            start = i * self.stride
+            stop = start + self.seq_len + 1
+            seq[start:stop] += seqs[i]
+            count[start:stop] += 1
+
+        seq //= count
+        return seq
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
-        n = self.n if max_n is None else min(max_n, self.n)
-        n_batches = math.ceil(n / batch_size)
-        seqs = self.seqs[self.__rand[:n]]
+        n = self.__full_n if max_n is None else min(max_n, self.__full_n)
+        batches = range(math.ceil(n / batch_size))
+        seqs = self.seqs[self.__indices[:n]]
         return iter(
             (
                 (
@@ -144,7 +146,7 @@ class TrainData(TrainDataBase):
                     non_blocking=True
                 )
             )
-            for batch in range(n_batches)
+            for batch in batches
         )
 
     def __call__(
@@ -153,44 +155,54 @@ class TrainData(TrainDataBase):
             step_freq: int = 1,
             epoch: int = 0
     ) -> Batches:
-        n = self.n_for(batch_size, step_freq)
-        rand = pt.randperm(self.n, device=self.seqs.device, dtype=pt.long)
-        seqs = self.seqs[rand[:n]]
+        if self.shuffle:
+            start = pt.randint(0, self.max_start, [1], device=self.data.device)
+            seqs = self.data[start:].unfold(0, self.seq_len + 1, self.stride)
+            self.__n = seqs.size(0)
+            n = self.n_for(batch_size, step_freq)
+            random = pt.randperm(self.n, device=self.data.device)
+            seqs = seqs[random[:n]]
+        else:
+            seqs = self.seqs
+        batches = range(self.n_batches_of(batch_size, step_freq))
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
                 (
-                    seqs[b * batch_size:(b + 1) * batch_size, :-1].to(
+                    seqs[batch * batch_size:(batch + 1) * batch_size, :-1].to(
                         self.device,
                         non_blocking=True
                     ),
-                    self.mask,  #[:bl, :bl],
+                    self.mask,
                     None,  # The padding/unknown mask is None for training
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
-                seqs[b * batch_size:(b + 1) * batch_size, 1:].to(
+                seqs[batch * batch_size:(batch + 1) * batch_size, 1:].to(
                     self.device,
                     non_blocking=True
                 )
             )
-            for b, (src, tgt, bl) in self.slices(batch_size, step_freq, epoch)
+            for batch in batches
         )
 
 
 make_train_data = Curry[TrainData](
     TrainData,
-    config.train.warmup,
-    config.data.device,
-    config.data.dtype
+    stride=config.data.stride,
+    shuffle=config.data.shuffle,
+    device=config.data.device,
+    dtype=config.data.dtype
 )
 make_test_data = Curry[TestData](
     TestData,
-    config.data.device,
-    config.data.dtype
+    shuffle=config.data.shuffle,
+    device=config.data.device,
+    dtype=config.data.dtype
 )
 make_validation_data = Curry[TestData](
     TestData,
-    config.data.device,
-    config.data.dtype
+    shuffle=config.data.shuffle,
+    device=config.data.device,
+    dtype=config.data.dtype
 )
