@@ -7,6 +7,7 @@ from .trainer import loss
 from .types import Validation
 
 
+# ToDo: Compute "perplexity"!
 class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:

@@ -903,12 +903,12 @@
         },
         "swak": {
             "hashes": [
-                "sha256:96965dc954916484c7e4f1e3507d4479e2b4f7c9fc3bfa020a312f6864da0da1",
-                "sha256:ebc3540e4e6798a7126fc76b82420beb0a3f20800fa8f64ddc13f19bddfdb1a3"
+                "sha256:9b8abeb3e823319f7dda77fa71a9e967d49dd7d51f8e325785abbd67d0c7ac7e",
+                "sha256:b3049454cb97d50f0cc6b36d6fadbc392c08c740ff1f9235a6c350bb9883382a"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.12'",
-            "version": "==0.2.6"
+            "version": "==0.2.7"
         },
         "tokenizers": {
             "hashes": [

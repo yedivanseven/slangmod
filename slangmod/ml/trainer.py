@@ -3,9 +3,9 @@ import torch.optim as pto
 import torch.optim.lr_scheduler as pts
 from swak.funcflow import Curry
 from swak.pt.train import Trainer, EpochPrinter, TrainPrinter, OnDisk
-from swak.pt.train import LinearInverse
+from swak.pt.train import LinearInverse, LinearCosine
 from swak.misc import StdOutLogger
-from ..config import config
+from ..config import config, Scaling
 
 LOGGER = StdOutLogger(__name__, config.log_level)
 
@@ -18,9 +18,13 @@ loss = ptn.CrossEntropyLoss(
     label_smoothing=config.train.label_smoothing
 )
 optimizer = Curry[pto.Adam](pto.AdamW, config.train.learning_rate, fused=True)
-linear_inverse = LinearInverse(config.train.warmup, config.train.power)
-scheduler = Curry[pts.LambdaLR](pts.LambdaLR, linear_inverse)
+scaling = {
+    Scaling.INVERSE: LinearInverse(config.train.warmup, config.train.power),
+    Scaling.COSINE: LinearCosine(config.train.warmup, config.train.cooldown)
+}[config.train.scaling]
+scheduler = Curry[pts.LambdaLR](pts.LambdaLR, scaling)
 
+# ToDo: Log gradient norm for gradient clipping!
 trainer = Trainer(
     loss=loss,
     optimizer=optimizer,

@@ -2,7 +2,7 @@ import warnings
 import random
 from pathlib import Path
 from swak.misc import ArgRepr
-from swak.text import NotFound  # ToDo: Import also LiteralNotFound!
+from swak.text import NotFound, LiteralNotFound
 from ..config import config
 
 __all__ = [
@@ -19,7 +19,7 @@ class CorpusDiscovery(ArgRepr):
     def __init__(
             self,
             path: str = '',
-            not_found: str = NotFound.RAISE  # ToDo LiteralNotFound!
+            not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
         self.path = path.strip()
         self.not_found = str(not_found)
@@ -49,7 +49,7 @@ class CorpusLoader(ArgRepr):
             self,
             eos_symbol: str,
             shuffle: bool = True,
-            not_found: str = NotFound.RAISE  # ToDo LiteralNotFound!
+            not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
         self.eos_symbol = eos_symbol
         self.shuffle = shuffle
@@ -75,8 +75,8 @@ class CorpusLoader(ArgRepr):
         return text.strip()
 
     def __call__(self, files: list[str]) -> str:
-        files = self.jumble(files) if self.shuffle else files
-        corpus = self.sep.join(map(self.read, files)) + self.end
+        actual_files = self.jumble(files) if self.shuffle else files
+        corpus = self.sep.join(map(self.read, actual_files)) + self.end
         if corpus:
             return corpus
         msg = 'No corpus to load!'

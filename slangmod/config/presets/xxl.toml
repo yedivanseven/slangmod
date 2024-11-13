@@ -5,4 +5,5 @@ n_layers = 12
 
 [train]
 learning_rate = 0.0003
+warmup = 7000
 batch_size = 24

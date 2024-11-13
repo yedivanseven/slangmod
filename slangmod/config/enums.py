@@ -6,6 +6,7 @@ __all__ = [
     'LiteralDevice',
     'Tokenizers',
     'Positions',
+    'Scaling',
     'Styles',
     'Generators'
 ]
@@ -26,6 +27,11 @@ class Tokenizers(StrEnum):
 class Positions(StrEnum):
     SINUSOIDAL = 'sinusoidal'
     LEARNABLE = 'learnable'
+
+
+class Scaling(StrEnum):
+    INVERSE = 'inverse'
+    COSINE = 'cosine'
 
 
 class Styles(StrEnum):

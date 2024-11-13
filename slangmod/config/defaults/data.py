@@ -9,7 +9,7 @@ from ..enums import Devices
 class Data(JsonObject):
     device: Lower() = device.type
     seq_len: int = 1024
-    stride: int = 512
+    stride: int = 768
     test: float = 0.05
     shuffle: bool = True
 

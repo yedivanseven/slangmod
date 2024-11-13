@@ -31,7 +31,7 @@ class DataSplitter(ArgRepr):
         n_train = int(n * self.train)
         n_test = int(n * self.test)
 
-        max_start = int(2 * n * self.test) + 1
+        max_start = 2 * n_test + 1
         if self.shuffle:
             start = pt.randint(0, max_start, [1], device=sequences.device)
             indices = pt.randperm(max_start, device=sequences.device)
