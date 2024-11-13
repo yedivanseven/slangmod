@@ -12,5 +12,5 @@ class Train(JsonObject):
     warmup: int = 4000
     scaling: Lower() = Scaling.COSINE
     power: float = 0.5
-    cooldown: int = 128
+    cooldown: int = 64
     patience: Maybe[int](int) = 10
