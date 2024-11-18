@@ -1,4 +1,4 @@
-from ...ml import TrainData, TestData
+from ..ml import TrainData, TestData
 
 
 def log_total_number_of_files(files: list[str]) -> str:

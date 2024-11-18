@@ -1,5 +1,4 @@
 from .tokenizers import Algo, tokenizer
-from .splitter import DataSplitter, split_data
 from .data import (
     TrainData,
     TestData,
@@ -13,8 +12,6 @@ from .validator import Validator, validate
 __all__ = [
     'Algo',
     'tokenizer',
-    'DataSplitter',
-    'split_data',
     'TrainData',
     'TestData',
     'make_train_data',

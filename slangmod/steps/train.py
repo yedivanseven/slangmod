@@ -15,7 +15,7 @@ from ..ml import make_train_data, make_test_data
 from ..ml import Model, compile_model
 from ..ml import trainer
 from ..ml import validate
-from .log_messages.train import (
+from .log_messages import (
     log_total_number_of_files,
     log_total_number_of_tokens,
     log_data_sizes,
@@ -56,7 +56,10 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     Map[[list[int]], Tensor, list](Create(pt.long, 'cpu')),
     LOGGER.debug('Splitting into train, test, and validation data.'),
     split_corpus,
-    Route(
+    Route[
+        [list[Tensor], list[Tensor], list[Tensor]],
+        tuple[TrainData, TestData, TestData]
+    ](
         [0, 1, 2],
         process_train,
         process_test,

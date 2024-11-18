@@ -27,20 +27,27 @@ class SequenceFolder(ArgRepr):
 
     @property
     def width(self) -> int:
-        return self.seq_len + self.stride
+        if self.stride > 0:
+            return self.seq_len + self.stride
+        return self.seq_len + 1
 
-    def padding(self, sequence: Tensor) -> int:
-        length = sequence.size(0)
+    def padding(self, length: int) -> int:
         if self.stride > 0:
             return self.seq_len + self.n(length) * self.stride - length
         else:
             return self.n(length) * self.seq_len + 1 - length
 
+    def pad(self, sequence: Tensor) -> Tensor:
+        length = sequence.size(0)
+        missing = self.seq_len + max(1, self.stride) - length
+        if missing > 0:
+            return ptnf.pad(sequence, (0, missing), value=0)
+        return ptnf.pad(sequence, (0, self.padding(length)), value=0)
+
     def __call__(self, sequence: Tensor) -> Tensor:
-        padded = ptnf.pad(sequence, (0, self.padding(sequence)), value=0)
         if self.stride > 0:
-            return padded.unfold(0, self.width, self.stride)
-        return padded.unfold(0, self.seq_len + 1, self.seq_len)
+            return self.pad(sequence).unfold(0, self.width, self.stride)
+        return self.pad(sequence).unfold(0, self.width, self.seq_len)
 
 
 fold_train = SequenceFolder(config.data.seq_len, config.data.stride)

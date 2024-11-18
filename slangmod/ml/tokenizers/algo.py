@@ -108,7 +108,7 @@ class Algo:
                 add_special_tokens
             )]
         else:
-            encodings = self.tokenizer.encode_batch(
+            encodings = self.tokenizer.encode_batch_fast(
                 sequence,
                 is_pretokenized,
                 add_special_tokens
