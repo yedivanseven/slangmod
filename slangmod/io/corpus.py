@@ -57,10 +57,6 @@ class CorpusLoader(ArgRepr):
         super().__init__(eos_symbol, shuffle, self.not_found)
 
     @property
-    def sep(self) -> str:
-        return f' {self.eos_symbol} '
-
-    @property
     def end(self) -> str:
         return f' {self.eos_symbol}'
 
@@ -68,18 +64,17 @@ class CorpusLoader(ArgRepr):
     def jumble(files: list[str]) -> list[str]:
         return random.sample(files, len(files))
 
-    @staticmethod
-    def read(file: str) -> str:
+    def read(self, file: str) -> str:
         with Path(file).open() as stream:
             text = stream.read()
-        return text.strip()
+        return text.strip() + self.end
 
-    def __call__(self, files: list[str]) -> str:
+    def __call__(self, files: list[str]) -> list[str]:
         actual_files = self.jumble(files) if self.shuffle else files
-        corpus = self.sep.join(map(self.read, actual_files)) + self.end
+        corpus = [self.read(file) for file in actual_files]
         if corpus:
             return corpus
-        msg = 'No corpus to load!'
+        msg = 'No files to load!'
         match self.not_found:
             case NotFound.WARN:
                 warnings.warn(msg)

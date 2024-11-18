@@ -1,7 +1,13 @@
 from ...ml import TrainData, TestData
 
-def log_total_number_of_tokens(tokens: list[int]) -> str:
-    return f'Converting {len(tokens)} tokens to CPU tensor.'
+
+def log_total_number_of_files(files: list[str]) -> str:
+    return f'Found {len(files)} files.'
+
+
+def log_total_number_of_tokens(sequences: list[list[int]]) -> str:
+    n_tokens = sum(len(sequence) for sequence in sequences)
+    return f'Converting {n_tokens} tokens to CPU tensor.'
 
 
 def log_data_sizes(

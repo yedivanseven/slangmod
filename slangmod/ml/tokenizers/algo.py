@@ -1,4 +1,4 @@
-from typing import Self, Any
+from typing import Self, Any, overload
 from tokenizers import Tokenizer
 from tokenizers.models import Model
 from tokenizers.normalizers import Normalizer
@@ -95,14 +95,22 @@ class Algo:
 
     def __call__(
             self,
-            sequence: str,
-            pair: str | None =None,
+            sequence: str | list[str],
+            pair: str | None = None,
             is_pretokenized: bool = False,
             add_special_tokens: bool = True
-    ) -> list[int]:
-        return self.tokenizer.encode(
-            sequence,
-            pair,
-            is_pretokenized,
-            add_special_tokens
-        ).ids
+    ) -> list[list[int]]:
+        if isinstance(sequence, str):
+            encodings = [self.tokenizer.encode(
+                sequence,
+                pair,
+                is_pretokenized,
+                add_special_tokens
+            )]
+        else:
+            encodings = self.tokenizer.encode_batch(
+                sequence,
+                is_pretokenized,
+                add_special_tokens
+            )
+        return [encoding.ids for encoding in encodings]

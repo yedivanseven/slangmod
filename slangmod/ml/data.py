@@ -1,4 +1,5 @@
 import math
+from collections.abc import Callable
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
@@ -21,15 +22,12 @@ class TestData(TestDataBase):
         self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
+        self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,
             dtype=dtype
         )
-        if self.shuffle:
-            self.__indices = pt.randperm(self.n, device=seqs.device)
-        else:
-            self.__indices = pt.arange(self.n, device=seqs.device)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -43,10 +41,14 @@ class TestData(TestDataBase):
     def seq_len(self) -> int:
         return self.seqs.size(1) - 1
 
+    @property
+    def jumble(self) -> Callable[..., Tensor]:
+        return pt.randperm if self.shuffle else pt.arange
+
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        seqs = self.seqs[self.__indices[:n]]
+        seqs = self.seqs[self.__jumbled[:n]]
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -80,22 +82,17 @@ class TrainData(TrainDataBase):
             dtype: Dtype
     ) -> None:
         self.seqs = seqs
-        if stride < 1.0:
-            self.stride = round(max(1.0, stride * self.seq_len))
-        else:
-            self.stride = round(min(stride, self.seq_len))
+        self.stride = stride
         self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
+        self.__jumbled = self.jumble(self.n, device=seqs.device)
+        self.__start = self.start
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,
             dtype=dtype
         )
-        if self.shuffle:
-            self.__indices = pt.randperm(self.n, device=seqs.device)
-        else:
-            self.__indices = pt.arange(self.n, device=seqs.device)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -107,20 +104,28 @@ class TrainData(TrainDataBase):
 
     @property
     def seq_len(self) -> int:
-        return self.seqs.size(1) - 1
+        return self.seqs.size(1) - self.stride
 
     @property
-    def max_start(self) -> int:
-        return self.seq_len - self.stride
+    def jumble(self) -> Callable[..., Tensor]:
+        return pt.randperm if self.shuffle else pt.arange
 
     @property
-    def data(self) -> Tensor:
-        return self.seqs.ravel()
+    def start(self) -> int:
+        return pt.randint(
+            0,
+            self.stride,
+            [1],
+            device=self.seqs.device
+        ) if self.shuffle else 0
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        seqs = self.seqs[self.__indices[:n]]
+        seqs = self.seqs[
+           self.__jumbled[:n],
+           self.__start:self.__start + self.seq_len + 1
+        ]
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -148,19 +153,10 @@ class TrainData(TrainDataBase):
             step_freq: int = 1,
             epoch: int = 0
     ) -> tuple[int, Batches]:
-        if self.shuffle:
-            start = pt.randint(0, self.max_start, [1], device=self.seqs.device)
-            seqs = self.data[start:].unfold(0, self.seq_len + 1, self.stride)
-            n = seqs.size(0)
-            adjusted_n = self.adjust_n_for(batch_size, step_freq, n)
-            shuffled = pt.randperm(n, device=self.data.device)
-            seqs = seqs[shuffled[:adjusted_n]]
-        else:
-            seqs = self.data.unfold(0, self.seq_len + 1, self.stride)
-            n = seqs.size(0)
-            adjusted_n = self.adjust_n_for(batch_size, step_freq, n)
-            seqs = seqs[:adjusted_n]
-        n_batches = self.adjust_batches_for(batch_size, step_freq, n)
+        jumbled = self.jumble(self.n, device=self.seqs.device)
+        start = self.start
+        seqs = self.seqs[jumbled, start:start + self.seq_len + 1]
+        n_batches = self.adjust_batches_for(batch_size, step_freq)
         return n_batches, iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -191,12 +187,6 @@ make_train_data = Curry[TrainData](
     dtype=config.data.dtype
 )
 make_test_data = Curry[TestData](
-    TestData,
-    shuffle=config.data.shuffle,
-    device=config.data.device,
-    dtype=config.data.dtype
-)
-make_validation_data = Curry[TestData](
     TestData,
     shuffle=config.data.shuffle,
     device=config.data.device,

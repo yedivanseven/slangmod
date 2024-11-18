@@ -1,26 +1,40 @@
 import torch as pt
-from swak.funcflow import Pipe, Fork, Route, unit
+from swak.funcflow import Pipe, Fork, Route, Map, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
+from swak.pt.misc import Cat
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity, apply
 from ..config import config
 from ..io import save_config, discover_corpus, load_corpus, load_tokenizer
+from ..etl import split_corpus, fold_train, fold_test
 from ..ml import Algo
-from ..ml import split_data
 from ..ml import TrainData, TestData
-from ..ml import make_train_data, make_test_data, make_validation_data
+from ..ml import make_train_data, make_test_data
 from ..ml import Model, compile_model
 from ..ml import trainer
 from ..ml import validate
 from .log_messages.train import (
+    log_total_number_of_files,
     log_total_number_of_tokens,
     log_data_sizes,
     log_validation_metrics
 )
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
+
+
+process_train = Pipe[[list[Tensor]], Tensor](
+    Map[[Tensor], Tensor, list](fold_train),
+    Cat(dim=0),
+    make_train_data
+)
+process_test = Pipe[[list[Tensor]], Tensor](
+    Map[[Tensor], Tensor, list](fold_test),
+    Cat(dim=0),
+    make_test_data
+)
 
 load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     Fork[[tuple[()]], tuple[Algo, str]](
@@ -31,6 +45,7 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
         Pipe[[tuple[()]], str](
             LOGGER.debug(f'Scanning "{config.corpus}" for files.'),
             discover_corpus,
+            LOGGER.debug(log_total_number_of_files),
             LOGGER.debug(f'Loading files from "{config.corpus}".'),
             load_corpus
         )
@@ -38,14 +53,14 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     LOGGER.debug('Encoding corpus.'),
     apply,
     LOGGER.debug(log_total_number_of_tokens),
-    Create(pt.int64, 'cpu'),
+    Map[[list[int]], Tensor, list](Create(pt.long, 'cpu')),
     LOGGER.debug('Splitting into train, test, and validation data.'),
-    split_data,
-    Route[[Tensor], tuple[TrainData, TestData, TestData]](
+    split_corpus,
+    Route(
         [0, 1, 2],
-        make_train_data,
-        make_test_data,
-        make_validation_data,
+        process_train,
+        process_test,
+        process_test
     ),
     LOGGER.info(log_data_sizes)
 )
