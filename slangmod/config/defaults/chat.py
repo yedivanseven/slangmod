@@ -20,11 +20,11 @@ def read_system_prompt(text: str) -> str:
 class Chat(JsonObject):
     style: Lower() = Styles.SPACE
     generator: Lower() = Generators.BEAM
-    max_tokens: int = 512
+    max_tokens: int = 256
     temperature: float = 1.0
     k: float = 0.1
     p: float = 0.8
-    width: int = 32
+    width: int = 16
     boost: float = 0.7
     user: str = 'user'
     bot: str = 'bot'

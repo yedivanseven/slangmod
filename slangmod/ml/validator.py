@@ -7,7 +7,6 @@ from .trainer import loss
 from .types import Validation
 
 
-# ToDo: Compute "perplexity"!
 class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:
@@ -16,13 +15,33 @@ class Validator(ArgRepr):
         self.batch_size = batch_size
 
     @staticmethod
-    def top(k: int, out: Tensor, target: Tensor) -> float:
-        matches = out.topk(k, dim=1).indices == target.unsqueeze(1)
-        return matches.sum(dim=(0, 1)) / target.shape[0]
+    def top(k: int, logits: Tensor, targets: Tensor) -> float:
+        matches = logits.topk(k, dim=1).indices == targets.unsqueeze(1)
+        return matches.sum(dim=(0, 1)) / targets.shape[0]
 
     @staticmethod
-    def stat(positions: Tensor) -> tuple[float, float]:
+    def stats(positions: Tensor) -> tuple[float, float]:
         return positions.mean().item(), 1.96 * positions.std().item()
+
+    def perplexity(self, logits: Tensor, targets: Tensor) -> float:
+        # Remember the "reduction" configured with the loss.
+        cached_reduction = self.loss.reduction
+        # Set its "reduction" to "none" ...
+        self.loss.reduction = 'none'
+        # ... to get the loss per sequence and token.
+        losses = self.loss(logits, targets)
+        # Revert the "reduction" back to what it was before.
+        self.loss.reduction = cached_reduction
+
+        # Count the number of non-padding tokens per sequence.
+        n_non_padding = (targets > 0).sum(dim=1)
+        # Create a mask to drop invalid sequences with only padding tokens.
+        mask = n_non_padding > 0
+        # Average the loss over all non-padding tokens per valid sequence.
+        mean_sequence_losses = losses.sum(dim=1)[mask] / n_non_padding[mask]
+        # Return the perplexity averaged over all sequences in the batch.
+        return mean_sequence_losses.exp().mean(dim=0).item()
+
 
     def __call__(self, model: Module, data: TestData) -> Validation:
         n = 0
@@ -30,29 +49,39 @@ class Validator(ArgRepr):
         top_2 = 0
         top_5 = 0
         val_loss = 0.0
+        perplexity = 0.0
 
         model.eval()
         with pt.no_grad():
-            for features, target in data.sample(self.batch_size):
-                batch_n = target.shape[0]
+            for features, targets in data.sample(self.batch_size):
+                batch_n = targets.shape[0]
 
-                (out,) = model(*features)
+                (logits,) = model(*features)
 
-                batch_loss = self.loss(out, target).item()
+                batch_loss = self.loss(logits, targets).item()
                 val_loss += batch_n * (batch_loss - val_loss) / (n + batch_n)
 
-                batch_top_1 = self.top(1, out, target)
+                batch_px = self.perplexity(logits, targets)
+                perplexity += batch_n * (batch_px - perplexity) / (n + batch_n)
+
+                batch_top_1 = self.top(1, logits, targets)
                 top_1 += batch_n * (batch_top_1 - top_1) / (n + batch_n)
 
-                batch_top_2 = self.top(2, out, target)
+                batch_top_2 = self.top(2, logits, targets)
                 top_2 += batch_n * (batch_top_2 - top_2) / (n + batch_n)
 
-                batch_top_5 = self.top(5, out, target)
+                batch_top_5 = self.top(5, logits, targets)
                 top_5 += batch_n * (batch_top_5 - top_5) / (n + batch_n)
 
                 n += batch_n
 
-        return val_loss, self.stat(top_1), self.stat(top_2), self.stat(top_5)
+        return (
+            val_loss,
+            perplexity,
+            self.stats(top_1),
+            self.stats(top_2),
+            self.stats(top_5)
+        )
 
 
 validate = Validator(loss, config.train.batch_size)

@@ -1,13 +1,27 @@
+from .encoding import EncodingEnforcer, enforce_encoding
 from .splitter import CorpusSplitter, split_corpus
 from .folder import SequenceFolder, fold_train, fold_test
+from .regex import (
+    RegexReplacer,
+    replace_article,
+    replace_section,
+    replace_newline,
+    replace_single_quote,
+    replace_double_quote
+)
 
 __all__ = [
+    'EncodingEnforcer',
+    'enforce_encoding',
     'CorpusSplitter',
     'split_corpus',
     'SequenceFolder',
     'fold_train',
-    'fold_test'
+    'fold_test',
+    'RegexReplacer',
+    'replace_article',
+    'replace_section',
+    'replace_newline',
+    'replace_single_quote',
+    'replace_double_quote'
 ]
-
-# ToDo: Step to replace non-cp1252 characters with [UNK] and copy to corpus
-# ToDo: Step to read parquet files and dump cells into files.

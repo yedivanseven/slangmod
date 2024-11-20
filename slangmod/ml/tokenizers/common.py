@@ -25,9 +25,5 @@ normalizer = Sequence([
     Strip(),
     StripAccents(),
     NFKD(),
-    Replace(Regex(config.tokens.eos_regex), f' {EOS.content} '),
-    Replace(r'“', r'"'),
-    Replace(r'”', r'"'),
-    Replace(r'‘', r"'"),
-    Replace(r'’', r"'"),
+    Replace(Regex(config.tokens.eos_regex), f' {EOS.content} ')
 ])

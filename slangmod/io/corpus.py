@@ -1,5 +1,7 @@
 import warnings
 import random
+from collections.abc import Iterable
+from hashlib import sha256
 from pathlib import Path
 from swak.misc import ArgRepr
 from swak.text import NotFound, LiteralNotFound
@@ -9,8 +11,10 @@ __all__ = [
     'NotFound',
     'CorpusDiscovery',
     'CorpusLoader',
+    'CorpusSaver',
     'discover_corpus',
-    'load_corpus'
+    'load_corpus',
+    'save_corpus',
 ]
 
 
@@ -26,7 +30,7 @@ class CorpusDiscovery(ArgRepr):
         super().__init__(self.path, self.not_found)
 
     def __call__(self, path: str = '') -> list[str]:
-        path = Path(self.path) / path.strip().strip(' /')
+        path = Path(self.path) / path.strip()
         corpus =  [
             str(item.resolve())
             for item in path.iterdir()
@@ -83,5 +87,25 @@ class CorpusLoader(ArgRepr):
         return corpus
 
 
+class CorpusSaver(ArgRepr):
+
+    def __init__(self, path: str = '', create: bool = False) -> None:
+        self.path = path.strip()
+        self.create = create
+        super().__init__(self.path, create)
+
+    def __call__(self, corpus: Iterable[str], *parts: str) -> tuple[()]:
+        path = Path(self.path.format(*parts).strip())
+        if self.create:
+            path.mkdir(parents=True, exist_ok=True)
+        for item in corpus:
+            name = sha256(item.encode()).hexdigest()
+            file = path / f'{name}.txt'
+            with file.open('wt') as stream:
+                stream.write(item)
+        return ()
+
+
 discover_corpus = CorpusDiscovery(config.corpus)
 load_corpus = CorpusLoader(config.tokens.eos_symbol, config.data.shuffle)
+save_corpus = CorpusSaver(config.corpus, create=True)

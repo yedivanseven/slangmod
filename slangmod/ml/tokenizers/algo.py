@@ -1,4 +1,4 @@
-from typing import Self, Any, overload
+from typing import Self, Any
 from tokenizers import Tokenizer
 from tokenizers.models import Model
 from tokenizers.normalizers import Normalizer

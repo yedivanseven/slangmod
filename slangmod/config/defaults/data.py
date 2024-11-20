@@ -10,7 +10,7 @@ class Data(JsonObject):
     device: Lower() = device.type
     seq_len: int = 1024
     stride: int = 768
-    test: float = 0.05
+    test: float = 0.02
     shuffle: bool = True
 
     @property

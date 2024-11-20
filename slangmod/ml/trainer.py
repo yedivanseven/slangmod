@@ -17,7 +17,7 @@ loss = ptn.CrossEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
-optimizer = Curry[pto.Adam](pto.AdamW, config.train.learning_rate, fused=True)
+optimizer = Curry[pto.AdamW](pto.AdamW, config.train.learning_rate, fused=True)
 inverse = LinearInverse(config.train.warmup, config.train.power)
 exponential = LinearExponential(config.train.warmup, config.train.gamma)
 cosine = LinearCosine(config.train.warmup, config.train.cooldown)

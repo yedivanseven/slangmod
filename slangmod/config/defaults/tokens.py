@@ -4,8 +4,9 @@ from ..enums import Tokenizers
 
 
 class Tokens(JsonObject):
+    encoding: Lower() = 'cp1252'
     algo: Lower() = Tokenizers.BPE
-    vocab: int = 16384
+    vocab: int = 32768
     dropout: float = 0.0
     min_frequency: int = 0
     max_length: int = 16

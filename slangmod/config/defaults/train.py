@@ -4,8 +4,8 @@ from ..enums import Scaling
 
 
 class Train(JsonObject):
-    batch_size: int = 32
-    step_freq: int = 1
+    batch_size: int = 16
+    step_freq: int = 2
     label_smoothing: float = 0.1
     learning_rate: Maybe[float](float) = 0.01
     max_epochs: int = 1024
@@ -13,5 +13,5 @@ class Train(JsonObject):
     scaling: Lower() = Scaling.COSINE
     power: float = 0.5
     gamma: float = 0.95
-    cooldown: int = 64
+    cooldown: int = 128
     patience: Maybe[int](int) = 10
