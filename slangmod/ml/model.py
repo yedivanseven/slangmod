@@ -6,7 +6,7 @@ from .positions import positions
 from ..config import config, LiteralDevice
 
 
-# ToDo: Make custom model with RoPE and GLU
+# ToDo: Make custom model with RoPE and GLU!
 class Model(ptn.Module):
 
     def __init__(

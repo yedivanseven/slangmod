@@ -62,7 +62,7 @@ clean_books = Pipe[[str], tuple[()]](
     load_books,
     LOGGER.info(log_total_number_of_docs),
     Map[[str], str, Series](process_books),
-    LOGGER.debug(f'Saving *.txt files to {config.corpus}'),
+    LOGGER.debug(f'Saving *.txt files to "{config.corpus}".'),
     save_corpus,
     LOGGER.info('Finished step "clean".')
 )
