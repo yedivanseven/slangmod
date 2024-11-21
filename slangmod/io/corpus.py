@@ -13,7 +13,9 @@ __all__ = [
     'CorpusLoader',
     'CorpusSaver',
     'discover_corpus',
+    'discover_books',
     'load_corpus',
+    'load_books',
     'save_corpus',
 ]
 
@@ -26,7 +28,7 @@ class CorpusDiscovery(ArgRepr):
             not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
         self.path = path.strip()
-        self.not_found = str(not_found)
+        self.not_found = str(not_found).strip().lower()
         super().__init__(self.path, self.not_found)
 
     def __call__(self, path: str = '') -> list[str]:
@@ -51,31 +53,36 @@ class CorpusLoader(ArgRepr):
 
     def __init__(
             self,
-            eos_symbol: str,
             shuffle: bool = True,
             not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
-        self.eos_symbol = eos_symbol
         self.shuffle = shuffle
         self.not_found = str(not_found).strip().lower()
-        super().__init__(eos_symbol, shuffle, self.not_found)
-
-    @property
-    def end(self) -> str:
-        return f' {self.eos_symbol}'
+        super().__init__(shuffle, self.not_found)
 
     @staticmethod
     def jumble(files: list[str]) -> list[str]:
         return random.sample(files, len(files))
 
-    def read(self, file: str) -> str:
-        with Path(file).open() as stream:
-            text = stream.read()
-        return text.strip() + self.end
-
     def __call__(self, files: list[str]) -> list[str]:
         actual_files = self.jumble(files) if self.shuffle else files
-        corpus = [self.read(file) for file in actual_files]
+        corpus = []
+        for file in actual_files:
+            try:
+                with Path(file).open() as stream:
+                    text = stream.read()
+            except FileNotFoundError as error:
+                match self.not_found:
+                    case NotFound.IGNORE:
+                        continue
+                    case NotFound.WARN:
+                        msg = f'File "{file}" not found. Moving on ...'
+                        warnings.warn(msg)
+                        continue
+                    case NotFound.RAISE:
+                        raise error
+            else:
+                corpus.append(text.strip())
         if corpus:
             return corpus
         msg = 'No files to load!'
@@ -105,7 +112,8 @@ class CorpusSaver(ArgRepr):
                 stream.write(item)
         return ()
 
-
+discover_books = CorpusDiscovery(config.files.raw)
 discover_corpus = CorpusDiscovery(config.corpus)
-load_corpus = CorpusLoader(config.tokens.eos_symbol, config.data.shuffle)
+load_books = CorpusLoader(config.data.shuffle)
+load_corpus = CorpusLoader(config.data.shuffle)
 save_corpus = CorpusSaver(config.corpus, create=True)

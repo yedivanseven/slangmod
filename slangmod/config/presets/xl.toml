@@ -1,11 +1,8 @@
 [model]
 dim = 768
 n_heads = 12
-n_layers = 12
+n_layers = 10
 
 [train]
-batch
-learning_rate = 0.001
+learning_rate = 0.0004
 warmup = 6000
-batch_size = 32
-step_freq = 2

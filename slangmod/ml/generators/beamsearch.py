@@ -90,7 +90,7 @@ class BeamSearch(Generator):
         winner = all_vals.argmax()
         answer = all_seqs[winner].tolist()
         if self.eos_id in answer[1:]:
-            eos_pos = answer[1:].index(2) + 2
+            eos_pos = answer[1:].index(self.eos_id) + 2
         else:
             eos_pos = len(answer)
         return answer[:eos_pos]

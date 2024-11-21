@@ -3,7 +3,10 @@ import math
 from swak.misc import ArgRepr
 from ..config import config
 
-__all__ = ['CorpusSplitter']
+__all__ = [
+    'CorpusSplitter',
+    'split_corpus'
+]
 
 
 class CorpusSplitter[T](ArgRepr):

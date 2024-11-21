@@ -7,6 +7,7 @@ from .enums import (
     LiteralDevice,
     Tokenizers,
     Positions,
+    Optimizers,
     Scaling,
     Styles,
     Generators
@@ -20,6 +21,7 @@ __all__ = [
     'LiteralDevice',
     'Tokenizers',
     'Positions',
+    'Optimizers',
     'Scaling',
     'Styles',
     'Generators'

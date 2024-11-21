@@ -10,7 +10,7 @@ name = "slangmod"
 dynamic = ["version"]
 requires-python = ">=3.12"
 dependencies = [
-  "swak >= 0.2.8",
+  "swak >= 0.2.9",
   "tokenizers >= 0.20"
 ]
 authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]

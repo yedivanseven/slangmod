@@ -2,6 +2,7 @@ from tokenizers import AddedToken, Regex
 from tokenizers.normalizers import Sequence
 from tokenizers.normalizers import Strip, NFKD, StripAccents, Replace
 from ...config import config
+from ...etl.regex import paragraph_regex
 
 __all__ = [
     'PAD',
@@ -25,5 +26,5 @@ normalizer = Sequence([
     Strip(),
     StripAccents(),
     NFKD(),
-    Replace(Regex(config.tokens.eos_regex), f' {EOS.content} ')
+    Replace(Regex(paragraph_regex), config.tokens.eos_repl)
 ])

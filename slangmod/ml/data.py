@@ -5,7 +5,7 @@ import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
 from swak.pt.train import TestDataBase, TrainDataBase
 from swak.funcflow import Curry
-from ..config import config, LiteralDevice
+from ..config import config, LiteralDevice, Devices
 from .types import Batches
 
 
@@ -18,10 +18,10 @@ class TestData(TestDataBase):
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
-        self.seqs = seqs
         self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
+        self.seqs = self.pin(seqs.contiguous())
         self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
@@ -44,6 +44,9 @@ class TestData(TestDataBase):
     @property
     def jumble(self) -> Callable[..., Tensor]:
         return pt.randperm if self.shuffle else pt.arange
+
+    def pin(self, seqs: Tensor) -> Tensor:
+        return seqs if self.device.type == Devices.CPU else seqs.pin_memory()
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
@@ -81,11 +84,11 @@ class TrainData(TrainDataBase):
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
-        self.seqs = seqs
         self.stride = stride
         self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
+        self.seqs = self.pin(seqs.contiguous())
         self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.__start = self.start
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
@@ -118,6 +121,9 @@ class TrainData(TrainDataBase):
             [1],
             device=self.seqs.device
         ) if self.shuffle else 0
+
+    def pin(self, seqs: Tensor) -> Tensor:
+        return seqs if self.device.type == Devices.CPU else seqs.pin_memory()
 
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
