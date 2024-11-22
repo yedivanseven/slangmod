@@ -1,11 +1,11 @@
-from pandas import Series
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.pd.read import ParquetReader
 from swak.pd.frame import ColumnSelector
-from swak.funcflow import Pipe, Map
+from swak.funcflow import Pipe
 from ..config import config
 from ..io import save_corpus, discover_books, load_books
 from ..etl import (
+    CorpusCleaner,
     replace_article,
     replace_section,
     replace_newline,
@@ -42,7 +42,7 @@ clean_wiki40b = Pipe[[str], tuple[()]](
     read_parquet,
     select_column,
     LOGGER.info(log_total_number_of_docs),
-    Map[[str], str, Series](process_wiki40b),
+    CorpusCleaner(process_wiki40b),
     LOGGER.debug(f'Saving *.txt files to "{config.corpus}".'),
     save_corpus,
     LOGGER.info('Finished step "clean".')
@@ -56,7 +56,7 @@ clean_books = Pipe[[str], tuple[()]](
     LOGGER.debug(f'Loading files from "{config.files.raw}".'),
     load_books,
     LOGGER.info(log_total_number_of_docs),
-    Map[[str], str, Series](process_books),
+    CorpusCleaner(process_books),
     LOGGER.debug(f'Saving *.txt files to "{config.corpus}".'),
     save_corpus,
     LOGGER.info('Finished step "clean".')

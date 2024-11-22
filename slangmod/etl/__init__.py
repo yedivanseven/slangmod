@@ -1,6 +1,7 @@
 from .encoding import EncodingEnforcer, enforce_encoding
 from .splitter import CorpusSplitter, split_corpus
 from .folder import SequenceFolder, fold_train, fold_test
+from .cleaner import CorpusCleaner
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -14,6 +15,7 @@ from .regex import (
 __all__ = [
     'EncodingEnforcer',
     'enforce_encoding',
+    'CorpusCleaner',
     'CorpusSplitter',
     'split_corpus',
     'SequenceFolder',

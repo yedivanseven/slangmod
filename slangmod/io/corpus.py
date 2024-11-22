@@ -3,6 +3,7 @@ import random
 from collections.abc import Iterable
 from hashlib import sha256
 from pathlib import Path
+from tqdm import tqdm
 from swak.misc import ArgRepr
 from swak.text import NotFound, LiteralNotFound
 from ..config import config
@@ -67,7 +68,7 @@ class CorpusLoader(ArgRepr):
     def __call__(self, files: list[str]) -> list[str]:
         actual_files = self.jumble(files) if self.shuffle else files
         corpus = []
-        for file in actual_files:
+        for file in tqdm(actual_files, 'Documents', leave=False):
             try:
                 with Path(file).open() as stream:
                     text = stream.read()
@@ -105,7 +106,7 @@ class CorpusSaver(ArgRepr):
         path = Path(self.path.format(*parts).strip())
         if self.create:
             path.mkdir(parents=True, exist_ok=True)
-        for item in corpus:
+        for item in tqdm(corpus, 'Documents', leave=False):
             name = sha256(item.encode()).hexdigest()
             file = path / f'{name}.txt'
             with file.open('wt') as stream:
