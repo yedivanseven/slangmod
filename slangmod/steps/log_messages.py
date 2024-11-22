@@ -14,6 +14,10 @@ def log_total_number_of_tokens(sequences: list[list[int]]) -> str:
     return f'Converting {n_tokens} tokens to CPU tensor.'
 
 
+def log_remaining_number_of_sequences(sequences: list[list[int]]) -> str:
+    return f'After filtering, {len(sequences)} sequences remain.'
+
+
 def log_data_sizes(
         train: TrainData,
         test: TestData,

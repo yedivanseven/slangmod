@@ -9,11 +9,9 @@ from ..etl import (
     replace_article,
     replace_section,
     replace_newline,
-    replace_paragraph,
     replace_single_quote,
     replace_double_quote,
-    enforce_encoding,
-    terminate
+    enforce_encoding
 )
 from .log_messages import log_total_number_of_docs, log_total_number_of_files
 
@@ -29,16 +27,13 @@ process_wiki40b = Pipe[[str], str](
     replace_newline,
     replace_single_quote,
     replace_double_quote,
-    enforce_encoding,
-    terminate
+    enforce_encoding
 )
 
 process_books = Pipe[[str], str](
-    replace_paragraph,
     replace_single_quote,
     replace_double_quote,
-    enforce_encoding,
-    terminate
+    enforce_encoding
 )
 
 clean_wiki40b = Pipe[[str], tuple[()]](

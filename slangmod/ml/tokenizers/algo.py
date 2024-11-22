@@ -113,4 +113,4 @@ class Algo:
                 is_pretokenized,
                 add_special_tokens
             )
-        return [encoding.ids for encoding in encodings]
+        return [encoding.ids + [self.eos_id] for encoding in encodings]

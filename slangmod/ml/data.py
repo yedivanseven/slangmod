@@ -81,11 +81,13 @@ class TrainData(TrainDataBase):
             seqs: Tensor,
             stride: int,
             shuffle: bool,
+            jitter: int,
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.stride = stride
         self.shuffle = shuffle
+        self.jitter = min(max(1, jitter), stride)
         self.device = pt.device(device)
         self.dtype = dtype
         self.seqs = self.pin(seqs.contiguous())
@@ -117,7 +119,7 @@ class TrainData(TrainDataBase):
     def start(self) -> int:
         return pt.randint(
             0,
-            self.stride,
+            self.jitter,
             [1],
             device=self.seqs.device
         ) if self.shuffle else 0
@@ -189,6 +191,7 @@ make_train_data = Curry[TrainData](
     TrainData,
     stride=config.data.stride,
     shuffle=config.data.shuffle,
+    jitter=config.data.jitter,
     device=config.data.device,
     dtype=config.data.dtype
 )

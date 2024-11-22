@@ -16,9 +16,10 @@ PAD = AddedToken('[PAD]', single_word=True, special=True)
 UNK = AddedToken('[UNK]', single_word=True, special=True)
 EOS = AddedToken(
     config.tokens.eos_symbol,
-    single_word=True,
-    special=True,
-    normalized=True  # Ensures that explicit "[EOS]" gets tokenized as such
+    single_word=False,
+    lstrip=True,
+    rstrip=True,
+    special=True
 )
 
 # Normalizer
@@ -26,5 +27,5 @@ normalizer = Sequence([
     Strip(),
     StripAccents(),
     NFKD(),
-    Replace(Regex(paragraph_regex), config.tokens.eos_repl)
+    Replace(Regex(paragraph_regex), config.tokens.eos_symbol)
 ])

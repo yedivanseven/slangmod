@@ -1,5 +1,5 @@
 import torch as pt
-from swak.funcflow import Pipe, Fork, Route, Map, unit
+from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
@@ -17,6 +17,7 @@ from ..ml import trainer
 from ..ml import validate
 from .log_messages import (
     log_total_number_of_files,
+    log_remaining_number_of_sequences,
     log_total_number_of_tokens,
     log_data_sizes,
     log_validation_metrics
@@ -52,6 +53,8 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     ),
     LOGGER.debug('Encoding corpus.'),
     apply,
+    Filter[list[int], list](lambda seq: len(seq) > config.data.jitter),
+    LOGGER.debug(log_remaining_number_of_sequences),
     LOGGER.debug(log_total_number_of_tokens),
     Map[[list[int]], Tensor, list](Create(pt.long, 'cpu')),
     LOGGER.debug('Splitting into train, test, and validation data.'),
