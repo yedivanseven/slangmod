@@ -43,6 +43,7 @@ class Model(ptn.Module):
             device=device,
             dtype=dtype
         )
+        self.drop = ptn.Dropout(dropout)
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=mod_dim,
             nhead=n_heads,
@@ -76,7 +77,7 @@ class Model(ptn.Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
-        embedded = self.positions(self.embed(src.to(self.device)))
+        embedded = self.drop(self.positions(self.embed(src)))
         transformed = self.transform(embedded, mask, padding_mask, is_causal)
         return self.finalize(transformed).transpose(-1, -2).contiguous(),
 
