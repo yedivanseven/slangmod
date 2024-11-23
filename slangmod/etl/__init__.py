@@ -7,6 +7,8 @@ from .regex import (
     replace_article,
     replace_section,
     replace_newline,
+    replace_minutes,
+    replace_seconds,
     paragraph_regex,
     replace_single_quote,
     replace_double_quote
@@ -25,6 +27,8 @@ __all__ = [
     'replace_article',
     'replace_section',
     'replace_newline',
+    'replace_minutes',
+    'replace_seconds',
     'paragraph_regex',
     'replace_single_quote',
     'replace_double_quote'

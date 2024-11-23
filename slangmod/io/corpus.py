@@ -26,27 +26,30 @@ class CorpusDiscovery(ArgRepr):
     def __init__(
             self,
             path: str = '',
+            suffix: str = 'txt',
             not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
         self.path = path.strip()
+        self.suffix = suffix.strip(' .')
         self.not_found = str(not_found).strip().lower()
-        super().__init__(self.path, self.not_found)
+        super().__init__(self.path, self.suffix, self.not_found)
 
     def __call__(self, path: str = '') -> list[str]:
         path = Path(self.path) / path.strip()
         corpus =  [
             str(item.resolve())
             for item in path.iterdir()
-            if item.is_file() and item.suffix == '.txt'
+            if item.is_file() and item.suffix == f'.{self.suffix}'
         ] if path.exists() and path.is_dir() else []
         if corpus:
             return corpus
-        msg = 'No *.txt files found in folder "{}"!'
+        msg = 'No *.{} files found in folder "{}"!'
+        interpolated = msg.format(self.suffix, path.resolve())
         match self.not_found:
             case NotFound.WARN:
-                warnings.warn(msg.format(path.resolve()))
+                warnings.warn(interpolated)
             case NotFound.RAISE:
-                raise FileNotFoundError(msg.format(path.resolve()))
+                raise FileNotFoundError(interpolated)
         return corpus
 
 

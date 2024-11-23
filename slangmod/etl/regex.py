@@ -9,6 +9,8 @@ __all__ = [
     'replace_article',
     'replace_section',
     'replace_newline',
+    'replace_minutes',
+    'replace_seconds',
     'paragraph_regex',
     'replace_single_quote',
     'replace_double_quote',
@@ -43,10 +45,14 @@ class RegexReplacer(ArgRepr):
 article_regex = r'\s*_START_ARTICLE_[\s\S]*?_START_PARAGRAPH_\s*'
 section_regex = r'\s*_START_SECTION_[\s\S]*?_START_PARAGRAPH_\s*'
 newline_regex = r'\s*_NEWLINE_\s*'
+minutes_regex = r'′'
+seconds_regex = r'″'
 paragraph_regex = r'\n{2,}'
 
 replace_article = RegexReplacer(article_regex, '')
 replace_section = RegexReplacer(section_regex, config.tokens.eos_string)
 replace_newline = RegexReplacer(newline_regex, config.tokens.eos_string)
+replace_minutes = RegexReplacer(minutes_regex, "'")
+replace_seconds = RegexReplacer(minutes_regex, '"')
 replace_single_quote = RegexReplacer(r'‘|’', "'")
 replace_double_quote = RegexReplacer(r'“|”', '"')
