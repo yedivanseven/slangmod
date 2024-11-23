@@ -29,13 +29,13 @@ class CorpusDiscovery(ArgRepr):
             suffix: str = 'txt',
             not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
-        self.path = path.strip()
+        self.path = str(path).strip()
         self.suffix = suffix.strip(' .')
         self.not_found = str(not_found).strip().lower()
         super().__init__(self.path, self.suffix, self.not_found)
 
     def __call__(self, path: str = '') -> list[str]:
-        path = Path(self.path) / path.strip()
+        path = Path(self.path) / str(path).strip()
         corpus =  [
             str(item.resolve())
             for item in path.iterdir()
@@ -101,7 +101,7 @@ class CorpusLoader(ArgRepr):
 class CorpusSaver(ArgRepr):
 
     def __init__(self, path: str = '', create: bool = False) -> None:
-        self.path = path.strip()
+        self.path = str(path).strip()
         self.create = create
         super().__init__(self.path, create)
 
