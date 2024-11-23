@@ -9,6 +9,8 @@ from ..etl import (
     replace_article,
     replace_section,
     replace_newline,
+    replace_minutes,
+    replace_seconds,
     replace_single_quote,
     replace_double_quote,
     enforce_encoding
@@ -25,12 +27,16 @@ process_wiki40b = Pipe[[str], str](
     replace_article,
     replace_section,
     replace_newline,
+    replace_minutes,
+    replace_seconds,
     replace_single_quote,
     replace_double_quote,
     enforce_encoding
 )
 
 process_books = Pipe[[str], str](
+    replace_minutes,
+    replace_seconds,
     replace_single_quote,
     replace_double_quote,
     enforce_encoding
