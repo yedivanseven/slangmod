@@ -9,7 +9,7 @@ from .regex import (
     replace_newline,
     replace_minutes,
     replace_seconds,
-    paragraph_regex,
+    PARAGRAPH_REGEX,
     replace_single_quote,
     replace_double_quote
 )
@@ -29,7 +29,7 @@ __all__ = [
     'replace_newline',
     'replace_minutes',
     'replace_seconds',
-    'paragraph_regex',
+    'PARAGRAPH_REGEX',
     'replace_single_quote',
     'replace_double_quote'
 ]

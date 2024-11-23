@@ -11,10 +11,17 @@ __all__ = [
     'replace_newline',
     'replace_minutes',
     'replace_seconds',
-    'paragraph_regex',
+    'PARAGRAPH_REGEX',
     'replace_single_quote',
     'replace_double_quote',
 ]
+
+ARTICLE_REGEX = r'\s*_START_ARTICLE_[\s\S]*?_START_PARAGRAPH_\s*'
+SECTION_REGEX = r'\s*_START_SECTION_[\s\S]*?_START_PARAGRAPH_\s*'
+NEWLINE_REGEX = r'\s*_NEWLINE_\s*'
+MINUTE_REGEX = r'′'
+SECONDS_REGEX = r'″'
+PARAGRAPH_REGEX = r'\n{2,}'
 
 
 class RegexReplacer(ArgRepr):
@@ -42,17 +49,10 @@ class RegexReplacer(ArgRepr):
         return re.sub(self.pattern, self.repl, text, count, flags)
 
 
-article_regex = r'\s*_START_ARTICLE_[\s\S]*?_START_PARAGRAPH_\s*'
-section_regex = r'\s*_START_SECTION_[\s\S]*?_START_PARAGRAPH_\s*'
-newline_regex = r'\s*_NEWLINE_\s*'
-minutes_regex = r'′'
-seconds_regex = r'″'
-paragraph_regex = r'\n{2,}'
-
-replace_article = RegexReplacer(article_regex, '')
-replace_section = RegexReplacer(section_regex, config.tokens.eos_string)
-replace_newline = RegexReplacer(newline_regex, config.tokens.eos_string)
-replace_minutes = RegexReplacer(minutes_regex, "'")
-replace_seconds = RegexReplacer(seconds_regex, '"')
+replace_article = RegexReplacer(ARTICLE_REGEX, '')
+replace_section = RegexReplacer(SECTION_REGEX, config.tokens.eos_string)
+replace_newline = RegexReplacer(NEWLINE_REGEX, config.tokens.eos_string)
+replace_minutes = RegexReplacer(MINUTE_REGEX, "'")
+replace_seconds = RegexReplacer(SECONDS_REGEX, '"')
 replace_single_quote = RegexReplacer(r'‘|’', "'")
 replace_double_quote = RegexReplacer(r'“|”', '"')
