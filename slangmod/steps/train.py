@@ -18,6 +18,7 @@ from ..ml import validate
 from .tokenize import load_corpus
 from .log_messages import (
     log_total_number_of_files,
+    log_total_number_of_docs,
     log_remaining_number_of_sequences,
     log_total_number_of_tokens,
     log_data_sizes,
@@ -53,7 +54,7 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     ),
     LOGGER.debug('Encoding corpus ...'),
     apply,
-    LOGGER.debug('... done!'),
+    LOGGER.debug(log_total_number_of_docs),
     LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[int], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),

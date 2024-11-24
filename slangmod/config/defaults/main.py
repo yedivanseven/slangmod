@@ -23,7 +23,7 @@ class Main(JsonObject):
     workdir: resolve = '/home/georg/Projects/slangmod/data'
     size: Maybe[str](Lower()) = None
     toml: Maybe[str](resolve) = None
-    name: Maybe[str](Lower()) = 'l'
+    name: Maybe[str](Lower()) = None
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()
