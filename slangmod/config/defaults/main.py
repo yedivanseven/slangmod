@@ -55,7 +55,7 @@ class Main(JsonObject):
 
     @property
     def corpus(self) -> str:
-        return str((Path(self.workdir) / 'corpus').resolve())
+        return str((Path(self.workdir) / 'test_corpus').resolve())
 
     @property
     def tokenizer_file(self) -> str:

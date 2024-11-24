@@ -7,4 +7,5 @@ class Files(JsonObject):
     checkpoint: Lower() = 'checkpoint.pt'
     model: Lower() = 'model.pt'
     config: Lower() = 'config.toml'
-    raw: resolve = '/home/georg/Projects/slangmod/data/wiki40b'
+    wiki40b: resolve = '/home/georg/Projects/slangmod/data/wiki40b'
+    gutenberg: resolve = '/home/georg/Projects/slangmod/data/gutenberg'

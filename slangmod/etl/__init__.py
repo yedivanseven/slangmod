@@ -1,3 +1,4 @@
+from .duplicates import DuplicateDropper, drop_duplicates
 from .encoding import EncodingEnforcer, enforce_encoding
 from .splitter import CorpusSplitter, split_corpus
 from .folder import SequenceFolder, fold_train, fold_test
@@ -15,6 +16,8 @@ from .regex import (
 )
 
 __all__ = [
+    'DuplicateDropper',
+    'drop_duplicates',
     'EncodingEnforcer',
     'enforce_encoding',
     'CorpusCleaner',

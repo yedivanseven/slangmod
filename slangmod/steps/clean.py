@@ -1,9 +1,8 @@
 from swak.funcflow.loggers import PassThroughStdOut
-from swak.pd.read import ParquetReader
-from swak.pd.frame import ColumnSelector
-from swak.funcflow import Pipe
+from swak.pd import ParquetReader, ParquetWriter, ColumnSelector
+from swak.funcflow import Pipe, Map, Sum, Fork
 from ..config import config
-from ..io import save_corpus, discover_books, load_books
+from ..io import discover_wiki40b, discover_gutenberg
 from ..etl import (
     CorpusCleaner,
     replace_article,
@@ -15,15 +14,16 @@ from ..etl import (
     replace_double_quote,
     enforce_encoding
 )
-from .log_messages import log_total_number_of_docs, log_total_number_of_files
+from .log_messages import log_total_number_of_files
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
+TARGET = config.corpus +'/{}.parquet'
 
-
-read_parquet = ParquetReader(config.files.raw)
+read_parquet = ParquetReader()
+write_parquet = ParquetWriter(TARGET, create=True)
 select_column = ColumnSelector('text')
 
-process_wiki40b = Pipe[[str], str](
+wiki40b_processor = Pipe[[str], str](
     replace_article,
     replace_section,
     replace_newline,
@@ -33,37 +33,52 @@ process_wiki40b = Pipe[[str], str](
     replace_double_quote,
     enforce_encoding
 )
+process_wiki40b_docs = CorpusCleaner(wiki40b_processor, 'Documents')
+process_wiki40b_file = Pipe[[str], tuple[()]](
+    read_parquet,
+    select_column,
+    process_wiki40b_docs,
+    write_parquet
+)
+process_wiki40b_corpus = Map[[str], tuple[()], list](process_wiki40b_file)
+clean_wiki40b = Pipe[[tuple[()]], tuple[()]](
+    LOGGER.debug(f'Scanning "{config.files.wiki40b}" for *.parquet files.'),
+    discover_wiki40b,
+    LOGGER.debug(log_total_number_of_files),
+    process_wiki40b_corpus,
+    LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
+    Sum(()),
+)
 
-process_books = Pipe[[str], str](
+gutenberg_processor = Pipe[[str], str](
     replace_minutes,
     replace_seconds,
     replace_single_quote,
     replace_double_quote,
     enforce_encoding
 )
-
-clean_wiki40b = Pipe[[str], tuple[()]](
-    LOGGER.info('Starting step "clean".'),
-    LOGGER.debug(f'Reading parquet files from "{config.files.raw}".'),
+process_gutenberg_docs = CorpusCleaner(gutenberg_processor, 'Documents')
+process_gutenberg_file = Pipe[[str], tuple[()]](
     read_parquet,
     select_column,
-    LOGGER.info(log_total_number_of_docs),
-    CorpusCleaner(process_wiki40b),
-    LOGGER.debug(f'Saving *.txt files to "{config.corpus}".'),
-    save_corpus,
-    LOGGER.info('Finished step "clean".')
+    process_gutenberg_docs,
+    write_parquet
+)
+process_gutenberg_corpus = Map[[str], tuple[()], list](process_gutenberg_file)
+clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
+    LOGGER.debug(f'Scanning "{config.files.gutenberg}" for *.parquet files.'),
+    discover_gutenberg,
+    LOGGER.debug(log_total_number_of_files),
+    process_gutenberg_corpus,
+    LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
+    Sum(()),
 )
 
-clean_books = Pipe[[str], tuple[()]](
+clean = Pipe[[tuple[()]], tuple[()]](
     LOGGER.info('Starting step "clean".'),
-    LOGGER.debug(f'Scanning "{config.files.raw}" for files.'),
-    discover_books,
-    LOGGER.debug(log_total_number_of_files),
-    LOGGER.debug(f'Loading files from "{config.files.raw}".'),
-    load_books,
-    LOGGER.info(log_total_number_of_docs),
-    CorpusCleaner(process_books),
-    LOGGER.debug(f'Saving *.txt files to "{config.corpus}".'),
-    save_corpus,
+    Fork[[tuple[()]], tuple[()]](
+        clean_wiki40b,
+        clean_gutenberg
+    ),
     LOGGER.info('Finished step "clean".')
 )

@@ -14,7 +14,8 @@ __all__ = [
     'CorpusLoader',
     'CorpusSaver',
     'discover_corpus',
-    'discover_books',
+    'discover_wiki40b',
+    'discover_gutenberg',
     'load_corpus',
     'load_books',
     'save_corpus',
@@ -26,7 +27,7 @@ class CorpusDiscovery(ArgRepr):
     def __init__(
             self,
             path: str = '',
-            suffix: str = 'txt',
+            suffix: str = 'parquet',
             not_found: NotFound | LiteralNotFound = NotFound.RAISE
     ) -> None:
         self.path = str(path).strip()
@@ -116,8 +117,10 @@ class CorpusSaver(ArgRepr):
                 stream.write(item)
         return ()
 
-discover_books = CorpusDiscovery(config.files.raw)
+discover_wiki40b = CorpusDiscovery(config.files.wiki40b)
+discover_gutenberg = CorpusDiscovery(config.files.gutenberg)
 discover_corpus = CorpusDiscovery(config.corpus)
+
 load_books = CorpusLoader(config.data.shuffle)
 load_corpus = CorpusLoader(config.data.shuffle)
 save_corpus = CorpusSaver(config.corpus, create=True)
