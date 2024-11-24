@@ -7,7 +7,7 @@ from swak.pt.misc import Cat
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity, apply
 from ..config import config
-from ..io import save_config, discover_corpus, load_corpus, load_tokenizer
+from ..io import save_config, discover_corpus, load_tokenizer
 from ..etl import split_corpus, fold_train, fold_test
 from ..ml import Algo
 from ..ml import TrainData, TestData
@@ -15,6 +15,7 @@ from ..ml import make_train_data, make_test_data
 from ..ml import Model, compile_model
 from ..ml import trainer
 from ..ml import validate
+from .tokenize import load_corpus
 from .log_messages import (
     log_total_number_of_files,
     log_remaining_number_of_sequences,
@@ -47,12 +48,13 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
             LOGGER.debug(f'Scanning "{config.corpus}" for files.'),
             discover_corpus,
             LOGGER.debug(log_total_number_of_files),
-            LOGGER.debug(f'Loading files from "{config.corpus}".'),
             load_corpus
         )
     ),
-    LOGGER.debug('Encoding corpus.'),
+    LOGGER.debug('Encoding corpus ...'),
     apply,
+    LOGGER.debug('... done!'),
+    LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[int], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),
     LOGGER.debug(log_total_number_of_tokens),

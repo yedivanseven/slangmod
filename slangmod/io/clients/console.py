@@ -4,6 +4,7 @@ from ...config import config
 from ...ml.generators import Generator
 
 
+# ToDo: Rethink the logic with EOS here! Make sure the tokenizer get's it!
 class ConsoleClient(ArgRepr):
 
     def __init__(

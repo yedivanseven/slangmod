@@ -1,6 +1,6 @@
 from tokenizers import AddedToken, Regex
 from tokenizers.normalizers import Sequence
-from tokenizers.normalizers import Strip, NFKD, StripAccents, Replace
+from tokenizers.normalizers import Strip, StripAccents, Replace
 from ...config import config
 from ...etl.regex import PARAGRAPH_REGEX
 
@@ -16,9 +16,10 @@ PAD = AddedToken('[PAD]', single_word=True, special=True)
 UNK = AddedToken('[UNK]', single_word=True, special=True)
 EOS = AddedToken(
     config.tokens.eos_symbol,
-    single_word=False,
+    single_word=True,
     lstrip=True,
     rstrip=True,
+    normalized=True,
     special=True
 )
 
@@ -26,6 +27,5 @@ EOS = AddedToken(
 normalizer = Sequence([
     Strip(),
     StripAccents(),
-    NFKD(),
-    Replace(Regex(PARAGRAPH_REGEX), config.tokens.eos_symbol)
+    Replace(Regex(PARAGRAPH_REGEX), config.tokens.eos_repl)
 ])

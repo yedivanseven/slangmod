@@ -1,4 +1,5 @@
 from typing import Self, Any
+from collections.abc import Iterable
 from tokenizers import Tokenizer
 from tokenizers.models import Model
 from tokenizers.normalizers import Normalizer
@@ -88,14 +89,18 @@ class Algo:
         algo.tokenizer = tokenizer
         return algo
 
-    def train(self, files: list[str], trainer: Trainer | None = None) -> Self:
+    def train(
+            self,
+            docs: Iterable[str],
+            trainer: Trainer | None = None
+    ) -> Self:
         trainer_to_use = self.trainer if trainer is None else trainer
-        self.tokenizer.train(files, trainer_to_use)
+        self.tokenizer.train_from_iterator(docs, trainer_to_use)
         return self
 
     def __call__(
             self,
-            sequence: str | list[str],
+            sequence: str | Iterable[str],
             pair: str | None = None,
             is_pretokenized: bool = False,
             add_special_tokens: bool = True
@@ -109,7 +114,7 @@ class Algo:
             )]
         else:
             encodings = self.tokenizer.encode_batch_fast(
-                sequence,
+                list(sequence),
                 is_pretokenized,
                 add_special_tokens
             )

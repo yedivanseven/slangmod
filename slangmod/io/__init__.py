@@ -2,13 +2,9 @@ from .config import save_config
 from .corpus import (
     CorpusDiscovery,
     CorpusLoader,
-    CorpusSaver,
     discover_corpus,
     discover_wiki40b,
-    discover_gutenberg,
-    load_corpus,
-    load_books,
-    save_corpus
+    discover_gutenberg
 )
 from .clients import ConsoleClient, console_client
 from .tokenizer import (
@@ -25,10 +21,6 @@ __all__ = [
     'discover_wiki40b',
     'discover_gutenberg',
     'CorpusLoader',
-    'load_corpus',
-    'load_books',
-    'CorpusSaver',
-    'save_corpus',
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',
