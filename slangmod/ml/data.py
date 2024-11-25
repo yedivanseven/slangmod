@@ -61,7 +61,7 @@ class TestData(TestDataBase):
                         non_blocking=True
                     ),
                     self.mask,
-                    None,  # The padding/unknown mask is None for testing
+                    None,  # unknown mask is None for testing
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
@@ -143,7 +143,7 @@ class TrainData(TrainDataBase):
                         non_blocking=True
                     ),
                     self.mask,
-                    None,  # The padding/unknown mask is None for training
+                    None,  # The unknown mask is None for training
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
@@ -174,7 +174,7 @@ class TrainData(TrainDataBase):
                         non_blocking=True
                     ),
                     self.mask,
-                    None,  # The padding/unknown mask is None for training
+                    None,  # The unknown mask is None for training
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
