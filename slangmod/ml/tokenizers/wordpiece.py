@@ -1,3 +1,4 @@
+from tokenizers import Tokenizer
 from tokenizers.pre_tokenizers import Sequence, WhitespaceSplit, Digits
 from tokenizers.models import WordPiece
 from tokenizers.decoders import WordPiece as WordPieceDecoder
@@ -22,7 +23,7 @@ pre_tokenizer = Sequence([
 decoder=WordPieceDecoder(prefix='##', cleanup=True)
 
 wordpiece = Algo(
-    model=model,
+    tokenizer=Tokenizer(model),
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,

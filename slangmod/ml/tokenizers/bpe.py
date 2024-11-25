@@ -1,3 +1,4 @@
+from tokenizers import Tokenizer
 from tokenizers.pre_tokenizers import Sequence, WhitespaceSplit, Digits
 from tokenizers.models import BPE
 from tokenizers.decoders import BPEDecoder
@@ -9,10 +10,12 @@ from .algo import Algo
 __all__ = ['bpe']
 
 model = BPE(
+    cache_capacity=100,
     dropout=config.tokens.dropout,
     unk_token=UNK.content,
     end_of_word_suffix='</w>',
-    fuse_unk=True
+    fuse_unk=True,
+    ignore_merges=False
 )
 trainer = BpeTrainer(
     vocab_size=config.tokens.vocab,
@@ -25,10 +28,10 @@ pre_tokenizer = Sequence([
     WhitespaceSplit(),
     Digits()
 ])
-decoder=BPEDecoder(suffix='</w>')
+decoder = BPEDecoder(suffix='</w>')
 
 bpe = Algo(
-    model=model,
+    tokenizer=Tokenizer(model),
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,

@@ -60,7 +60,7 @@ class Sinusoidal(Module):
         return p.unsqueeze(0)
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings[:, :src.shape[1], :]
+        return src + self.positional_encodings[:, :src.shape[-2], :]
 
     def reset_parameters(self) -> None:
         pass

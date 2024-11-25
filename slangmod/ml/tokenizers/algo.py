@@ -1,14 +1,12 @@
 from typing import Self, Any
 from collections.abc import Iterable
 from tokenizers import Tokenizer
-from tokenizers.models import Model
 from tokenizers.normalizers import Normalizer
 from tokenizers.pre_tokenizers import PreTokenizer
 from tokenizers.processors import PostProcessor
 from tokenizers.decoders import Decoder
 from tokenizers.tokenizers import AddedToken
 from tokenizers.trainers import Trainer
-from .common import PAD, UNK, EOS
 
 
 __all__ = ['Algo']
@@ -18,29 +16,24 @@ class Algo:
 
     def __init__(
             self,
-            model: Model,
+            tokenizer: Tokenizer,
             trainer: Trainer,
             normalizer: Normalizer | None = None,
             pre_tokenizer: PreTokenizer | None = None,
             post_processor: PostProcessor | None = None,
             decoder: Decoder | None = None,
-            pad: AddedToken = PAD,
-            unk: AddedToken = UNK,
-            eos: AddedToken = EOS,
-            *extra: AddedToken,
     ) -> None:
+        self.tokenizer = tokenizer
         self.trainer = trainer
-        self.pad = pad
-        self.unk = unk
-        self.eos = eos
-        self.extra = extra
-        self.tokenizer = Tokenizer(model)
-        self.tokenizer.normalizer = normalizer
-        self.tokenizer.pre_tokenizer = pre_tokenizer
-        self.tokenizer.post_processor = post_processor
-        self.tokenizer.decoder = decoder
-        self.tokenizer.add_tokens(self.special)
-        self.tokenizer.add_special_tokens(self.special)
+        self.pad, self.unk, *self.extra, self.eos = trainer.special_tokens
+        if normalizer is not None:
+            self.tokenizer.normalizer = normalizer
+        if pre_tokenizer is not None:
+            self.tokenizer.pre_tokenizer = pre_tokenizer
+        if post_processor is not None:
+            self.tokenizer.post_processor = post_processor
+        if decoder is not None:
+            self.tokenizer.decoder = decoder
 
     def __repr__(self) -> str:
         cls = self.tokenizer.model.__class__.__name__
@@ -70,32 +63,10 @@ class Algo:
         return self.tokenizer.get_vocab_size()
 
     def from_file(self, path: str) -> Self:
-        tokenizer = Tokenizer.from_file(path)
-        added_tokens = tokenizer.get_added_tokens_decoder()
-        sorted_tokens = sorted(added_tokens.items(), key=lambda x: x[0])
-        pad, unk, *extra, eos = (token for _, token in sorted_tokens)
-        algo = self.__class__(
-            model=tokenizer.model,
-            trainer=self.trainer,
-            normalizer=tokenizer.normalizer,
-            pre_tokenizer=tokenizer.pre_tokenizer,
-            post_processor=tokenizer.post_processor,
-            decoder=tokenizer.decoder,
-            pad=pad,
-            unk=unk,
-            eos=eos,
-            *extra
-        )
-        algo.tokenizer = tokenizer
-        return algo
+        return self.__class__(Tokenizer.from_file(path), self.trainer)
 
-    def train(
-            self,
-            docs: Iterable[str],
-            trainer: Trainer | None = None
-    ) -> Self:
-        trainer_to_use = self.trainer if trainer is None else trainer
-        self.tokenizer.train_from_iterator(docs, trainer_to_use)
+    def train(self, docs: Iterable[str]) -> Self:
+        self.tokenizer.train_from_iterator(docs, self.trainer)
         return self
 
     def __call__(

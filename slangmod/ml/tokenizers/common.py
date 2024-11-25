@@ -1,6 +1,6 @@
 from tokenizers import AddedToken, Regex
 from tokenizers.normalizers import Sequence
-from tokenizers.normalizers import Strip, StripAccents, Replace
+from tokenizers.normalizers import Strip, NFD, StripAccents, Replace
 from ...config import config
 from ...etl.regex import PARAGRAPH_REGEX
 
@@ -26,6 +26,7 @@ EOS = AddedToken(
 # Normalizer
 normalizer = Sequence([
     Strip(),
+    NFD(),
     StripAccents(),
     Replace(Regex(PARAGRAPH_REGEX), config.tokens.eos_repl)
 ])
