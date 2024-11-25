@@ -2,12 +2,12 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.misc import Compile
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
+from swak.pt.blocks import Block
 from .positions import positions
 from ..config import config, LiteralDevice
 
 
-# ToDo: Make custom model with RoPE and GLU!
-class Model(ptn.Module):
+class Model(Module):
 
     def __init__(
             self,
@@ -15,7 +15,7 @@ class Model(ptn.Module):
             vocab: int,
             n_heads: int,
             n_layers: int,
-            positions: Module,
+            positions: Block,
             feedforward_factor: int,
             scale_grad_by_freq: bool,
             dropout: float,

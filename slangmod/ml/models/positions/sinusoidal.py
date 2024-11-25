@@ -1,7 +1,7 @@
 import math
 import torch as pt
 from swak.pt.types import Module, Tensor, Dtype, Device
-from ...config import config, LiteralDevice
+from ....config import config, LiteralDevice
 
 
 class Sinusoidal(Module):
@@ -32,7 +32,7 @@ class Sinusoidal(Module):
 
     @property
     def _divisors(self) -> Tensor:
-        return pt.exp(-2 * self._span * math.log(self.context) / self.mod_dim)
+        return pt.exp(-self._span * math.log(self.context) / self.mod_dim)
 
     @property
     def _positions(self) -> Tensor:
@@ -60,7 +60,7 @@ class Sinusoidal(Module):
         return p.unsqueeze(0)
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings[:, :src.shape[1], :]
+        return src + self.positional_encodings[:, :src.shape[-2], :]
 
     def reset_parameters(self) -> None:
         pass

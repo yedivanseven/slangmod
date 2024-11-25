@@ -1,7 +1,7 @@
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Tensor, Dtype, Device
-from ...config import config, LiteralDevice
+from ....config import config, LiteralDevice
 
 
 class Learnable(Module):

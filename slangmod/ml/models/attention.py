@@ -3,28 +3,32 @@ from typing import Self
 import torch as pt
 import torch.nn as ptn
 import torch.nn.functional as ptnf
-from swak.pt.types import Module, Device, Dtype, Tensor
-from ...config import LiteralDevice
+from swak.pt.types import Device, Dtype, Tensor
+from swak.pt.blocks import Block
+from ...config import config, LiteralDevice
 
-__all__ = ['MHA']
+__all__ = [
+    'Attention',
+    'vanilla_attention'
+]
 
 
-class MHA(Module):
+class Attention(Block):
 
     def __init__(
             self,
-            mod_dim: int = 512,
-            n_heads: int = 8,
-            dropout: float = 0.1,
+            mod_dim: int,
+            n_heads: int,
             bias: bool = True,
+            dropout: float = 0.1,
             device: Device | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
         self.n_heads = n_heads
-        self.dropout = dropout
         self.bias = bias
+        self.dropout = dropout
         self.device = pt.device(device)
         self.dtype = dtype
         self.qkv = ptn.Linear(
@@ -86,8 +90,18 @@ class MHA(Module):
         return self.__class__(
             self.mod_dim,
             self.n_heads,
-            self.dropout,
             self.bias,
+            self.dropout,
             self.device,
             self.dtype
         )
+
+
+vanilla_attention = Attention(
+    mod_dim=config.model.dim,
+    n_heads=config.model.n_heads,
+    bias=config.model.bias,
+    dropout=config.model.bias,
+    device=config.data.device,
+    dtype=config.data.dtype
+)
