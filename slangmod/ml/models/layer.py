@@ -22,6 +22,7 @@ class Layer(Block):
             feedforward: Block,
             bias: bool = True,
             dropout: float = 0.1,
+            norm_first: bool = True,
             eps: float = 1e-5,
             device: Device | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
@@ -31,6 +32,7 @@ class Layer(Block):
         self.feedforward = feedforward
         self.bias = bias
         self.dropout = dropout
+        self.norm_first = norm_first
         self.eps = eps
         self.device = pt.device(device)
         self.dtype = dtype
@@ -61,23 +63,17 @@ class Layer(Block):
             self,
             src: Tensor,
             mask: Tensor | None = None,
-            padding_mask: Tensor | None = None,
             is_causal: bool = False,
     ) -> Tensor:
-        if is_causal or (mask is None and padding_mask is None):
-            attn_mask = None
-        elif mask is None:
-            sizes = -1, padding_mask.size(-1), -1
-            attn_mask = padding_mask.unsqueeze(-2).expand(*sizes)
-        elif padding_mask is None:
-            attn_mask = mask
+        if self.norm_first:
+            attended = self.attention(self.norm1(src), mask, is_causal)
+            normed = self.norm2(src + self.drop1(attended))
+            out = normed + self.drop2(self.feedforward(normed))
         else:
-            sizes = -1, padding_mask.size(-1), -1
-            attn_mask = mask + padding_mask.unsqueeze(-2).expand(*sizes)
-
-        attended = self.attention(src, attn_mask, is_causal)
-        normed =  self.norm1(src + self.drop1(attended))
-        return self.norm2(normed + self.drop2(self.feedforward(normed)))
+            attended = self.attention(src, mask, is_causal)
+            normed = self.norm1(src + self.drop1(attended))
+            out = self.norm2(normed + self.drop2(self.feedforward(normed)))
+        return out
 
     def reset_parameters(self) -> None:
         self.attention.reset_parameters()
@@ -91,6 +87,7 @@ class Layer(Block):
             self.feedforward.new(),
             self.bias,
             self.dropout,
+            self.norm_first,
             self.eps,
             self.device,
             self.dtype,
@@ -102,6 +99,7 @@ vanilla_layer = Layer(
     feedforward=vanilla_feedforward,
     bias=config.model.bias,
     dropout=config.model.dropout,
+    norm_first=config.model.norm_first,
     device=config.data.device,
     dtype=config.data.dtype
 )

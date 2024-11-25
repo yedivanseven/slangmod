@@ -1,7 +1,7 @@
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Tensor, Dtype, Device
-from ....config import config, LiteralDevice
+from ....config import LiteralDevice
 
 
 class Learnable(Module):
@@ -10,8 +10,8 @@ class Learnable(Module):
             self,
             mod_dim: int,
             context: int,
-            device: Device | LiteralDevice,
-            dtype: Dtype
+            device: Device | LiteralDevice = 'cpu',
+            dtype: Dtype = pt.float
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
@@ -27,11 +27,3 @@ class Learnable(Module):
 
     def reset_parameters(self) -> None:
         ptn.init.normal_(self.positional_encodings)
-
-
-learnable = Learnable(
-    mod_dim=config.model.dim,
-    context=config.data.seq_len,
-    device=config.data.device,
-    dtype=config.data.dtype,
-)

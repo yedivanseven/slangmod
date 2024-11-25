@@ -56,7 +56,7 @@ class Attention(Block):
 
     @property
     def scale(self) -> float:
-        return 1.0 / math.sqrt(self.mod_dim)
+        return 1.0 / math.sqrt(self.head_dim)
 
     def forward(
             self,
@@ -101,7 +101,7 @@ vanilla_attention = Attention(
     mod_dim=config.model.dim,
     n_heads=config.model.n_heads,
     bias=config.model.bias,
-    dropout=config.model.bias,
+    dropout=config.model.dropout,
     device=config.data.device,
     dtype=config.data.dtype
 )

@@ -4,5 +4,6 @@ n_heads = 4
 n_layers = 4
 
 [train]
+batch_size = 128
 learning_rate = 0.01
 warmup = 3000

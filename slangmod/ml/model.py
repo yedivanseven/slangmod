@@ -2,8 +2,7 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.misc import Compile
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
-from swak.pt.blocks import Block
-from .positions import positions
+from .models import positions
 from ..config import config, LiteralDevice
 
 
@@ -15,7 +14,7 @@ class Model(Module):
             vocab: int,
             n_heads: int,
             n_layers: int,
-            positions: Block,
+            pos_enc: Module,
             feedforward_factor: int,
             scale_grad_by_freq: bool,
             dropout: float,
@@ -28,7 +27,7 @@ class Model(Module):
         self.vocab = vocab
         self.n_heads = n_heads
         self.n_layers = n_layers
-        self.positions = positions
+        self.pos_enc = pos_enc
         self.feedforward_factor = feedforward_factor
         self.scale_grad_by_freq = scale_grad_by_freq
         self.dropout = dropout
@@ -77,18 +76,18 @@ class Model(Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
-        embedded = self.drop(self.positions(self.embed(src)))
+        embedded = self.drop(self.pos_enc(self.embed(src)))
         transformed = self.transform(embedded, mask, padding_mask, is_causal)
         return self.finalize(transformed).transpose(-1, -2).contiguous(),
 
     def reset_parameters(self) -> None:
         self.embed.reset_parameters()
-        self.positions.reset_parameters()
+        self.pos_enc.reset_parameters()
         self.finalize.reset_parameters()
         self.encoder = ptn.TransformerEncoderLayer(
             d_model=self.mod_dim,
             nhead=self.n_heads,
-            dim_feedforward=4 * self.mod_dim,
+            dim_feedforward=self.feedforward_factor * self.mod_dim,
             dropout=self.dropout,
             batch_first=True,
             norm_first=False,
@@ -109,7 +108,7 @@ model = Model(
     vocab=config.tokens.vocab,
     n_heads=config.model.n_heads,
     n_layers=config.model.n_layers,
-    positions=positions,
+    pos_enc=positions,
     feedforward_factor=config.model.feedforward_factor,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
     dropout=config.model.dropout,

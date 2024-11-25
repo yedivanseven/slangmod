@@ -12,7 +12,6 @@ __all__ = [
     'vanilla_former'
 ]
 
-
 class Former(Module):
 
     def __init__(
@@ -21,7 +20,7 @@ class Former(Module):
             vocab: int,
             layer: Block,
             n_layers: int,
-            positions: Module = Identity,
+            pos_enc: Module = Identity,
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
@@ -32,7 +31,7 @@ class Former(Module):
         self.mod_dim = mod_dim
         self.vocab = vocab
         self.n_layers = n_layers
-        self.positions = positions
+        self.pos_enc = pos_enc
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
@@ -46,8 +45,8 @@ class Former(Module):
             device=device,
             dtype=dtype
         )
-        self.transform = ptn.Sequential(*[layer.new() for _ in self.layers])
         self.drop = ptn.Dropout(dropout)
+        self.layers = ptn.ModuleList([layer.new() for _ in range(n_layers)])
         self.finalize = ptn.Linear(
             in_features=mod_dim,
             out_features=vocab,
@@ -56,10 +55,6 @@ class Former(Module):
             dtype=dtype
         )
 
-    @property
-    def layers(self) -> range:
-        return range(self.n_layers)
-
     def forward(
             self,
             src: Tensor,
@@ -67,15 +62,27 @@ class Former(Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
-        embedded = self.drop(self.positions(self.embed(src)))
-        transformed = self.transform(embedded, mask, padding_mask, is_causal)
-        return self.finalize(transformed).contiguous(),
+        if is_causal or (mask is None and padding_mask is None):
+            attn_mask = None
+        elif mask is None:
+            sizes = -1, padding_mask.size(-1), -1
+            attn_mask = padding_mask.unsqueeze(-2).expand(*sizes)
+        elif padding_mask is None:
+            attn_mask = mask
+        else:
+            sizes = -1, padding_mask.size(-1), -1
+            attn_mask = mask + padding_mask.unsqueeze(-2).expand(*sizes)
+
+        out = self.drop(self.pos_enc(self.embed(src)))
+        for layer in self.layers:
+            out = layer(out, attn_mask, is_causal)
+        return self.finalize(out).transpose(-1, -2).contiguous(),
 
     def reset_parameters(self) -> None:
-        for layer in self.transform:
+        for layer in self.layers:
             layer.reset_parameters()
         self.embed.reset_parameters()
-        self.positions.reset_parameters()
+        self.pos_enc.reset_parameters()
         self.finalize.reset_parameters()
 
 
@@ -84,10 +91,10 @@ vanilla_former = Former(
     vocab=config.tokens.vocab,
     layer=vanilla_layer,
     n_layers=config.model.n_layers,
-    positions = positions,
-    bias = config.model.bias,
-    dropout=config.model.bias,
+    pos_enc=positions,
+    bias=config.model.bias,
+    dropout=config.model.dropout,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
-    device = config.data.device,
-    dtype=config.data.device
+    device=config.data.device,
+    dtype=config.data.dtype
 )

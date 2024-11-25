@@ -2,7 +2,7 @@ from swak.pt.misc import Compile
 from .attention import Attention
 from .layer import Layer
 from .former import Former, vanilla_former
-from .positions import Learnable, Sinusoidal
+from .positions import Learnable, Sinusoidal, positions
 from ...config import config
 
 __all__ = [
@@ -11,7 +11,7 @@ __all__ = [
     'Former',
     'Learnable',
     'Sinusoidal',
-    'vanilla_former',
+    'positions',
     'compile_model'
 ]
 

@@ -13,6 +13,7 @@ class Model(JsonObject):
     scale_grad_by_freq: bool = True
     dropout: float = 0.1
     bias: bool = True
+    norm_first: bool = False
     compile: bool = True
 
     @property

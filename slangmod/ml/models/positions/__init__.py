@@ -1,5 +1,5 @@
-from .sinusoidal import Sinusoidal, sinusoidal
-from .learnable import Learnable, learnable
+from .sinusoidal import Sinusoidal
+from .learnable import Learnable
 from ....config import config, Positions
 
 __all__ = [
@@ -9,6 +9,11 @@ __all__ = [
 ]
 
 positions = {
-    Positions.SINUSOIDAL: sinusoidal,
-    Positions.LEARNABLE: learnable
-}[config.model.positions]
+    Positions.SINUSOIDAL: Sinusoidal,
+    Positions.LEARNABLE: Learnable
+}[config.model.positions](
+    mod_dim=config.model.dim,
+    context=config.model.context,
+    device=config.data.device,
+    dtype=config.data.dtype,
+)
