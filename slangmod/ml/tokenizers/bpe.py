@@ -10,7 +10,6 @@ from .algo import Algo
 __all__ = ['bpe']
 
 model = BPE(
-    cache_capacity=100,
     dropout=config.tokens.dropout,
     unk_token=UNK.content,
     end_of_word_suffix='</w>',

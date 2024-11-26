@@ -1,3 +1,4 @@
+from typing import Any
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Tensor, Dtype, Device
@@ -11,7 +12,8 @@ class Learnable(Module):
             mod_dim: int,
             context: int,
             device: Device | LiteralDevice = 'cpu',
-            dtype: Dtype = pt.float
+            dtype: Dtype = pt.float,
+            **__: Any
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim

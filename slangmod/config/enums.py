@@ -27,6 +27,7 @@ class Tokenizers(StrEnum):
 
 class Positions(StrEnum):
     SINUSOIDAL = 'sinusoidal'
+    ROTARY = 'rotary'
     LEARNABLE = 'learnable'
 
 
