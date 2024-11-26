@@ -58,8 +58,8 @@ class Sinusoidal(Module):
             device=self.device,
             dtype=self.dtype
         )
-        encodings[:, 0::2] = pt.sin(self._arguments)
-        encodings[:, 1::2] = pt.cos(self._arguments)
+        encodings[:, :, 0::2] = pt.sin(self._arguments)
+        encodings[:, :, 1::2] = pt.cos(self._arguments)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
