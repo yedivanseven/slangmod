@@ -6,6 +6,7 @@ n_layers = 10
 [data]
 seq_len = 768
 stride = 576
+jitter = 48
 
 [tokens]
 vocab = 24576
