@@ -20,7 +20,7 @@ class Sinusoidal(Module):
         self.context = context
         self.device = pt.device(device)
         self.dtype = dtype
-        self.register_buffer('positional_encodings', self._encodings)
+        self.register_buffer('positional_encodings', self._encodings, False)
 
     @property
     def _span(self) -> Tensor:
