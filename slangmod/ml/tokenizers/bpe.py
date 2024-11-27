@@ -4,7 +4,7 @@ from tokenizers.models import BPE
 from tokenizers.decoders import BPEDecoder
 from tokenizers.trainers import BpeTrainer
 from ...config import config
-from .common import PAD, UNK, EOS, normalizer
+from .common import UNK, SPECIAL_TOKENS, normalizer
 from .algo import Algo
 
 __all__ = ['bpe']
@@ -19,7 +19,7 @@ model = BPE(
 trainer = BpeTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
-    special_tokens=[PAD, UNK, EOS],
+    special_tokens=SPECIAL_TOKENS,
     end_of_word_suffix='</w>',
     max_token_length=config.tokens.max_length
 )

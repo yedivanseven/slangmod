@@ -8,6 +8,7 @@ __all__ = [
     'PAD',
     'UNK',
     'EOS',
+    'SPECIAL_TOKENS',
     'normalizer',
 ]
 
@@ -22,6 +23,7 @@ EOS = AddedToken(
     normalized=True,
     special=True
 )
+SPECIAL_TOKENS = [PAD, UNK, EOS]
 
 # Normalizer
 normalizer = Sequence([
