@@ -3,7 +3,14 @@ dim = 1024
 n_heads = 16
 n_layers = 12
 
+[data]
+seq_len = 1024
+stride = 768
+
+[tokens]
+vocab = 32768
+
 [train]
-learning_rate = 0.0003
+batch_size = 16
+learning_rate = 0.0005
 warmup = 7000
-batch_size = 24

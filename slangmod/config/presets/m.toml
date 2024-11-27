@@ -3,6 +3,13 @@ dim = 256
 n_heads = 4
 n_layers = 6
 
+[data]
+seq_len = 512
+stride = 384
+
+[tokens]
+vocab = 16384
+
 [train]
 batch_size = 128
 learning_rate = 0.002
