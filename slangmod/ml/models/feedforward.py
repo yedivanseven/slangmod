@@ -6,14 +6,11 @@ __all__ = [
     'vanilla_feedforward'
 ]
 
-vanilla_activation = ptn.Sequential(
-    ptn.GELU(),
-    ptn.Dropout(config.model.dropout)
-)
 # ToDo: Make nice selection here so that only the needed one is instantiated!
 vanilla_feedforward = ActivatedBlock(
     mod_dim=config.model.dim,
-    activate=vanilla_activation,
+    activate=ptn.GELU(),
+    drop=ptn.Dropout(config.model.dropout),
     hidden_factor=config.model.feedforward_factor,
     bias=config.model.bias,
     device=config.data.device,

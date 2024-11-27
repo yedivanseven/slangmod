@@ -17,6 +17,3 @@ tokenizer = {
     Tokenizers.WORDPIECE: wordpiece,
     Tokenizers.UNIGRAM: unigram
 }[config.tokens.algo]
-
-# ToDo: Investigate whitespaces in number encoding and decoding!
-# ToDo: Investigate why EOS is in the vocabulary!

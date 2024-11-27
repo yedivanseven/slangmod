@@ -4,6 +4,7 @@ import torch.optim.lr_scheduler as pts
 from swak.funcflow import Curry
 from swak.pt.train import Trainer, EpochPrinter, TrainPrinter, OnDisk
 from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
+from swak.pt.losses import XEntropyLoss
 from swak.misc import StdOutLogger
 from ..config import config, Optimizers, Scaling
 
@@ -13,7 +14,7 @@ checkpoint = OnDisk(config.checkpoint_file, create=True)
 epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)
 
-loss = ptn.CrossEntropyLoss(
+loss = XEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
