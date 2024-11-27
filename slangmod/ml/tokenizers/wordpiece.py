@@ -9,7 +9,10 @@ from .algo import Algo
 
 __all__ = ['wordpiece']
 
-model = WordPiece(unk_token=UNK.content)
+model = WordPiece(
+    unk_token=UNK.content,
+    max_input_chars_per_word=config.tokens.max_length
+)
 trainer = WordPieceTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
@@ -20,7 +23,7 @@ pre_tokenizer = Sequence([
     WhitespaceSplit(),
     Digits()
 ])
-decoder=WordPieceDecoder(prefix='##', cleanup=True)
+decoder = WordPieceDecoder(prefix='##', cleanup=True)
 
 wordpiece = Algo(
     tokenizer=Tokenizer(model),

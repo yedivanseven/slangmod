@@ -14,6 +14,7 @@ class Model(JsonObject):
     dropout: float = 0.1
     bias: bool = True
     norm_first: bool = False
+    normalize: bool = False
     compile: bool = True
 
     @property

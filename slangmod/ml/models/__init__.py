@@ -20,3 +20,4 @@ compile_model = Compile(
     model=vanilla_former,
     disable=config.model.disable
 )
+# ToDo: Play with a few strategically placed "contiguous" for speed!

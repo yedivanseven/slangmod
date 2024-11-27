@@ -1,10 +1,10 @@
-from typing import Self
+from typing import Self, Any
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor
 from swak.pt.blocks import Block
 from ...config import config, LiteralDevice
-from .attention import vanilla_attention
+from .attention import Attention, vanilla_attention
 from .feedforward import vanilla_feedforward
 
 
@@ -18,14 +18,15 @@ class Layer(Block):
 
     def __init__(
             self,
-            attention: Block,
+            attention: Attention,
             feedforward: Block,
             bias: bool = True,
             dropout: float = 0.1,
             norm_first: bool = True,
             eps: float = 1e-5,
             device: Device | LiteralDevice = 'cpu',
-            dtype: Dtype = pt.float
+            dtype: Dtype = pt.float,
+            **_: Any
     ) -> None:
         super().__init__()
         self.attention = attention
@@ -93,7 +94,7 @@ class Layer(Block):
             self.dtype,
         )
 
-
+# ToDo: Make nice selection here so that only the needed one is instantiated!
 vanilla_layer = Layer(
     attention=vanilla_attention,
     feedforward=vanilla_feedforward,

@@ -27,7 +27,7 @@ pre_tokenizer = Sequence([
     Digits(),
     MetaspacePreTokenizer()
 ])
-decoder=MetaspaceDecoder()
+decoder = MetaspaceDecoder()
 
 unigram = Algo(
     tokenizer=Tokenizer(model),

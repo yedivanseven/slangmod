@@ -56,7 +56,7 @@ class Rotary(Module):
         ).unsqueeze(1)
 
     @property
-    def _arguments(self) -> Tensor:
+    def angles(self) -> Tensor:
         return self._positions * self._divisors
 
     @property
@@ -70,20 +70,19 @@ class Rotary(Module):
             device=self.device,
             dtype=self.dtype
         )
-        encodings[..., 0] = pt.cos(self._arguments)
-        encodings[..., 1] = pt.sin(self._arguments)
+        encodings[..., 0] = pt.cos(self.angles)
+        encodings[..., 1] = pt.sin(self.angles)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
         seq_len = src.size(-2)
-        shaped = src.unflatten(-1, (-1, 2))
-        x1 = shaped[..., 0]
-        x2 = shaped[..., 1]
+        reshaped = src.unflatten(-1, (-1, 2))
         cos = self.positional_encodings[:, :, :seq_len, :, 0]
         sin = self.positional_encodings[:, :, :seq_len, :, 1]
-        rotated_x1 = x1 * cos - x2 * sin
-        rotated_x2 = x1 * sin + x2 * cos
-        return pt.stack([rotated_x1, rotated_x2], dim=-1).flatten(-2)
+        return pt.stack([
+            reshaped[..., 0] * cos - reshaped[..., 1] * sin,
+            reshaped[..., 0] * sin + reshaped[..., 1] * cos
+        ], dim=-1).flatten(-2)
 
     def reset_parameters(self) -> None:
         pass

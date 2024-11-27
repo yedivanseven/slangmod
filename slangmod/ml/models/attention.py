@@ -103,7 +103,7 @@ class Attention(Block):
             self.dtype
         )
 
-
+# ToDo: Make nice selection here so that only the needed one is instantiated!
 vanilla_attention = Attention(
     mod_dim=config.model.dim,
     n_heads=config.model.n_heads,

@@ -1,9 +1,8 @@
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
-from swak.pt.blocks import Block
 from swak.pt.misc import Identity
-from .layer import vanilla_layer
+from .layer import Layer, vanilla_layer
 from .positions import positions
 from ...config import config, LiteralDevice
 
@@ -18,12 +17,13 @@ class Former(Module):
             self,
             mod_dim: int,
             vocab: int,
-            layer: Block,
+            layer: Layer,
             n_layers: int,
-            pos_enc: Module = Identity,
+            pos_enc: Module = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
+            normalize: bool = False,
             device: Device | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
@@ -35,6 +35,7 @@ class Former(Module):
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
+        self.normalize = normalize
         self.device = pt.device(device)
         self.dtype = dtype
         self.embed = ptn.Embedding(
@@ -47,6 +48,14 @@ class Former(Module):
         )
         self.drop = ptn.Dropout(dropout)
         self.layers = ptn.ModuleList([layer.new() for _ in range(n_layers)])
+        self.norm = ptn.LayerNorm(
+            self.mod_dim,
+            eps=layer.norm1.eps,
+            elementwise_affine=layer.norm1.elementwise_affine,
+            bias=layer.norm1.bias,
+            device=device,
+            dtype=dtype
+        ) if self.normalize and layer.norm_first else Identity()
         self.finalize = ptn.Linear(
             in_features=mod_dim,
             out_features=vocab,
@@ -76,7 +85,8 @@ class Former(Module):
         out = self.drop(self.pos_enc(self.embed(src)))
         for layer in self.layers:
             out = layer(out, attn_mask, is_causal)
-        return self.finalize(out).transpose(-1, -2).contiguous(),
+
+        return self.finalize(self.norm(out)).transpose(-1, -2).contiguous(),
 
     def reset_parameters(self) -> None:
         for layer in self.layers:
@@ -85,7 +95,7 @@ class Former(Module):
         self.pos_enc.reset_parameters()
         self.finalize.reset_parameters()
 
-
+# ToDo: Make nice selection here so that only the needed one is instantiated!
 vanilla_former = Former(
     mod_dim=config.model.dim,
     vocab=config.tokens.vocab,
@@ -95,6 +105,7 @@ vanilla_former = Former(
     bias=config.model.bias,
     dropout=config.model.dropout,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
+    normalize=config.model.normalize,
     device=config.data.device,
     dtype=config.data.dtype
 )

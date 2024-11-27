@@ -46,7 +46,7 @@ class Sinusoidal(Module):
         ).unsqueeze(1)
 
     @property
-    def _arguments(self) -> Tensor:
+    def _angles(self) -> Tensor:
         return self._positions * self._divisors
 
     @property
@@ -58,12 +58,12 @@ class Sinusoidal(Module):
             device=self.device,
             dtype=self.dtype
         )
-        encodings[:, :, 0::2] = pt.sin(self._arguments)
-        encodings[:, :, 1::2] = pt.cos(self._arguments)
+        encodings[:, :, 0::2] = pt.sin(self._angles)
+        encodings[:, :, 1::2] = pt.cos(self._angles)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings[:, :src.shape[-2], :]
+        return src + self.positional_encodings[:, :src.size(-2), :]
 
     def reset_parameters(self) -> None:
         pass
