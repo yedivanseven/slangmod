@@ -25,7 +25,7 @@ class Learnable(Module):
         )
 
     def forward(self, src: Tensor) -> Tensor:
-        return src + self.positional_encodings[:, :src.shape[1], :]
+        return src + self.positional_encodings[:, :src.size(-2), :]
 
     def reset_parameters(self) -> None:
         ptn.init.normal_(self.positional_encodings)

@@ -22,8 +22,8 @@ class CorpusCleaner(ArgRepr):
         self.kwargs = kwargs
 
     def __call__(self, corpus: Series, **kwargs: Any) -> tuple[DataFrame, str]:
-        updated = self.kwargs | kwargs
-        wrapped = tqdm(corpus, *self.args, **updated)
+        merged_kwargs = self.kwargs | kwargs
+        wrapped = tqdm(corpus, *self.args, **merged_kwargs)
         corpus[:] = [self.process(document) for document in wrapped]
         hashed = sha256(str(corpus).encode()).hexdigest()
         return corpus.to_frame(), hashed

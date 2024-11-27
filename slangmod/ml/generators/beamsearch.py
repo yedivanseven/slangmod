@@ -41,7 +41,7 @@ class BeamSearch(Generator):
         all_vals = top_k.values
 
         more = False if more else (all_seqs == self.eos_id).any()
-        eos = pt.zeros(all_seqs.shape[0], dtype=pt.bool)
+        eos = pt.zeros(all_seqs.size(0), dtype=pt.bool)
 
         for _ in range(1, self.max_tokens):
 
@@ -54,7 +54,7 @@ class BeamSearch(Generator):
             eos_prob = all_prob[eos]
             eos_size = all_size[eos]
             eos_vals = all_vals[eos]
-            n_remain = all_seqs[~eos].shape[0]
+            n_remain = all_seqs[~eos].size(0)
 
             inp = pt.cat([src.expand(n_remain, -1), all_seqs[~eos]], dim=-1)
             mask = pt.cat([mask, self.zero], dim=-1)[:, -self.context:]

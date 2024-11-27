@@ -25,8 +25,8 @@ class DuplicateDropper(ArgRepr):
         ...
 
     def __call__(self, pd, **kwargs):
-        updated = self.kwargs | kwargs
-        return pd.drop_duplicates(*self.args, **updated)
+        merged_kwargs = self.kwargs | kwargs
+        return pd.drop_duplicates(*self.args, **merged_kwargs)
 
 
 drop_duplicates = DuplicateDropper(inplace=True, ignore_index=True)

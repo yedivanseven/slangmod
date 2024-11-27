@@ -17,7 +17,7 @@ class Validator(ArgRepr):
     @staticmethod
     def top(k: int, logits: Tensor, targets: Tensor) -> float:
         matches = logits.topk(k, dim=1).indices == targets.unsqueeze(1)
-        return matches.sum(dim=(0, 1)) / targets.shape[0]
+        return matches.sum(dim=(0, 1)) / targets.size(0)
 
     @staticmethod
     def stats(positions: Tensor) -> tuple[float, float]:
@@ -54,7 +54,7 @@ class Validator(ArgRepr):
         model.eval()
         with pt.no_grad():
             for features, targets in data.sample(self.batch_size):
-                batch_n = targets.shape[0]
+                batch_n = targets.size(0)
 
                 (logits,) = model(*features)
 
