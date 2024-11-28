@@ -43,7 +43,7 @@ class Generator(ABC):
 
     @property
     def context(self) -> int:
-        return self.model.positions.context
+        return self.model.pos_enc.context
 
     @cached_property
     def zero(self) -> Tensor:
@@ -55,7 +55,11 @@ class Generator(ABC):
 
         more = encoded.ids[-1] == self.eos_id
 
-        src = pt.tensor(encoded.ids, device=self.model.device).unsqueeze(0)
+        src = pt.tensor(
+            encoded.ids,
+            device=self.model.device,
+            dtype=pt.long
+        ).unsqueeze(0)
 
         mask = pt.zeros_like(
             src,
