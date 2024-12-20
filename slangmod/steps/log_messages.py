@@ -11,7 +11,7 @@ def log_total_number_of_files(files: list[str]) -> str:
 
 
 def log_total_number_of_docs(files: list[str]) -> str:
-    return f'... done encoding {len(files)} documents.'
+    return f'Loaded {len(files)} encoded documents.'
 
 
 def log_total_number_of_tokens(sequences: list[list[int]]) -> str:

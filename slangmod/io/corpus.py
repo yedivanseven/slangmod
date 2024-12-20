@@ -9,13 +9,18 @@ from ..config import config
 __all__ = [
     'NotFound',
     'CorpusDiscovery',
+    'CorpusFilter',
     'CorpusLoader',
     'PrefixExtractor',
     'discover_corpus',
     'discover_wiki40b',
     'discover_gutenberg',
+    'discover_encodings',
     'extract_prefix',
-    'extract_file_name'
+    'extract_file_name',
+    'train_filter',
+    'test_filter',
+    'validation_filter'
 ]
 
 
@@ -88,6 +93,16 @@ class PrefixExtractor(ArgRepr):
         raise ValueError(msg.format(file, self.sep))
 
 
+class CorpusFilter(ArgRepr):
+
+    def __init__(self, prefix: str) -> None:
+        self.prefix = prefix.strip()
+        super().__init__(self.prefix)
+
+    def __call__(self, file: str) -> bool:
+        return Path(file).name.startswith(self.prefix)
+
+
 class CorpusLoader(ArgRepr):
 
     def __init__(self, reader: Callable[[str], Iterable[str]]) -> None:
@@ -119,4 +134,10 @@ discover_gutenberg = CorpusDiscovery(
     config.files.validation
 )
 discover_corpus = CorpusDiscovery(config.corpus)
+discover_encodings = CorpusDiscovery(config.encodings)
+
 extract_prefix = PrefixExtractor(config.files.sep)
+
+train_filter = CorpusFilter(config.files.train)
+test_filter = CorpusFilter(config.files.test)
+validation_filter = CorpusFilter(config.files.validation)

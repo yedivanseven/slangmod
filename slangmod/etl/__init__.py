@@ -1,6 +1,5 @@
 from .duplicates import DuplicateDropper, drop_duplicates
 from .encoding import EncodingEnforcer, enforce_encoding
-from .splitter import CorpusSplitter, split_corpus
 from .folder import SequenceFolder, fold_train, fold_test
 from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame
@@ -24,8 +23,6 @@ __all__ = [
     'CorpusCleaner',
     'ToFrame',
     'to_frame',
-    'CorpusSplitter',
-    'split_corpus',
     'SequenceFolder',
     'fold_train',
     'fold_test',

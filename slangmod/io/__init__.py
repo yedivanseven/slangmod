@@ -1,13 +1,18 @@
 from .config import save_config
 from .corpus import (
     CorpusDiscovery,
+    CorpusFilter,
     CorpusLoader,
     PrefixExtractor,
     discover_corpus,
     discover_wiki40b,
     discover_gutenberg,
+    discover_encodings,
     extract_prefix,
-    extract_file_name
+    extract_file_name,
+    train_filter,
+    test_filter,
+    validation_filter
 )
 from .clients import ConsoleClient, console_client
 from .tokenizer import (
@@ -23,6 +28,11 @@ __all__ = [
     'discover_corpus',
     'discover_wiki40b',
     'discover_gutenberg',
+    'discover_encodings',
+    'CorpusFilter',
+    'train_filter',
+    'test_filter',
+    'validation_filter',
     'CorpusLoader',
     'PrefixExtractor',
     'extract_prefix',
