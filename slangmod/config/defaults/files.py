@@ -11,6 +11,7 @@ class Files(JsonObject):
     sep: str = '-'
     train: str = 'train'
     test: str = 'test'
+    column: str = 'text'
     validation: str = 'validation'
     wiki40b: resolve = '/home/georg/Projects/slangmod/data/wiki40b'
     gutenberg: resolve = '/home/georg/Projects/slangmod/data/gutenberg'

@@ -10,7 +10,7 @@ from .log_messages import log_total_number_of_files
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 read_parquet = ParquetReader()
-select_column = ColumnSelector('text')
+select_column = ColumnSelector(config.files.column)
 loader = Pipe[[str], Series](read_parquet, select_column)
 load_corpus = CorpusLoader(loader)
 

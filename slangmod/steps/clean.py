@@ -22,7 +22,7 @@ TARGET = config.corpus + '/{}' + config.files.sep + '{}.' + config.files.suffix
 
 read_parquet = ParquetReader()
 write_parquet = ParquetWriter(TARGET, create=True)
-select_column = ColumnSelector('text')
+select_column = ColumnSelector(config.files.column)
 
 wiki40b_processor = Pipe[[str], str](
     replace_article,

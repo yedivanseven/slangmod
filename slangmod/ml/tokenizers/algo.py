@@ -39,9 +39,6 @@ class Algo:
         cls = self.tokenizer.model.__class__.__name__
         return f'{cls}(...)'
 
-    def __getattr__(self, attr: str) -> Any:
-        return getattr(self.tokenizer, attr)
-
     @property
     def special(self) -> list[AddedToken]:
         return [self.pad, self.unk, *self.extra, self.eos]
@@ -68,6 +65,9 @@ class Algo:
     def train(self, docs: Iterable[str]) -> Self:
         self.tokenizer.train_from_iterator(docs, self.trainer)
         return self
+
+    def save(self, path: str, pretty: bool = True) -> None:
+        self.tokenizer.save(path, pretty)
 
     def __call__(
             self,

@@ -21,9 +21,9 @@ class Main(JsonObject):
     version = VERSION
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     workdir: resolve = '/home/georg/Projects/slangmod/data'
-    size: Maybe[str](Lower()) = None
+    size: Maybe[str](Lower()) = 'm'
     toml: Maybe[str](resolve) = None
-    name: Maybe[str](Lower()) = None
+    name: Maybe[str](Lower()) = 'm'
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()
@@ -56,6 +56,10 @@ class Main(JsonObject):
     @property
     def corpus(self) -> str:
         return str((Path(self.workdir) / 'corpus').resolve())
+
+    @property
+    def encodings(self) -> str:
+        return str((Path(self.folder) / 'encodings').resolve())
 
     @property
     def tokenizer_file(self) -> str:

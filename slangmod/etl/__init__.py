@@ -3,6 +3,7 @@ from .encoding import EncodingEnforcer, enforce_encoding
 from .splitter import CorpusSplitter, split_corpus
 from .folder import SequenceFolder, fold_train, fold_test
 from .cleaner import CorpusCleaner
+from .frame import ToFrame, to_frame
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -21,6 +22,8 @@ __all__ = [
     'EncodingEnforcer',
     'enforce_encoding',
     'CorpusCleaner',
+    'ToFrame',
+    'to_frame',
     'CorpusSplitter',
     'split_corpus',
     'SequenceFolder',

@@ -6,7 +6,8 @@ from .corpus import (
     discover_corpus,
     discover_wiki40b,
     discover_gutenberg,
-    extract_prefix
+    extract_prefix,
+    extract_file_name
 )
 from .clients import ConsoleClient, console_client
 from .tokenizer import (
@@ -25,6 +26,7 @@ __all__ = [
     'CorpusLoader',
     'PrefixExtractor',
     'extract_prefix',
+    'extract_file_name',
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',

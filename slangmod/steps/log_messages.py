@@ -1,4 +1,9 @@
+from pathlib import Path
 from ..ml import TrainData, TestData
+
+
+def log_encode_file(file: str) -> str:
+    return f'Encoding "{Path(file).name}".'
 
 
 def log_total_number_of_files(files: list[str]) -> str:

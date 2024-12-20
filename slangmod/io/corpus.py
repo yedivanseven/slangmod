@@ -14,7 +14,8 @@ __all__ = [
     'discover_corpus',
     'discover_wiki40b',
     'discover_gutenberg',
-    'extract_prefix'
+    'extract_prefix',
+    'extract_file_name'
 ]
 
 
@@ -78,7 +79,7 @@ class PrefixExtractor(ArgRepr):
         self.sep = sep.strip()
         super().__init__(self.sep)
 
-    def __call__(self, file: str | Path) -> str:
+    def __call__(self, file: str) -> str:
         stem = Path(file).stem
         prefix = stem.split(self.sep)[0]
         if prefix != stem:
@@ -95,6 +96,10 @@ class CorpusLoader(ArgRepr):
 
     def __call__(self, files: list[str]) -> chain[str]:
         return chain.from_iterable(map(self.reader, files))
+
+
+def extract_file_name(file: str) -> str:
+    return Path(file).name
 
 
 discover_wiki40b = CorpusDiscovery(
