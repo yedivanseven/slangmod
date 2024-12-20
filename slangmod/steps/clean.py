@@ -1,8 +1,9 @@
+from pandas import DataFrame
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.pd import ParquetReader, ParquetWriter, ColumnSelector
-from swak.funcflow import Pipe, Map, Sum, Fork
+from swak.funcflow import Pipe, Map, Sum, Fork, Route
 from ..config import config
-from ..io import discover_wiki40b, discover_gutenberg
+from ..io import discover_wiki40b, discover_gutenberg, extract_prefix
 from ..etl import (
     CorpusCleaner,
     replace_article,
@@ -17,7 +18,7 @@ from ..etl import (
 from .log_messages import log_total_number_of_files
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
-TARGET = config.corpus +'/{}.parquet'
+TARGET = config.corpus + '/{}' + config.files.sep + '{}.' + config.files.suffix
 
 read_parquet = ParquetReader()
 write_parquet = ParquetWriter(TARGET, create=True)
@@ -35,10 +36,15 @@ wiki40b_processor = Pipe[[str], str](
 )
 process_wiki40b_docs = CorpusCleaner(wiki40b_processor, 'Documents')
 process_wiki40b_file = Pipe[[str], tuple[()]](
-    read_parquet,
-    select_column,
-    process_wiki40b_docs,
-    write_parquet
+    Fork[[str], tuple[str, DataFrame, str]](
+        extract_prefix,
+        Pipe[[str], tuple[()]](
+            read_parquet,
+        select_column,
+            process_wiki40b_docs,
+        )
+    ),
+    Route[[str, DataFrame, str], tuple[()]]([(1, 0, 2)], write_parquet)
 )
 process_wiki40b_corpus = Map[[str], tuple[()], list](process_wiki40b_file)
 clean_wiki40b = Pipe[[tuple[()]], tuple[()]](
@@ -59,10 +65,15 @@ gutenberg_processor = Pipe[[str], str](
 )
 process_gutenberg_docs = CorpusCleaner(gutenberg_processor, 'Documents')
 process_gutenberg_file = Pipe[[str], tuple[()]](
-    read_parquet,
-    select_column,
-    process_gutenberg_docs,
-    write_parquet
+    Fork[[str], tuple[str, DataFrame, str]](
+        extract_prefix,
+        Pipe[[str], tuple[()]](
+            read_parquet,
+        select_column,
+            process_gutenberg_docs,
+        )
+    ),
+    Route[[str, DataFrame, str], tuple[()]]([(1, 0, 2)], write_parquet)
 )
 process_gutenberg_corpus = Map[[str], tuple[()], list](process_gutenberg_file)
 clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
