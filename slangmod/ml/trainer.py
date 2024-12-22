@@ -1,4 +1,3 @@
-import torch.nn as ptn
 import torch.optim as pto
 import torch.optim.lr_scheduler as pts
 from swak.funcflow import Curry

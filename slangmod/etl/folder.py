@@ -34,8 +34,7 @@ class SequenceFolder(ArgRepr):
     def padding(self, length: int) -> int:
         if self.stride > 0:
             return self.seq_len + self.n(length) * self.stride - length
-        else:
-            return self.n(length) * self.seq_len + 1 - length
+        return self.n(length) * self.seq_len + 1 - length
 
     def pad(self, sequence: Tensor) -> Tensor:
         length = sequence.size(0)

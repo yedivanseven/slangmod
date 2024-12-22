@@ -21,7 +21,7 @@ class TestData(TestDataBase):
         self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
-        self.seqs = self.pin(seqs.contiguous())
+        self.seqs = seqs
         self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
@@ -90,7 +90,7 @@ class TrainData(TrainDataBase):
         self.jitter = min(max(1, jitter), stride)
         self.device = pt.device(device)
         self.dtype = dtype
-        self.seqs = self.pin(seqs.contiguous())
+        self.seqs = seqs
         self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.__start = self.start
         self.mask = ptn.Transformer.generate_square_subsequent_mask(

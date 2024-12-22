@@ -3,17 +3,15 @@ from .tokenize import tokenize
 from .train import train
 from .chat import chat
 from .clean import clean
-
+from .encode import encode
 
 __all__ = [
     'dry_run',
     'clean',
     'tokenize',
+    'encode',
     'train',
     'chat'
 ]
 
-# ToDo: Make separate "encode" step to save lists of token ids
-# ToDo: rewrite train step to read token ids from file
 # ToDo: Make a "resume" step somehow!
-from .encode import encode

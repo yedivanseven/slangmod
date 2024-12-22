@@ -64,7 +64,7 @@ class CorpusDiscovery(ArgRepr):
             for item in path.iterdir()
             if item.is_file()
                 and item.suffix == f'.{self.suffix}'
-                and item.stem.split(self.sep)[0] in self.prefixes
+                and any(prefix in item.name for prefix in self.prefixes)
         ] if path.exists() and path.is_dir() else []
         if corpus:
             return corpus
@@ -100,7 +100,7 @@ class CorpusFilter(ArgRepr):
         super().__init__(self.prefix)
 
     def __call__(self, file: str) -> bool:
-        return Path(file).name.startswith(self.prefix)
+        return self.prefix in Path(file).name
 
 
 class CorpusLoader(ArgRepr):

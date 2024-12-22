@@ -1,4 +1,4 @@
-from typing import Self, Any
+from typing import Self
 from collections.abc import Iterable
 from tokenizers import Tokenizer
 from tokenizers.normalizers import Normalizer

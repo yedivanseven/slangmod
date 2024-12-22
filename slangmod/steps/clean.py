@@ -1,7 +1,7 @@
 from pandas import DataFrame
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.pd import ParquetReader, ParquetWriter, ColumnSelector
-from swak.funcflow import Pipe, Map, Sum, Fork, Route
+from swak.funcflow import Pipe, Map, Sum, Fork
 from ..config import config
 from ..io import discover_wiki40b, discover_gutenberg, extract_prefix
 from ..etl import (
@@ -13,7 +13,8 @@ from ..etl import (
     replace_seconds,
     replace_single_quote,
     replace_double_quote,
-    enforce_encoding
+    enforce_encoding,
+    trim_memory
 )
 from .log_messages import log_total_number_of_files
 
@@ -37,14 +38,15 @@ wiki40b_processor = Pipe[[str], str](
 process_wiki40b_docs = CorpusCleaner(wiki40b_processor, 'Documents')
 process_wiki40b_file = Pipe[[str], tuple[()]](
     Fork[[str], tuple[str, DataFrame, str]](
-        extract_prefix,
         Pipe[[str], tuple[()]](
             read_parquet,
         select_column,
             process_wiki40b_docs,
-        )
+        ),
+        extract_prefix
     ),
-    Route[[str, DataFrame, str], tuple[()]]([(1, 0, 2)], write_parquet)
+    write_parquet,
+    trim_memory
 )
 process_wiki40b_corpus = Map[[str], tuple[()], list](process_wiki40b_file)
 clean_wiki40b = Pipe[[tuple[()]], tuple[()]](
@@ -66,14 +68,15 @@ gutenberg_processor = Pipe[[str], str](
 process_gutenberg_docs = CorpusCleaner(gutenberg_processor, 'Documents')
 process_gutenberg_file = Pipe[[str], tuple[()]](
     Fork[[str], tuple[str, DataFrame, str]](
-        extract_prefix,
         Pipe[[str], tuple[()]](
             read_parquet,
         select_column,
             process_gutenberg_docs,
-        )
+        ),
+        extract_prefix,
     ),
-    Route[[str, DataFrame, str], tuple[()]]([(1, 0, 2)], write_parquet)
+    write_parquet,
+    trim_memory
 )
 process_gutenberg_corpus = Map[[str], tuple[()], list](process_gutenberg_file)
 clean_gutenberg = Pipe[[tuple[()]], tuple[()]](

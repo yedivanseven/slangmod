@@ -3,6 +3,7 @@ from .encoding import EncodingEnforcer, enforce_encoding
 from .folder import SequenceFolder, fold_train, fold_test
 from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame
+from .memory import MemoryTrimmer, trim_memory
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -23,6 +24,8 @@ __all__ = [
     'CorpusCleaner',
     'ToFrame',
     'to_frame',
+    'MemoryTrimmer',
+    'trim_memory',
     'SequenceFolder',
     'fold_train',
     'fold_test',

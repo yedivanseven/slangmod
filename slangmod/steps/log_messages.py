@@ -6,6 +6,10 @@ def log_encode_file(file: str) -> str:
     return f'Encoding "{Path(file).name}".'
 
 
+def log_process_file(file: str) -> str:
+    return f'Processing "{Path(file).name}".'
+
+
 def log_total_number_of_files(files: list[str]) -> str:
     return f'Found {len(files)} files.'
 
