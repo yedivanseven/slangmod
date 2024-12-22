@@ -45,14 +45,12 @@ read_file = Pipe[[str], list[Tensor]](
     read_parquet,
     select_column,
     LOGGER.debug(log_total_number_of_docs),
-    LOGGER.debug(log_total_number_of_tokens),
-    Map(Create(pt.long, 'cpu'), list),
-    trim_memory
 )
 cat_sequences = Pipe[[list[Tensor]], Tensor](
     trim_memory,
     Cat(dim=0),
-    trim_memory
+    trim_memory,
+    LOGGER.debug('... done!')
 )
 
 process_train_file = Pipe[[str], Tensor](
@@ -61,11 +59,23 @@ LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[Tensor], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
+    LOGGER.debug(log_total_number_of_tokens),
+    Map(Create(pt.long, 'cpu'), list),
+    trim_memory,
+    LOGGER.debug('Folding sequences ...'),
     Map(fold_train),
     cat_sequences
 )
 process_test_file = Pipe[[str], Tensor](
     read_file,
+LOGGER.debug('Dropping sequences shorter than 2.'),
+    Filter[list[Tensor], list](lambda seq: len(seq) > 1),
+    LOGGER.debug(log_remaining_number_of_sequences),
+    trim_memory,
+    LOGGER.debug(log_total_number_of_tokens),
+    Map(Create(pt.long, 'cpu'), list),
+    trim_memory,
+    LOGGER.debug('Folding sequences.'),
     Map(fold_test),
     cat_sequences
 )

@@ -76,6 +76,7 @@ class Model(Module):
             padding_mask: Tensor | None,
             is_causal: bool
     ) -> Tensors1T:
+        print(src.shape)
         embedded = self.drop(self.pos_enc(self.embed(src)))
         transformed = self.transform(embedded, mask, padding_mask, is_causal)
         return self.finalize(transformed).transpose(-1, -2).contiguous(),
