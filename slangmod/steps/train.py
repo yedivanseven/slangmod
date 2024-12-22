@@ -75,7 +75,7 @@ LOGGER.debug('Dropping sequences shorter than 2.'),
     LOGGER.debug(log_total_number_of_tokens),
     Map(Create(pt.long, 'cpu'), list),
     trim_memory,
-    LOGGER.debug('Folding sequences.'),
+    LOGGER.debug('Folding sequences ...'),
     Map(fold_test),
     cat_sequences
 )
