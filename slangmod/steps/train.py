@@ -1,4 +1,5 @@
 import torch as pt
+from numpy import ndarray
 from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pd import ParquetReader, ColumnSelector
 from swak.pt.create import Create
@@ -40,10 +41,11 @@ filter_train = Filter[str, list](train_filter)
 filter_test = Filter[str, list](test_filter)
 filter_validation = Filter[str, list](validation_filter)
 
-read_file = Pipe[[str], list[Tensor]](
+read_file = Pipe[[str], list[ndarray]](
     LOGGER.debug(log_process_file),
     read_parquet,
     select_column,
+    list,
     LOGGER.debug(log_total_number_of_docs),
 )
 cat_sequences = Pipe[[list[Tensor]], Tensor](
@@ -56,32 +58,32 @@ cat_sequences = Pipe[[list[Tensor]], Tensor](
 process_train_file = Pipe[[str], Tensor](
     read_file,
 LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
-    Filter[list[Tensor], list](lambda seq: len(seq) > config.data.jitter),
+    Filter[list[ndarray], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
     LOGGER.debug(log_total_number_of_tokens),
-    Map(Create(pt.long, 'cpu'), list),
+    Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences ...'),
-    Map(fold_train),
+    Map[[Tensor], Tensor, list](fold_train),
     cat_sequences
 )
 process_test_file = Pipe[[str], Tensor](
     read_file,
 LOGGER.debug('Dropping sequences shorter than 2.'),
-    Filter[list[Tensor], list](lambda seq: len(seq) > 1),
+    Filter[list[ndarray], list](lambda seq: len(seq) > 1),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
     LOGGER.debug(log_total_number_of_tokens),
-    Map(Create(pt.long, 'cpu'), list),
+    Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences ...'),
-    Map(fold_test),
+    Map[[Tensor], Tensor, list](fold_test),
     cat_sequences
 )
 
 process_train = Pipe[[list[str]], TrainData](
-    Map(process_train_file),
+    Map[[str], Tensor, list](process_train_file),
     trim_memory,
     Cat(dim=0),
     trim_memory,
@@ -89,7 +91,7 @@ process_train = Pipe[[list[str]], TrainData](
     trim_memory
 )
 process_test = Pipe[[list[str]], TestData](
-    Map(process_test_file),
+    Map[[str], Tensor, list](process_test_file),
     trim_memory,
     Cat(dim=0),
     trim_memory,
@@ -131,6 +133,7 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
 train_model = Pipe[[Model, TrainData, TestData], Model](
     LOGGER.info(f'Training model on {config.data.device.upper()} with a target'
                 f' learning rate of {config.train.learning_rate:7.5f}'),
+    trim_memory,
     trainer.train,
     LOGGER.debug(f'Saving model to "{config.model_file}".'),
     Fork[[Model], Model](
