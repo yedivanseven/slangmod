@@ -81,7 +81,6 @@ class TrainData(TrainDataBase):
         self.device = pt.device(device)
         self.dtype = dtype
         self.seqs = seqs
-        print(seqs.is_contiguous())
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,

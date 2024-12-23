@@ -5,6 +5,7 @@ from swak.pd import ParquetReader, ColumnSelector
 from ..config import config
 from ..io import save_config, save_tokenizer, discover_corpus, CorpusLoader
 from ..ml import tokenizer
+from ..etl import trim_memory
 from .log_messages import log_total_number_of_files
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
@@ -26,5 +27,6 @@ tokenize = Pipe[[tuple[()]], tuple[()]](
     tokenizer.train,
     LOGGER.debug(f'Saving trained tokenizer to "{config.tokenizer_file}".'),
     save_tokenizer,
+    trim_memory,
     LOGGER.info('Finished step "tokenize".')
 )
