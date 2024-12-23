@@ -41,8 +41,7 @@ encode_file = Pipe[[str], tuple[()]](
         ),
         extract_file_name
     ),
-    write_parquet,
-    trim_memory
+    write_parquet
 )
 
 encode = Pipe[[tuple[()]], tuple[()]](

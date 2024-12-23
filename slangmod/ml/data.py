@@ -14,15 +14,12 @@ class TestData(TestDataBase):
     def __init__(
             self,
             seqs: Tensor,
-            shuffle: bool,
             device: Device | LiteralDevice,
             dtype: Dtype
     ) -> None:
-        self.shuffle = shuffle
         self.device = pt.device(device)
         self.dtype = dtype
         self.seqs = seqs
-        self.__jumbled = self.jumble(self.n, device=seqs.device)
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,
@@ -41,14 +38,10 @@ class TestData(TestDataBase):
     def seq_len(self) -> int:
         return self.seqs.size(1) - 1
 
-    @property
-    def jumble(self) -> Callable[..., Tensor]:
-        return pt.randperm if self.shuffle else pt.arange
-
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        seqs = self.seqs[self.__jumbled[:n]]
+        seqs = self.seqs[:n]
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -88,8 +81,7 @@ class TrainData(TrainDataBase):
         self.device = pt.device(device)
         self.dtype = dtype
         self.seqs = seqs
-        self.__jumbled = self.jumble(self.n, device=seqs.device)
-        self.__start = self.start
+        print(seqs.is_contiguous())
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,
@@ -124,10 +116,7 @@ class TrainData(TrainDataBase):
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        seqs = self.seqs[
-           self.__jumbled[:n],
-           self.__start:self.__start + self.seq_len + 1
-        ]
+        seqs = self.seqs[:n, :self.seq_len + 1]
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -155,10 +144,10 @@ class TrainData(TrainDataBase):
             step_freq: int = 1,
             epoch: int = 0
     ) -> tuple[int, Batches]:
-        jumbled = self.jumble(self.n, device=self.seqs.device)
         start = self.start
-        seqs = self.seqs[jumbled, start:start + self.seq_len + 1]
+        seqs = self.seqs[:, start:start + self.seq_len + 1]
         n_batches = self.adjust_batches_for(batch_size, step_freq)
+        batches = self.jumble(n_batches, device=self.seqs.device)
         return n_batches, iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -177,7 +166,7 @@ class TrainData(TrainDataBase):
                     non_blocking=True
                 )
             )
-            for batch in range(n_batches)
+            for batch in batches
         )
 
 
@@ -191,7 +180,6 @@ make_train_data = Curry[TrainData](
 )
 make_test_data = Curry[TestData](
     TestData,
-    shuffle=config.data.shuffle,
     device=config.data.device,
     dtype=config.data.dtype
 )

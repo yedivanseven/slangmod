@@ -51,8 +51,7 @@ read_file = Pipe[[str], list[ndarray]](
 cat_sequences = Pipe[[list[Tensor]], Tensor](
     trim_memory,
     Cat(dim=0),
-    trim_memory,
-    LOGGER.debug('... done!')
+    trim_memory
 )
 
 process_train_file = Pipe[[str], Tensor](
@@ -64,7 +63,7 @@ LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     LOGGER.debug(log_total_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
-    LOGGER.debug('Folding sequences ...'),
+    LOGGER.debug('Folding sequences.'),
     Map[[Tensor], Tensor, list](fold_train),
     cat_sequences
 )
@@ -77,7 +76,7 @@ LOGGER.debug('Dropping sequences shorter than 2.'),
     LOGGER.debug(log_total_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
-    LOGGER.debug('Folding sequences ...'),
+    LOGGER.debug('Folding sequences.'),
     Map[[Tensor], Tensor, list](fold_test),
     cat_sequences
 )

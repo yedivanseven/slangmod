@@ -30,7 +30,6 @@ class CorpusDiscovery(ArgRepr):
             self,
             path: str = '',
             suffix: str = 'parquet',
-            sep: str = '-',
             train: str = 'train',
             test: str = 'test',
             validation: str = 'validation',
@@ -38,7 +37,6 @@ class CorpusDiscovery(ArgRepr):
     ) -> None:
         self.path = str(path).strip()
         self.suffix = suffix.strip(' .')
-        self.sep = sep.strip()
         self.train = train.strip()
         self.test = test.strip()
         self.validation = validation.strip()
@@ -46,7 +44,6 @@ class CorpusDiscovery(ArgRepr):
         super().__init__(
             self.path,
             self.suffix,
-            self.sep,
             self.train,
             self.test,
             self.validation,
@@ -118,20 +115,18 @@ def extract_file_name(file: str) -> str:
 
 
 discover_wiki40b = CorpusDiscovery(
-    config.files.wiki40b,
-    config.files.suffix,
-    config.files.sep,
-    config.files.train,
-    config.files.test,
-    config.files.validation
+    path=config.files.wiki40b,
+    suffix=config.files.suffix,
+    train=config.files.train,
+    test=config.files.test,
+    validation=config.files.validation
 )
 discover_gutenberg = CorpusDiscovery(
-    config.files.gutenberg,
-    config.files.suffix,
-    config.files.sep,
-    config.files.train,
-    config.files.test,
-    config.files.validation
+    path=config.files.gutenberg,
+    suffix=config.files.suffix,
+    train=config.files.train,
+    test=config.files.test,
+    validation=config.files.validation
 )
 discover_corpus = CorpusDiscovery(config.corpus)
 discover_encodings = CorpusDiscovery(config.encodings)
