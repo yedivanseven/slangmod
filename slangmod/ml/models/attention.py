@@ -6,7 +6,7 @@ import torch.nn.functional as ptnf
 from swak.pt.types import Device, Dtype, Tensor, Module
 from swak.pt.misc import Identity
 from swak.pt.blocks import Block
-from ...config import config, LiteralDevice
+from ...config import config, LiteralDevice, Devices
 
 __all__ = [
     'Attention',
@@ -24,7 +24,7 @@ class Attention(Block):
             dropout: float = 0.1,
             src_pos_enc: Module = Identity(),
             qk_pos_enc: Module = Identity(),
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
         super().__init__()

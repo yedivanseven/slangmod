@@ -21,9 +21,9 @@ class Main(JsonObject):
     version = VERSION
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     workdir: resolve = '/home/georg/Projects/slangmod/data'
-    size: Maybe[str](Lower()) = 'l'
+    size: Maybe[str](Lower()) = 'xxs'
     toml: Maybe[str](resolve) = None
-    name: Maybe[str](Lower()) = 'l'
+    name: Maybe[str](Lower()) = 'xxs-32'
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()

@@ -1,5 +1,4 @@
 from typing import Any
-from collections.abc import Callable
 import torch as pt
 import torch.nn.functional as ptnf
 from swak.pt.types import Module, Tensor
@@ -13,20 +12,17 @@ class BeamSearch(Generator):
             self,
             tokenizer: Algo,
             model: Module,
-            style: Callable[[str], str],
             max_tokens: int = 1024,
-            width: int = 10,
+            width: int = 8,
             boost: float = 0.8,
             **_: Any
     ) -> None:
-        super().__init__(tokenizer, model, style, max_tokens)
-        self.width = width
+        super().__init__(tokenizer, model, max_tokens, width)
         self.boost = boost
 
     def __repr__(self) -> str:
-        prefix = super().__repr__()[:-1]
-        suffix = f', width={self.width}, boost={self.boost})'
-        return prefix + suffix
+        extras = f', width={self.width}, boost={self.boost})'
+        return super().__repr__()[:-1] + extras
 
     def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
 

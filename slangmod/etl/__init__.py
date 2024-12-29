@@ -4,6 +4,7 @@ from .folder import SequenceFolder, fold_train, fold_test
 from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame
 from .memory import MemoryTrimmer, trim_memory
+from .shuffle import Shuffle
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -29,6 +30,7 @@ __all__ = [
     'SequenceFolder',
     'fold_train',
     'fold_test',
+    'Shuffle',
     'RegexReplacer',
     'replace_article',
     'replace_section',

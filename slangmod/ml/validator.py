@@ -1,3 +1,5 @@
+import math
+from tqdm import tqdm
 import torch as pt
 from swak.misc import ArgRepr
 from swak.pt.types import Module, Tensor
@@ -11,11 +13,11 @@ class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:
         super().__init__(loss, batch_size)
-        self.loss = loss
+        self.loss = loss.eval()
         self.batch_size = batch_size
 
     @staticmethod
-    def top(k: int, logits: Tensor, targets: Tensor) -> float:
+    def top(k: int, logits: Tensor, targets: Tensor) -> Tensor:
         matches = logits.topk(k, dim=1).indices == targets.unsqueeze(1)
         return matches.sum(dim=(0, 1)) / targets.size(0)
 
@@ -42,7 +44,6 @@ class Validator(ArgRepr):
         # Return the perplexity averaged over all sequences in the batch.
         return mean_sequence_losses.exp().mean(dim=0).item()
 
-
     def __call__(self, model: Module, data: TestData) -> Validation:
         n = 0
         top_1 = 0
@@ -50,16 +51,20 @@ class Validator(ArgRepr):
         top_5 = 0
         val_loss = 0.0
         perplexity = 0.0
+        n_batches = math.ceil(data.n / self.batch_size)
 
         model.eval()
         with pt.no_grad():
-            for features, targets in data.sample(self.batch_size):
+            batches = data.sample(self.batch_size)
+            progress = tqdm(batches, 'Validate', n_batches, False)
+            for features, targets in progress:
                 batch_n = targets.size(0)
 
-                (logits,) = model(*features)
+                logits, *_ = model(*features)
 
                 batch_loss = self.loss(logits, targets).item()
                 val_loss += batch_n * (batch_loss - val_loss) / (n + batch_n)
+                progress.set_postfix(loss=f'{batch_loss:4.2f}')
 
                 batch_px = self.perplexity(logits, targets)
                 perplexity += batch_n * (batch_px - perplexity) / (n + batch_n)

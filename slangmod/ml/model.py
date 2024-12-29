@@ -3,7 +3,7 @@ import torch.nn as ptn
 from swak.pt.misc import Compile
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
 from .models import positions
-from ..config import config, LiteralDevice
+from ..config import config, LiteralDevice, Devices
 
 
 class Model(Module):
@@ -19,7 +19,8 @@ class Model(Module):
             scale_grad_by_freq: bool,
             dropout: float,
             bias: bool,
-            device: Device | LiteralDevice,
+            norm_first: bool,
+            device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
         super().__init__()
@@ -32,6 +33,7 @@ class Model(Module):
         self.scale_grad_by_freq = scale_grad_by_freq
         self.dropout = dropout
         self.bias = bias
+        self.norm_first = norm_first
         self.device = pt.device(device)
         self.dtype = dtype
         self.embed = ptn.Embedding(
@@ -50,14 +52,23 @@ class Model(Module):
             dropout=dropout,
             activation='gelu',
             batch_first=True,
-            norm_first=False,
+            norm_first=norm_first,
             bias=bias,
             device=device,
             dtype=dtype
         )
+        norm = ptn.LayerNorm(
+            self.mod_dim,
+            eps=1e-5,
+            elementwise_affine=True,
+            bias=self.bias,
+            device=self.device,
+            dtype=self.dtype
+        ) if self.norm_first else None
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
             num_layers=n_layers,
+            norm=norm,
             enable_nested_tensor=False,
             mask_check=False
         )
@@ -90,14 +101,23 @@ class Model(Module):
             dim_feedforward=self.feedforward_factor * self.mod_dim,
             dropout=self.dropout,
             batch_first=True,
-            norm_first=False,
+            norm_first=self.norm_first,
             bias=self.bias,
             device=self.device,
             dtype=self.dtype
         )
+        norm = ptn.LayerNorm(
+            self.mod_dim,
+            eps=1e-5,
+            elementwise_affine=True,
+            bias=self.bias,
+            device=self.device,
+            dtype=self.dtype
+        ) if self.norm_first else None
         self.transform = ptn.TransformerEncoder(
             encoder_layer=self.encoder,
             num_layers=self.n_layers,
+            norm=norm,
             enable_nested_tensor=False,
             mask_check=False
         )
@@ -113,6 +133,7 @@ model = Model(
     scale_grad_by_freq=config.model.scale_grad_by_freq,
     dropout=config.model.dropout,
     bias=config.model.bias,
+    norm_first=config.model.norm_first,
     device=config.data.device,
     dtype=config.data.dtype
 )

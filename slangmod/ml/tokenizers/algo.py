@@ -1,12 +1,17 @@
 from typing import Self
-from collections.abc import Iterable
-from tokenizers import Tokenizer
+from collections.abc import Iterable, Sequence
 from tokenizers.normalizers import Normalizer
 from tokenizers.pre_tokenizers import PreTokenizer
 from tokenizers.processors import PostProcessor
 from tokenizers.decoders import Decoder
 from tokenizers.tokenizers import AddedToken
 from tokenizers.trainers import Trainer
+from tokenizers import (
+    Tokenizer,
+    Encoding,
+    TextInputSequence,
+    PreTokenizedInputSequence
+)
 
 
 __all__ = ['Algo']
@@ -68,6 +73,27 @@ class Algo:
 
     def save(self, path: str, pretty: bool = True) -> None:
         self.tokenizer.save(path, pretty)
+
+    def encode(
+            self,
+            sequence: TextInputSequence | PreTokenizedInputSequence,
+            pair: TextInputSequence | PreTokenizedInputSequence | None = None,
+            is_pretokenized: bool = False,
+            add_special_tokens: bool = True
+    ) -> Encoding:
+        return self.tokenizer.encode(
+            sequence,
+            pair,
+            is_pretokenized,
+            add_special_tokens
+        )
+
+    def decode(
+            self,
+            ids: Sequence[int],
+            skip_special_tokens: bool = True
+    ) -> str:
+        return self.tokenizer.decode(ids, skip_special_tokens)
 
     def __call__(
             self,

@@ -2,7 +2,7 @@ from typing import Any
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Tensor, Dtype, Device
-from ....config import LiteralDevice
+from ....config import LiteralDevice, Devices
 
 
 class Learnable(Module):
@@ -11,7 +11,7 @@ class Learnable(Module):
             self,
             mod_dim: int,
             context: int,
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
             **__: Any
     ) -> None:

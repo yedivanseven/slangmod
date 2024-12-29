@@ -2,7 +2,7 @@ from typing import Any
 import math
 import torch as pt
 from swak.pt.types import Module, Tensor, Dtype, Device
-from ....config import LiteralDevice
+from ....config import LiteralDevice, Devices
 
 
 class Sinusoidal(Module):
@@ -11,7 +11,7 @@ class Sinusoidal(Module):
             self,
             mod_dim: int,
             context: int,
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
             **_: Any
     ) -> None:

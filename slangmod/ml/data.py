@@ -5,7 +5,7 @@ import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
 from swak.pt.train import TestDataBase, TrainDataBase
 from swak.funcflow import Curry
-from ..config import config, LiteralDevice
+from ..config import config, LiteralDevice, Devices
 from .types import Batches
 
 
@@ -14,7 +14,7 @@ class TestData(TestDataBase):
     def __init__(
             self,
             seqs: Tensor,
-            device: Device | LiteralDevice,
+            device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.device = pt.device(device)
@@ -72,7 +72,7 @@ class TrainData(TrainDataBase):
             stride: int,
             shuffle: bool,
             jitter: int,
-            device: Device | LiteralDevice,
+            device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.stride = stride

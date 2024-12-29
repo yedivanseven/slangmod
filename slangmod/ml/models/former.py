@@ -4,7 +4,7 @@ from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
 from swak.pt.misc import Identity
 from .layer import Layer, vanilla_layer
 from .positions import positions
-from ...config import config, LiteralDevice
+from ...config import config, LiteralDevice, Devices
 
 __all__ = [
     'Former',
@@ -24,7 +24,7 @@ class Former(Module):
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
             normalize: bool = False,
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
         super().__init__()

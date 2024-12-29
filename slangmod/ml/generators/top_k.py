@@ -1,5 +1,4 @@
 from typing import Any
-from collections.abc import Callable
 import torch.distributions as ptd
 from swak.pt.types import Module, Tensor
 from ..tokenizers import Algo
@@ -12,13 +11,12 @@ class TopK(NextToken):
             self,
             tokenizer: Algo,
             model: Module,
-            style: Callable[[str], str],
             max_tokens: int = 1024,
             k: float | None = None,
             temperature: float = 1.0,
             **_: Any
     ) -> None:
-        super().__init__(tokenizer, model, style, max_tokens)
+        super().__init__(tokenizer, model, max_tokens, 1)
         if k is None:
             self.k = self.max_k
         elif k < 1.0:
@@ -28,7 +26,8 @@ class TopK(NextToken):
         self.temperature = temperature
 
     def __repr__(self) -> str:
-        return super().__repr__()[:-1] + f', k={self.k})'
+        extras = f', k={self.k}, temperature={self.temperature})'
+        return super().__repr__()[:-1] + extras
 
     @property
     def max_k(self) -> int:

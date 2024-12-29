@@ -19,6 +19,7 @@ class Devices(StrEnum):
     CPU = 'cpu'
     CUDA = 'cuda'
 
+
 class Tokenizers(StrEnum):
     BPE = 'bpe'
     WORDPIECE = 'wordpiece'

@@ -3,7 +3,7 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor
 from swak.pt.blocks import Block
-from ...config import config, LiteralDevice
+from ...config import config, LiteralDevice, Devices
 from .attention import Attention, vanilla_attention
 from .feedforward import vanilla_feedforward
 
@@ -24,7 +24,7 @@ class Layer(Block):
             dropout: float = 0.1,
             norm_first: bool = True,
             eps: float = 1e-5,
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
             **_: Any
     ) -> None:

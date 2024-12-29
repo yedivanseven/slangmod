@@ -2,7 +2,7 @@ from typing import Any
 import math
 import torch as pt
 from swak.pt.types import Module, Tensor, Dtype, Device
-from slangmod.config import LiteralDevice
+from slangmod.config import LiteralDevice, Devices
 
 
 class Rotary(Module):
@@ -12,7 +12,7 @@ class Rotary(Module):
             mod_dim: int,
             n_heads: int,
             context: int,
-            device: Device | LiteralDevice = 'cpu',
+            device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
             **__: Any
     ) -> None:

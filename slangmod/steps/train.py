@@ -1,7 +1,6 @@
 import torch as pt
 from numpy import ndarray
 from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
-from swak.pd import ParquetReader, ColumnSelector
 from swak.pt.create import Create
 from swak.pt.types import Tensor
 from swak.pt.io import ModelSaver
@@ -18,6 +17,7 @@ from ..ml import validate
 from ..io import (
     save_config,
     discover_encodings,
+    read_column,
     train_filter,
     test_filter,
     validation_filter
@@ -27,15 +27,17 @@ from .log_messages import (
     log_process_file,
     log_total_number_of_docs,
     log_remaining_number_of_sequences,
-    log_total_number_of_tokens,
+    log_number_of_tokens,
     log_data_sizes,
     log_validation_metrics
 )
 
+# ToDo: Use Shuffler!
+# ToDo: Try gradient scaler!
+# ToDo: Try upcasting logits to float32!
+# ToDo: Try autocast!
+# ToDo: In-place vs not in-place compile
 LOGGER = PassThroughStdOut(__name__, config.log_level)
-
-read_parquet = ParquetReader()
-select_column = ColumnSelector(config.files.column)
 
 filter_train = Filter[str, list](train_filter)
 filter_test = Filter[str, list](test_filter)
@@ -43,8 +45,7 @@ filter_validation = Filter[str, list](validation_filter)
 
 read_file = Pipe[[str], list[ndarray]](
     LOGGER.debug(log_process_file),
-    read_parquet,
-    select_column,
+    read_column,
     list,
     LOGGER.debug(log_total_number_of_docs),
 )
@@ -60,7 +61,7 @@ LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[ndarray], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
-    LOGGER.debug(log_total_number_of_tokens),
+    LOGGER.debug(log_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences.'),
@@ -73,7 +74,7 @@ LOGGER.debug('Dropping sequences shorter than 2.'),
     Filter[list[ndarray], list](lambda seq: len(seq) > 1),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
-    LOGGER.debug(log_total_number_of_tokens),
+    LOGGER.debug(log_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences.'),

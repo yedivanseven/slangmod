@@ -1,5 +1,4 @@
 from typing import Any
-from collections.abc import Callable
 from abc import ABC, abstractmethod
 from functools import cached_property
 import torch as pt
@@ -15,23 +14,32 @@ class Generator(ABC):
             self,
             tokenizer: Algo,
             model: Module,
-            style: Callable[[str], str],
             max_tokens: int = 1024,
+            width: int = 1,
             **_: Any
     ) -> None:
         self.tokenizer = tokenizer
         self.model = model
-        self.style = style
         self.max_tokens = max_tokens
-        # Initialize model buffers with a sequence of maximum length
-        src = pt.randint(0, self.vocab, [self.context], device=model.device)
-        mask = pt.zeros(self.context, dtype=model.dtype, device=model.device)
-        _ = self.model(src.unsqueeze(0), None, mask.unsqueeze(0), False)
+        self.width = width
+        # Initialize model buffers with batch of maximum sequence length
+        src = pt.randint(
+            0,
+            self.vocab,
+            [self.width, self.context],
+            device=model.device
+        )
+        mask = pt.zeros(
+            self.width,
+            self.context,
+            dtype=model.dtype,
+            device=model.device
+        )
+        _ = self.model(src, None, mask, False)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
-        template = '{}(tokenizer, model, {}, {})'
-        return template.format(cls, self.style, self.max_tokens)
+        return f'{cls}(tokenizer, model, {self.max_tokens})'
 
     @property
     def vocab(self) -> int:

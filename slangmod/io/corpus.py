@@ -5,19 +5,18 @@ from pathlib import Path
 from swak.misc import ArgRepr
 from swak.text import NotFound, LiteralNotFound
 from ..config import config
+from .misc import read_column
 
 __all__ = [
     'NotFound',
     'CorpusDiscovery',
     'CorpusFilter',
     'CorpusLoader',
-    'PrefixExtractor',
+    'load_corpus',
     'discover_corpus',
     'discover_wiki40b',
     'discover_gutenberg',
     'discover_encodings',
-    'extract_prefix',
-    'extract_file_name',
     'train_filter',
     'test_filter',
     'validation_filter'
@@ -75,21 +74,6 @@ class CorpusDiscovery(ArgRepr):
         return corpus
 
 
-class PrefixExtractor(ArgRepr):
-
-    def __init__(self, sep: str = '-') -> None:
-        self.sep = sep.strip()
-        super().__init__(self.sep)
-
-    def __call__(self, file: str) -> str:
-        stem = Path(file).stem
-        prefix = stem.split(self.sep)[0]
-        if prefix != stem:
-            return prefix
-        msg = 'File name "{}" does not contain any separators "{}".'
-        raise ValueError(msg.format(file, self.sep))
-
-
 class CorpusFilter(ArgRepr):
 
     def __init__(self, prefix: str) -> None:
@@ -110,10 +94,6 @@ class CorpusLoader(ArgRepr):
         return chain.from_iterable(map(self.reader, files))
 
 
-def extract_file_name(file: str) -> str:
-    return Path(file).name
-
-
 discover_wiki40b = CorpusDiscovery(
     path=config.files.wiki40b,
     suffix=config.files.suffix,
@@ -131,7 +111,7 @@ discover_gutenberg = CorpusDiscovery(
 discover_corpus = CorpusDiscovery(config.corpus)
 discover_encodings = CorpusDiscovery(config.encodings)
 
-extract_prefix = PrefixExtractor(config.files.sep)
+load_corpus = CorpusLoader(read_column)
 
 train_filter = CorpusFilter(config.files.train)
 test_filter = CorpusFilter(config.files.test)

@@ -11,9 +11,10 @@ class Train(JsonObject):
     learning_rate: Maybe[float](float) = 0.01
     max_epochs: int = 1024
     warmup: int = 4000
+    batch_step: bool = True
     optimizer: Lower() = Optimizers.ADMAW
     scaling: Lower() = Scaling.COSINE
     power: float = 0.5
     gamma: float = 0.95
-    cooldown: int = 32
-    patience: Maybe[int](int) = 10
+    cooldown: int = 60_000
+    patience: Maybe[int](int) = 2
