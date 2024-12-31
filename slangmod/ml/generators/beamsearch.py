@@ -26,7 +26,7 @@ class BeamSearch(Generator):
 
     def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
 
-        with pt.no_grad():
+        with pt.inference_mode():
             (out,) = self.model(src, None, mask, False)
         logits = out[0, self.eos_id + more:, -1].float()
         top_k = ptnf.log_softmax(logits, dim=-1).topk(self.width, dim=-1)
@@ -56,7 +56,7 @@ class BeamSearch(Generator):
             mask = pt.cat([mask, self.zero], dim=-1)[:, -self.context:]
             unk = mask.expand(n_remain, -1)
 
-            with pt.no_grad():
+            with pt.inference_mode():
                 (out,) = self.model(inp[:, -self.context:], None, unk, False)
             logits = out[:, self.eos_id + more:, -1].float()
             top_k = ptnf.log_softmax(logits, dim=-1).topk(self.width, dim=-1)

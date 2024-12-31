@@ -8,7 +8,7 @@ from swak.pt.misc import Cat
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
 from ..config import config
-from ..etl import fold_train, fold_test, trim_memory
+from ..etl import fold_train, fold_test, trim_memory, Shuffle
 from ..ml import TrainData, TestData
 from ..ml import make_train_data, make_test_data
 from ..ml import Model, compile_model
@@ -32,11 +32,6 @@ from .log_messages import (
     log_validation_metrics
 )
 
-# ToDo: Use Shuffler!
-# ToDo: Try gradient scaler!
-# ToDo: Try upcasting logits to float32!
-# ToDo: Try autocast!
-# ToDo: In-place vs not in-place compile
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 filter_train = Filter[str, list](train_filter)
@@ -61,6 +56,7 @@ LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[ndarray], list](lambda seq: len(seq) > config.data.jitter),
     LOGGER.debug(log_remaining_number_of_sequences),
     trim_memory,
+    Shuffle[list[ndarray]](config.data.shuffle),
     LOGGER.debug(log_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
@@ -84,6 +80,7 @@ LOGGER.debug('Dropping sequences shorter than 2.'),
 
 process_train = Pipe[[list[str]], TrainData](
     Map[[str], Tensor, list](process_train_file),
+    Shuffle[list[Tensor]](config.data.shuffle),
     trim_memory,
     Cat(dim=0),
     trim_memory,

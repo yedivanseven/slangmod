@@ -14,7 +14,7 @@ class Rotary(Module):
             context: int,
             device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
-            **__: Any
+            **_: Any
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim

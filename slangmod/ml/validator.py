@@ -13,7 +13,7 @@ class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:
         super().__init__(loss, batch_size)
-        self.loss = loss.eval()
+        self.loss = loss
         self.batch_size = batch_size
 
     @staticmethod
@@ -54,7 +54,8 @@ class Validator(ArgRepr):
         n_batches = math.ceil(data.n / self.batch_size)
 
         model.eval()
-        with pt.no_grad():
+        self.loss.eval()
+        with pt.inference_mode():
             batches = data.sample(self.batch_size)
             progress = tqdm(batches, 'Validate', n_batches, False)
             for features, targets in progress:

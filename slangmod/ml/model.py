@@ -139,7 +139,7 @@ model = Model(
 )
 
 compile_model = Compile(
-    inplace=True,
+    inplace=False,
     model=model,
     disable=config.model.disable
 )

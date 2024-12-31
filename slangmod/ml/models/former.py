@@ -23,7 +23,6 @@ class Former(Module):
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
-            normalize: bool = False,
             device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
@@ -35,7 +34,6 @@ class Former(Module):
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
-        self.normalize = normalize
         self.device = pt.device(device)
         self.dtype = dtype
         self.embed = ptn.Embedding(
@@ -52,10 +50,10 @@ class Former(Module):
             self.mod_dim,
             eps=layer.norm1.eps,
             elementwise_affine=layer.norm1.elementwise_affine,
-            bias=layer.norm1.bias,
+            bias=layer.bias,
             device=device,
             dtype=dtype
-        ) if self.normalize and layer.norm_first else Identity()
+        ) if layer.norm_first else Identity()
         self.finalize = ptn.Linear(
             in_features=mod_dim,
             out_features=vocab,
@@ -105,7 +103,6 @@ vanilla_former = Former(
     bias=config.model.bias,
     dropout=config.model.dropout,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
-    normalize=config.model.normalize,
     device=config.data.device,
     dtype=config.data.dtype
 )

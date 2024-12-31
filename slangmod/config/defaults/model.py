@@ -1,6 +1,6 @@
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower
-from ..enums import Positions
+from ..enums import Positions, Models
 
 
 class Model(JsonObject):
@@ -14,8 +14,8 @@ class Model(JsonObject):
     dropout: float = 0.1
     bias: bool = True
     norm_first: bool = True
-    normalize: bool = False
     compile: bool = True
+    flavour: Lower() = Models.VANILLA
 
     @property
     def disable(self) -> bool:

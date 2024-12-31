@@ -9,8 +9,9 @@ from .enums import (
     Positions,
     Optimizers,
     Scaling,
-    Styles,
-    Generators
+    Models,
+    Generators,
+    Styles
 )
 
 __all__ = [
@@ -23,8 +24,9 @@ __all__ = [
     'Positions',
     'Optimizers',
     'Scaling',
-    'Styles',
-    'Generators'
+    'Models',
+    'Generators',
+    'Styles'
 ]
 
 # Parse the environment for config options

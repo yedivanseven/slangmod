@@ -8,11 +8,14 @@ __all__ = [
     'Positions',
     'Optimizers',
     'Scaling',
-    'Styles',
-    'Generators'
+    'Models',
+    'LiteralModel',
+    'Generators',
+    'Styles'
 ]
 
 type LiteralDevice = Literal['cpu', 'cuda']
+type LiteralModel = Literal['vanilla']
 
 
 class Devices(StrEnum):
@@ -30,6 +33,7 @@ class Positions(StrEnum):
     SINUSOIDAL = 'sinusoidal'
     ROTARY = 'rotary'
     LEARNABLE = 'learnable'
+    NONE = 'none'
 
 
 class Optimizers(StrEnum):
@@ -43,11 +47,8 @@ class Scaling(StrEnum):
     COSINE = 'cosine'
 
 
-class Styles(StrEnum):
-    SPACE = 'space'
-    PARAGRAPH = 'paragraph'
-    QUOTE = 'quote'
-    DIALOGUE = 'dialogue'
+class Models(StrEnum):
+    VANILLA = 'vanilla'
 
 
 class Generators(StrEnum):
@@ -56,3 +57,10 @@ class Generators(StrEnum):
     TOP_K = 'top_k'
     TOP_P = 'top_p'
     BEAM = 'beam'
+
+
+class Styles(StrEnum):
+    SPACE = 'space'
+    PARAGRAPH = 'paragraph'
+    QUOTE = 'quote'
+    DIALOGUE = 'dialogue'

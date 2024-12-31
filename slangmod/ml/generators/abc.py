@@ -90,7 +90,7 @@ class Generator(ABC):
 class NextToken(Generator):
 
     def logits(self, src: Tensor, mask: Tensor, more: bool) -> Logits:
-        with pt.no_grad():
+        with pt.inference_mode():
             (out,) = self.model(src, None, mask, False)
         return out[0, self.eos_id + more:, -1].float(), self.eos_id + more
 
