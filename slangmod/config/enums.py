@@ -6,16 +6,14 @@ __all__ = [
     'LiteralDevice',
     'Tokenizers',
     'Positions',
+    'FeedForward',
     'Optimizers',
     'Scaling',
-    'Models',
-    'LiteralModel',
     'Generators',
     'Styles'
 ]
 
 type LiteralDevice = Literal['cpu', 'cuda']
-type LiteralModel = Literal['vanilla']
 
 
 class Devices(StrEnum):
@@ -36,6 +34,10 @@ class Positions(StrEnum):
     NONE = 'none'
 
 
+class FeedForward(StrEnum):
+    REFERENCE = 'reference'
+
+
 class Optimizers(StrEnum):
     ADMAW = 'adamw'
     ADAFACTOR = 'adafactor'
@@ -45,10 +47,6 @@ class Scaling(StrEnum):
     INVERSE = 'inverse'
     EXPONENTIAL = 'exponential'
     COSINE = 'cosine'
-
-
-class Models(StrEnum):
-    VANILLA = 'vanilla'
 
 
 class Generators(StrEnum):

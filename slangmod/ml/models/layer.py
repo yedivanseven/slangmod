@@ -2,15 +2,17 @@ from typing import Self, Any
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor
+from swak.pt.misc import Identity
 from swak.pt.blocks import Block
+
 from ...config import config, LiteralDevice, Devices
-from .attention import Attention, vanilla_attention
-from .feedforward import vanilla_feedforward
+from .attention import Attention, attention
+from .feedforward import feedforward
 
 
 __all__ = [
     'Layer',
-    'vanilla_layer'
+    'layer'
 ]
 
 
@@ -94,10 +96,10 @@ class Layer(Block):
             self.dtype,
         )
 
-# ToDo: Make nice selection here so that only the needed one is instantiated!
-vanilla_layer = Layer(
-    attention=vanilla_attention,
-    feedforward=vanilla_feedforward,
+
+layer = Identity() if config.model.reference else Layer(
+    attention=attention,
+    feedforward=feedforward,
     bias=config.model.bias,
     dropout=config.model.dropout,
     norm_first=config.model.norm_first,

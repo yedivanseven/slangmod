@@ -5,7 +5,7 @@ from .data import (
     make_train_data,
     make_test_data
 )
-from .model import Model, model, compile_model
+from .models import compile_model
 from .trainer import Trainer, trainer
 from .validator import Validator, validate
 
@@ -16,8 +16,6 @@ __all__ = [
     'TestData',
     'make_train_data',
     'make_test_data',
-    'Model',
-    'model',
     'compile_model',
     'Trainer',
     'trainer',

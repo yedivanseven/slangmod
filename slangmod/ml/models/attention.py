@@ -7,10 +7,11 @@ from swak.pt.types import Device, Dtype, Tensor, Module
 from swak.pt.misc import Identity
 from swak.pt.blocks import Block
 from ...config import config, LiteralDevice, Devices
+from .positions import src_pos_enc, qk_pos_enc
 
 __all__ = [
     'Attention',
-    'vanilla_attention'
+    'attention'
 ]
 
 
@@ -103,12 +104,14 @@ class Attention(Block):
             self.dtype
         )
 
-# ToDo: Make nice selection here so that only the needed one is instantiated!
-vanilla_attention = Attention(
+
+attention = Identity() if config.model.reference else Attention(
     mod_dim=config.model.dim,
     n_heads=config.model.n_heads,
     bias=config.model.bias,
     dropout=config.model.dropout,
+    src_pos_enc=src_pos_enc,
+    qk_pos_enc=qk_pos_enc,
     device=config.data.device,
     dtype=config.data.dtype
 )

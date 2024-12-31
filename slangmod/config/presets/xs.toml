@@ -3,6 +3,15 @@ dim = 64
 n_heads = 2
 n_layers = 2
 
+[data]
+seq_len = 512
+stride = 384
+jitter = 32
+
+[tokens]
+vocab = 16384
+
 [train]
-learning_rate = 0.03
+batch_size = 192
+learning_rate = 0.1
 warmup = 2000

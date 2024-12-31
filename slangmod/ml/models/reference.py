@@ -1,12 +1,12 @@
 import torch as pt
 import torch.nn as ptn
-from swak.pt.misc import Compile
 from swak.pt.types import Module, Tensor, Tensors1T, Dtype, Device
-from .models import positions
-from ..config import config, LiteralDevice, Devices
+from ...config import LiteralDevice, Devices
+
+__all__ = ['Reference']
 
 
-class Model(Module):
+class Reference(Module):
 
     def __init__(
             self,
@@ -121,25 +121,3 @@ class Model(Module):
             enable_nested_tensor=False,
             mask_check=False
         )
-
-
-model = Model(
-    mod_dim=config.model.dim,
-    vocab=config.tokens.vocab,
-    n_heads=config.model.n_heads,
-    n_layers=config.model.n_layers,
-    pos_enc=positions,
-    feedforward_factor=config.model.feedforward_factor,
-    scale_grad_by_freq=config.model.scale_grad_by_freq,
-    dropout=config.model.dropout,
-    bias=config.model.bias,
-    norm_first=config.model.norm_first,
-    device=config.data.device,
-    dtype=config.data.dtype
-)
-
-compile_model = Compile(
-    inplace=False,
-    model=model,
-    disable=config.model.disable
-)

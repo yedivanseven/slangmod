@@ -2,18 +2,22 @@ import torch as pt
 from numpy import ndarray
 from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
-from swak.pt.types import Tensor
+from swak.pt.types import Tensor, Module
 from swak.pt.io import ModelSaver
 from swak.pt.misc import Cat
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
 from ..config import config
 from ..etl import fold_train, fold_test, trim_memory, Shuffle
-from ..ml import TrainData, TestData
-from ..ml import make_train_data, make_test_data
-from ..ml import Model, compile_model
-from ..ml import trainer
-from ..ml import validate
+from ..ml import (
+    TrainData,
+    TestData,
+    make_train_data,
+    make_test_data,
+    compile_model,
+    trainer,
+    validate
+)
 from ..io import (
     save_config,
     discover_encodings,
@@ -127,28 +131,28 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     LOGGER.info(log_data_sizes)
 )
 
-train_model = Pipe[[Model, TrainData, TestData], Model](
+train_model = Pipe[[Module, TrainData, TestData], Module](
     LOGGER.info(f'Training model on {config.data.device.upper()} with a target'
                 f' learning rate of {config.train.learning_rate:7.5f}'),
     trim_memory,
     trainer.train,
     LOGGER.debug(f'Saving model to "{config.model_file}".'),
-    Fork[[Model], Model](
+    Fork[[Module], Module](
         identity,
         ModelSaver(config.model_file, True)
     )
 )
 
-train = Pipe[[tuple[()]], tuple[Model, TrainData, TestData, TestData]](
+train = Pipe[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
     LOGGER.debug(f'Saving config file to "{config.config_file}".'),
     save_config,
     LOGGER.info('Starting step "train".'),
     LOGGER.debug('Compiling model.'),
-    Fork[[tuple[()]], tuple[Model, TrainData, TestData, TestData]](
+    Fork[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
         compile_model,
         load_data
     ),
-    Route[[Model, TrainData, TestData, TestData], tuple[Model, TestData]](
+    Route[[Module, TrainData, TestData, TestData], tuple[Module, TestData]](
         [(0, 1, 2), 3],
         train_model,
         identity,

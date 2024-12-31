@@ -2,14 +2,10 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
 from swak.pt.misc import Identity
-from .layer import Layer, vanilla_layer
-from .positions import positions
-from ...config import config, LiteralDevice, Devices
+from .layer import Layer
+from ...config import LiteralDevice, Devices
 
-__all__ = [
-    'Former',
-    'vanilla_former'
-]
+__all__ = ['Former']
 
 class Former(Module):
 
@@ -19,7 +15,7 @@ class Former(Module):
             vocab: int,
             layer: Layer,
             n_layers: int,
-            pos_enc: Module = Identity(),
+            emb_pos_enc: Module = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
@@ -30,7 +26,7 @@ class Former(Module):
         self.mod_dim = mod_dim
         self.vocab = vocab
         self.n_layers = n_layers
-        self.pos_enc = pos_enc
+        self.emb_pos_enc = emb_pos_enc
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
@@ -80,7 +76,7 @@ class Former(Module):
             sizes = -1, padding_mask.size(-1), -1
             attn_mask = mask + padding_mask.unsqueeze(-2).expand(*sizes)
 
-        out = self.drop(self.pos_enc(self.embed(src)))
+        out = self.drop(self.emb_pos_enc(self.embed(src)))
         for layer in self.layers:
             out = layer(out, attn_mask, is_causal)
 
@@ -90,19 +86,5 @@ class Former(Module):
         for layer in self.layers:
             layer.reset_parameters()
         self.embed.reset_parameters()
-        self.pos_enc.reset_parameters()
+        self.emb_pos_enc.reset_parameters()
         self.finalize.reset_parameters()
-
-# ToDo: Make nice selection here so that only the needed one is instantiated!
-vanilla_former = Former(
-    mod_dim=config.model.dim,
-    vocab=config.tokens.vocab,
-    layer=vanilla_layer,
-    n_layers=config.model.n_layers,
-    pos_enc=positions,
-    bias=config.model.bias,
-    dropout=config.model.dropout,
-    scale_grad_by_freq=config.model.scale_grad_by_freq,
-    device=config.data.device,
-    dtype=config.data.dtype
-)

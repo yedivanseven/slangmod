@@ -17,7 +17,7 @@ loss = XEntropyLoss(
     ignore_index=0,
     label_smoothing=config.train.label_smoothing
 )
-# ToDo: Check optimizer memory usage fused vs. foreach vs. for loop
+
 adamw = Curry[pto.AdamW](pto.AdamW, config.train.learning_rate, fused=True)
 adafactor = Curry[pto.Adafactor](pto.Adafactor, config.train.learning_rate)
 optimizer = {
