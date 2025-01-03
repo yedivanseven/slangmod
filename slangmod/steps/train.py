@@ -4,7 +4,7 @@ from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
 from swak.pt.io import ModelSaver
-from swak.pt.misc import Cat
+from swak.pt.misc import Cat, LazyCatDim0
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
 from ..config import config
@@ -86,7 +86,7 @@ process_train = Pipe[[list[str]], TrainData](
     Map[[str], Tensor, list](process_train_file),
     Shuffle[list[Tensor]](config.data.shuffle),
     trim_memory,
-    Cat(dim=0),  # ToDo: Try LazyCatDim0 here if memory peak is critical
+    LazyCatDim0,
     trim_memory,
     make_train_data,
     trim_memory

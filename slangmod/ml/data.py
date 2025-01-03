@@ -65,7 +65,6 @@ class TestData(TestDataBase):
         )
 
 
-# ToDo: Try LazyCatDim0 here if memory peak is critical
 class TrainData(TrainDataBase):
 
     def __init__(
@@ -117,12 +116,14 @@ class TrainData(TrainDataBase):
     def sample(self, batch_size: int, max_n: int | None = None) -> Batches:
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        seqs = self.seqs[:n, :self.seq_len + 1]
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
                 (
-                    seqs[batch * batch_size:(batch + 1) * batch_size, :-1].to(
+                    self.seqs[
+                        batch * batch_size:(batch + 1) * batch_size,
+                        :self.seq_len
+                    ].to(
                         self.device,
                         non_blocking=True
                     ),
@@ -131,7 +132,10 @@ class TrainData(TrainDataBase):
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
-                seqs[batch * batch_size:(batch + 1) * batch_size, 1:].to(
+                self.seqs[
+                    batch * batch_size:(batch + 1) * batch_size,
+                    1:self.seq_len + 1
+                ].to(
                     self.device,
                     non_blocking=True
                 )
@@ -146,14 +150,16 @@ class TrainData(TrainDataBase):
             epoch: int = 0
     ) -> tuple[int, Batches]:
         start = self.start
-        seqs = self.seqs[:, start:start + self.seq_len + 1]
         n_batches = self.adjust_batches_for(batch_size, step_freq)
         batches = self.jumble(n_batches, device=self.seqs.device)
         return n_batches, iter(
             (
                 # Source sequence, attention mask, and is_causal flag
                 (
-                    seqs[batch * batch_size:(batch + 1) * batch_size, :-1].to(
+                    self.seqs[
+                        batch * batch_size:(batch + 1) * batch_size,
+                        start:start + self.seq_len
+                    ].to(
                         self.device,
                         non_blocking=True
                     ),
@@ -162,7 +168,10 @@ class TrainData(TrainDataBase):
                     True
                 ),
                 # Target sequence, shifted by one relative to the source
-                seqs[batch * batch_size:(batch + 1) * batch_size, 1:].to(
+                self.seqs[
+                    batch * batch_size:(batch + 1) * batch_size,
+                    start + 1:start + 1 + self.seq_len
+                ].to(
                     self.device,
                     non_blocking=True
                 )

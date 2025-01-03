@@ -65,7 +65,7 @@ class Validator(ArgRepr):
 
                 batch_loss = self.loss(logits, targets).item()
                 val_loss += batch_n * (batch_loss - val_loss) / (n + batch_n)
-                progress.set_postfix(loss=f'{batch_loss:4.2f}')
+                progress.set_postfix(loss=f'{val_loss:4.2f}')
 
                 batch_px = self.perplexity(logits, targets)
                 perplexity += batch_n * (batch_px - perplexity) / (n + batch_n)
