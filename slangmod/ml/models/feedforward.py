@@ -9,7 +9,7 @@ __all__ = [
 
 if config.model.reference:
     feedforward = Identity()
-elif config.model.feedforward_flavour == FeedForward.REFERENCE:
+elif config.model.feedforward_flavour == FeedForward.VANILLA:
     feedforward = ActivatedBlock(
         mod_dim=config.model.dim,
         activate=ptn.GELU(),

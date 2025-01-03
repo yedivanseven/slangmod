@@ -28,14 +28,14 @@ class Tokenizers(StrEnum):
 
 
 class Positions(StrEnum):
+    VANILLA = 'vanilla'
+    LEARNABLE = 'learnable'
     SINUSOIDAL = 'sinusoidal'
     ROTARY = 'rotary'
-    LEARNABLE = 'learnable'
-    NONE = 'none'
 
 
 class FeedForward(StrEnum):
-    REFERENCE = 'reference'
+    VANILLA = 'vanilla'
 
 
 class Optimizers(StrEnum):

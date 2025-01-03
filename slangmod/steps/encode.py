@@ -16,7 +16,7 @@ from ..io import (
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-write_parquet = ParquetWriter(config.encodings + '/{}', create=True)
+write_parquet = ParquetWriter(config.encoded_files, create=True)
 
 load_column = Pipe[[str], Series](
     LOGGER.debug(log_encode_file),

@@ -24,9 +24,8 @@ from ..etl import (
 from .log_messages import log_total_number_of_files
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
-TARGET = config.corpus + '/{}' + config.files.sep + '{}.' + config.files.suffix
 
-write_parquet = ParquetWriter(TARGET, create=True)
+write_parquet = ParquetWriter(config.clean_files, create=True)
 
 wiki40b_processor = Pipe[[str], str](
     replace_article,

@@ -14,10 +14,11 @@ __all__ = [
 ]
 
 emb_pos_enc = {
-    Positions.SINUSOIDAL: Sinusoidal,
+    Positions.VANILLA: Sinusoidal,
     Positions.LEARNABLE: Learnable,
-    Positions.NONE: Identity
-}[config.model.emb_pos_enc](
+    Positions.SINUSOIDAL: Identity,
+    Positions.ROTARY: Identity
+}[config.model.positions](
     mod_dim=config.model.dim,
     context=config.model.context,
     n_heads=config.model.n_heads,
@@ -26,10 +27,11 @@ emb_pos_enc = {
 )
 
 src_pos_enc = {
+    Positions.VANILLA: Identity,
+    Positions.LEARNABLE: Identity,
     Positions.SINUSOIDAL: Sinusoidal,
-    Positions.LEARNABLE: Learnable,
-    Positions.NONE: Identity
-}[config.model.src_pos_enc](
+    Positions.ROTARY: Identity
+}[config.model.positions](
     mod_dim=config.model.dim,
     context=config.model.context,
     n_heads=config.model.n_heads,
@@ -38,9 +40,11 @@ src_pos_enc = {
 )
 
 qk_pos_enc = {
-    Positions.ROTARY: Rotary,
-    Positions.NONE: Identity
-}[config.model.qk_pos_enc](
+    Positions.VANILLA: Identity,
+    Positions.LEARNABLE: Identity,
+    Positions.SINUSOIDAL: Identity,
+    Positions.ROTARY: Rotary
+}[config.model.positions](
     mod_dim=config.model.dim,
     context=config.model.context,
     n_heads=config.model.n_heads,

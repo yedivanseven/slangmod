@@ -8,6 +8,7 @@ from .data import (
 from .models import compile_model
 from .trainer import Trainer, trainer
 from .validator import Validator, validate
+from .generators import Generator, create_generator
 
 __all__ = [
     'Algo',
@@ -20,5 +21,7 @@ __all__ = [
     'Trainer',
     'trainer',
     'Validator',
-    'validate'
+    'validate',
+    'Generator',
+    'create_generator'
 ]

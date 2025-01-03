@@ -1,16 +1,15 @@
-from tokenizers import Tokenizer
 from swak.funcflow import Pipe, Fork, unit
 from swak.pt.io import ModelLoader
 from swak.pt.types import Module
 from swak.funcflow.loggers import PassThroughStdOut
 from ..config import config
 from ..io import load_tokenizer, ConsoleClient, console_client
-from ..ml.generators import create_generator
+from ..ml import Algo, create_generator
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 chat = Pipe[[tuple[()]], ConsoleClient](
-    Fork[[tuple[()]], tuple[Tokenizer, Module]](
+    Fork[[tuple[()]], tuple[Algo, Module]](
         LOGGER.debug(f'Loading tokenizer from "{config.tokenizer_file}".'),
         load_tokenizer,
         LOGGER.debug(f'Loading model from "{config.model_file}".'),

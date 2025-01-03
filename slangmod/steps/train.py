@@ -86,7 +86,7 @@ process_train = Pipe[[list[str]], TrainData](
     Map[[str], Tensor, list](process_train_file),
     Shuffle[list[Tensor]](config.data.shuffle),
     trim_memory,
-    Cat(dim=0),
+    Cat(dim=0),  # ToDo: Try LazyCatDim0 here if memory peak is critical
     trim_memory,
     make_train_data,
     trim_memory

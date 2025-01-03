@@ -4,6 +4,7 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
 from swak.pt.train import TestDataBase, TrainDataBase
+from swak.pt.misc import LazyCatDim0
 from swak.funcflow import Curry
 from ..config import config, LiteralDevice, Devices
 from .types import Batches
@@ -17,9 +18,9 @@ class TestData(TestDataBase):
             device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
+        self.seqs = seqs
         self.device = pt.device(device)
         self.dtype = dtype
-        self.seqs = seqs
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,
@@ -64,23 +65,24 @@ class TestData(TestDataBase):
         )
 
 
+# ToDo: Try LazyCatDim0 here if memory peak is critical
 class TrainData(TrainDataBase):
 
     def __init__(
             self,
-            seqs: Tensor,
+            seqs: Tensor | LazyCatDim0,
             stride: int,
             shuffle: bool,
             jitter: int,
             device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
+        self.seqs = seqs
         self.stride = stride
         self.shuffle = shuffle
         self.jitter = min(max(1, jitter), stride)
         self.device = pt.device(device)
         self.dtype = dtype
-        self.seqs = seqs
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
             self.seq_len,
             device=self.device,

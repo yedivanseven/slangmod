@@ -8,6 +8,7 @@ from ..tokenizers import Algo
 type Logits = tuple[Tensor, int]
 
 
+# ToDo: Check what happens if we add the UNK mask to a causal mask!
 class Generator(ABC):
 
     def __init__(

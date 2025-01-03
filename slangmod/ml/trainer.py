@@ -42,6 +42,7 @@ trainer = Trainer(
     max_epochs=config.train.max_epochs,
     scheduler=scheduler,
     warmup=config.train.warmup,
+    batch_step=True,
     patience=config.train.patience,
     step_freq=config.train.step_freq,
     clip_grad=config.train.clip_grad,
