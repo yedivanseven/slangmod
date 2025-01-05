@@ -59,7 +59,7 @@ class Main(JsonObject):
 
     @property
     def encodings(self) -> str:
-        return str((Path(self.folder) / 'encodings').resolve())
+        return str((Path(self.workdir) / 'encodings').resolve())
 
     @property
     def tokenizer_file(self) -> str:

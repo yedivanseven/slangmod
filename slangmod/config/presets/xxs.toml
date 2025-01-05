@@ -14,4 +14,6 @@ vocab = 16384
 [train]
 batch_size = 192
 learning_rate = 0.1
-warmup = 1000
+warmup = 1_000
+cooldown = 20_000  # ToDo: Decrease to 15k for Unigram
+patience = 10  # ToDo: Remove this again

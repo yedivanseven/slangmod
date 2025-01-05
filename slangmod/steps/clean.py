@@ -6,7 +6,8 @@ from ..config import config
 from ..io import (
     discover_wiki40b,
     discover_gutenberg,
-    extract_prefix,
+    clean_corpus_directory,
+    extract_file_type,
     read_column
 )
 from ..etl import (
@@ -44,7 +45,7 @@ process_wiki40b_file = Pipe[[str], tuple[()]](
             read_column,
             process_wiki40b_docs,
         ),
-        extract_prefix
+        extract_file_type
     ),
     write_parquet,
     trim_memory
@@ -73,7 +74,7 @@ process_gutenberg_file = Pipe[[str], tuple[()]](
             read_column,
             process_gutenberg_docs,
         ),
-        extract_prefix,
+        extract_file_type,
     ),
     write_parquet,
     trim_memory
@@ -90,9 +91,11 @@ clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
 
 clean = Pipe[[tuple[()]], tuple[()]](
     LOGGER.info('Starting step "clean".'),
+LOGGER.debug(f'Preparing a fresh and empty folder "{config.corpus}".'),
+    clean_corpus_directory,
     Fork[[tuple[()]], tuple[()]](
         clean_wiki40b,
-        clean_gutenberg
+        # clean_gutenberg
     ),
     LOGGER.info('Finished step "clean".')
 )

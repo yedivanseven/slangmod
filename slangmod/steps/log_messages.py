@@ -11,19 +11,17 @@ def log_process_file(file: str) -> str:
 
 
 def log_total_number_of_files(files: list[str]) -> str:
-    return f'Found {len(files)} files.'
+    return f'Found {len(files)} file(s).'
 
 
 def log_total_number_of_docs(files: list[str]) -> str:
-    return f'Loaded {len(files)} encoded documents.'
+    return f'Loaded {len(files)} encoded document(s).'
 
 
 def log_number_of_tokens(sequences: list[list[int]]) -> str:
     n_tokens = sum(len(sequence) for sequence in sequences)
     return f'Converting {n_tokens} tokens to CPU tensor.'
 
-def log_total_number_of_tokens(lengths: list[int]) -> str:
-    return f'Training on a grand total of {sum(lengths)} tokens.'
 
 def log_remaining_number_of_sequences(sequences: list[list[int]]) -> str:
     return f'After filtering, {len(sequences)} sequences remain.'

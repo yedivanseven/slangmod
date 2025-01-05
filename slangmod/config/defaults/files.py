@@ -15,3 +15,7 @@ class Files(JsonObject):
     validation: str = 'validation'
     wiki40b: resolve = '/home/georg/Projects/slangmod/data/wiki40b'
     gutenberg: resolve = '/home/georg/Projects/slangmod/data/gutenberg'
+
+    @property
+    def types(self) -> tuple[str, str, str]:
+        return self.train, self.test, self.validation

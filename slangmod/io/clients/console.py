@@ -5,13 +5,14 @@ from ...ml.generators import Generator
 
 
 # ToDo: Rethink the logic with EOS here! Make sure the tokenizer get's it!
+# ToDo: THe style should probably be part of the client, not the generator!
 class ConsoleClient(ArgRepr):
 
     def __init__(
             self,
             system: str ='',
-            user: str = 'user',
-            bot: str = 'bot',
+            user: str = 'USR',
+            bot: str = 'BOT',
             stop: str = 'Stop!',
             eos_string: str = '\n\n'
     ) -> None:
@@ -44,6 +45,7 @@ class ConsoleClient(ArgRepr):
             elif prompt == self.stop:
                 break
 
+            # ToDO: Replace style here ...
             self.history.append((self.user, generate.style(prompt)))
             generated, terminates = generate(self.flat)
 

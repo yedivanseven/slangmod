@@ -1,18 +1,12 @@
-from typing import Self
-from collections.abc import Iterable, Sequence
+from typing import Self, Any
+from collections.abc import Iterable
 from tokenizers.normalizers import Normalizer
 from tokenizers.pre_tokenizers import PreTokenizer
 from tokenizers.processors import PostProcessor
 from tokenizers.decoders import Decoder
 from tokenizers.tokenizers import AddedToken
 from tokenizers.trainers import Trainer
-from tokenizers import (
-    Tokenizer,
-    Encoding,
-    TextInputSequence,
-    PreTokenizedInputSequence
-)
-
+from tokenizers import Tokenizer
 
 __all__ = ['Algo']
 
@@ -64,6 +58,12 @@ class Algo:
     def vocab(self) -> int:
         return self.tokenizer.get_vocab_size()
 
+    def __getattr__(self, item: str) -> Any:
+        # Needed to safely use in multiprocessing pools. Mo idea why, though
+        if item == 'tokenizer':
+            return getattr(super(), item)
+        return getattr(self.tokenizer, item)
+
     def from_file(self, path: str) -> Self:
         return self.__class__(Tokenizer.from_file(path), self.trainer)
 
@@ -73,27 +73,6 @@ class Algo:
 
     def save(self, path: str, pretty: bool = True) -> None:
         self.tokenizer.save(path, pretty)
-
-    def encode(
-            self,
-            sequence: TextInputSequence | PreTokenizedInputSequence,
-            pair: TextInputSequence | PreTokenizedInputSequence | None = None,
-            is_pretokenized: bool = False,
-            add_special_tokens: bool = True
-    ) -> Encoding:
-        return self.tokenizer.encode(
-            sequence,
-            pair,
-            is_pretokenized,
-            add_special_tokens
-        )
-
-    def decode(
-            self,
-            ids: Sequence[int],
-            skip_special_tokens: bool = True
-    ) -> str:
-        return self.tokenizer.decode(ids, skip_special_tokens)
 
     def __call__(
             self,

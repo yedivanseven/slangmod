@@ -14,8 +14,11 @@ from .corpus import (
     validation_filter
 )
 from .misc import (
-    PrefixExtractor,
-    extract_prefix,
+    DirectoryCleaner,
+    clean_corpus_directory,
+    clean_encodings_directory,
+    FileTypeExtractor,
+    extract_file_type,
     extract_file_name,
     read_column
 )
@@ -39,8 +42,11 @@ __all__ = [
     'validation_filter',
     'CorpusLoader',
     'load_corpus',
-    'PrefixExtractor',
-    'extract_prefix',
+    'DirectoryCleaner',
+    'clean_corpus_directory',
+    'clean_encodings_directory',
+    'FileTypeExtractor',
+    'extract_file_type',
     'extract_file_name',
     'read_column',
     'TokenizerSaver',

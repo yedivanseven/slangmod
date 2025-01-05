@@ -28,7 +28,7 @@ model = Reference(
         device=config.data.device,
         dtype=config.data.dtype
     ),
-    feedforward_factor=config.model.feedforward_factor,
+    feedforward_factor=config.model.feedforward.factor,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
     dropout=config.model.dropout,
     bias=config.model.bias,

@@ -21,7 +21,7 @@ tokenize = Pipe[[tuple[()]], tuple[()]](
     discover_corpus,
     LOGGER.debug(log_total_number_of_files),
     load_corpus,
-    LOGGER.info('Training tokenizer.'),
+    LOGGER.info(f'Training tokenizer {config.tokens.algo}.'),
     tokenizer.train,
     LOGGER.debug(f'Saving trained tokenizer to "{config.tokenizer_file}".'),
     save_tokenizer,

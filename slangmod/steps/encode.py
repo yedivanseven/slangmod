@@ -8,6 +8,7 @@ from ..ml import Algo
 from .log_messages import log_total_number_of_files, log_encode_file
 from ..io import (
     load_tokenizer,
+    clean_encodings_directory,
     discover_corpus,
     read_column,
     extract_file_name,
@@ -47,8 +48,9 @@ encode = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(f'Saving config file to "{config.config_file}".'),
     save_config,
     LOGGER.info('Starting step "encode".'),
+    LOGGER.debug(f'Preparing a fresh and empty folder "{config.encodings}".'),
+    clean_encodings_directory,
     LOGGER.debug(f'Scanning "{config.corpus}" for files.'),
-    LOGGER.debug(f'Writing to "{config.encodings}".'),
     discover_corpus,
     LOGGER.debug(log_total_number_of_files),
     Map[[str], tuple[()], list](encode_file),

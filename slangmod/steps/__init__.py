@@ -2,7 +2,7 @@ from .dry_run import dry_run
 from .tokenize import tokenize
 from .train import train
 from .chat import chat
-from .clean import clean, clean_wiki40b  # ToDo: Remove clean_wiki40b again
+from .clean import clean
 from .encode import encode
 
 __all__ = [

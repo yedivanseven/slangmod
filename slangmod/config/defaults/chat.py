@@ -26,8 +26,8 @@ class Chat(JsonObject):
     p: float = 0.8
     width: int = 16
     boost: float = 0.7
-    user: str = 'user'
-    bot: str = 'bot'
+    user: str = 'USR'
+    bot: str = 'BOT'
     stop: str = 'Stop!'
     system: read_system_prompt = '''
 I had seen little of Holmes lately. My marriage had drifted us away
