@@ -26,6 +26,7 @@ class Style(ArgRepr):
 
     def strip(self, prompt: str) -> str:
         naked = prompt.strip()
+        # ToDo: Rethink if the ordering of characters is irrelevant
         for char in self.chars:
             naked = naked.strip(char)
         return naked.strip()

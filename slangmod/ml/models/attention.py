@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-class Attention(Block):
+class Attention(Module):
 
     def __init__(
             self,
@@ -23,8 +23,8 @@ class Attention(Block):
             n_heads: int,
             bias: bool = True,
             dropout: float = 0.1,
-            src_pos_enc: Module = Identity(),
-            qk_pos_enc: Module = Identity(),
+            src_pos_enc: Block = Identity(),
+            qk_pos_enc: Block = Identity(),
             device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float
     ) -> None:
@@ -64,6 +64,13 @@ class Attention(Block):
     def scale(self) -> float:
         return 1.0 / math.sqrt(self.head_dim)
 
+    @property
+    def has_pos_enc(self) -> bool:
+        return (
+            not isinstance(self.src_pos_enc, Identity) or
+            not isinstance(self.qk_pos_enc, Identity)
+        )
+
     def forward(
             self,
             src: Tensor,
@@ -91,6 +98,8 @@ class Attention(Block):
     def reset_parameters(self) -> None:
         self.qkv.reset_parameters()
         self.out.reset_parameters()
+        self.src_pos_enc.reset_parameters()
+        self.qk_pos_enc.reset_parameters()
 
     def new(self) -> Self:
         return self.__class__(
@@ -98,8 +107,8 @@ class Attention(Block):
             self.n_heads,
             self.bias,
             self.dropout,
-            self.src_pos_enc,
-            self.qk_pos_enc,
+            self.src_pos_enc.new(),
+            self.qk_pos_enc.new(),
             self.device,
             self.dtype
         )

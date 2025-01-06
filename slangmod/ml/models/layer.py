@@ -1,10 +1,9 @@
 from typing import Self, Any
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Device, Dtype, Tensor
+from swak.pt.types import Device, Dtype, Tensor, Module
 from swak.pt.misc import Identity
 from swak.pt.blocks import Block
-
 from ...config import config, LiteralDevice, Devices
 from .attention import Attention, attention
 from .feedforward import feedforward
@@ -16,7 +15,7 @@ __all__ = [
 ]
 
 
-class Layer(Block):
+class Layer(Module):
 
     def __init__(
             self,
@@ -61,6 +60,10 @@ class Layer(Block):
     @property
     def mod_dim(self) -> int:
         return self.attention.mod_dim
+
+    @property
+    def has_pos_enc(self) -> bool:
+        return self.attention.has_pos_enc
 
     def forward(
             self,

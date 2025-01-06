@@ -5,7 +5,7 @@ from ...ml.generators import Generator
 
 
 # ToDo: Rethink the logic with EOS here! Make sure the tokenizer get's it!
-# ToDo: THe style should probably be part of the client, not the generator!
+# ToDo: The style should probably be part of the client, not the generator!
 class ConsoleClient(ArgRepr):
 
     def __init__(

@@ -11,7 +11,6 @@ class Data(JsonObject):
     seq_len: int = 512
     stride: int = 384
     jitter: int = 32
-    test: float = 0.01
     shuffle: bool = True
 
     @property

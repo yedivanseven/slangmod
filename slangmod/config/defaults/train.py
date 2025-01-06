@@ -8,7 +8,7 @@ class Train(JsonObject):
     step_freq: int = 1
     clip_grad: float = 0.8
     label_smoothing: float = 0.1
-    learning_rate: Maybe[float](float) = 0.01
+    learning_rate: float = 0.01
     max_epochs: int = 1024
     warmup: int = 4000
     batch_step: bool = True

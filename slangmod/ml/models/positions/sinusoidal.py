@@ -1,11 +1,12 @@
-from typing import Any
+from typing import Any, Self
 import math
 import torch as pt
-from swak.pt.types import Module, Tensor, Dtype, Device
+from swak.pt.types import Tensor, Dtype, Device
+from swak.pt.blocks import Block
 from ....config import LiteralDevice, Devices
 
 
-class Sinusoidal(Module):
+class Sinusoidal(Block):
 
     def __init__(
             self,
@@ -67,3 +68,11 @@ class Sinusoidal(Module):
 
     def reset_parameters(self) -> None:
         pass
+
+    def new(self) -> Self:
+        return self.__class__(
+            self.mod_dim,
+            self.context,
+            self.device,
+            self.dtype
+        )

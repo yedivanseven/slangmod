@@ -1,11 +1,12 @@
-from typing import Any
+from typing import Any, Self
 import math
 import torch as pt
-from swak.pt.types import Module, Tensor, Dtype, Device
+from swak.pt.types import Tensor, Dtype, Device
+from swak.pt.blocks import Block
 from slangmod.config import LiteralDevice, Devices
 
 
-class Rotary(Module):
+class Rotary(Block):
 
     def __init__(
             self,
@@ -86,3 +87,12 @@ class Rotary(Module):
 
     def reset_parameters(self) -> None:
         pass
+
+    def new(self) -> Self:
+        return self.__class__(
+            self.mod_dim,
+            self.n_heads,
+            self.context,
+            self.device,
+            self.dtype
+        )

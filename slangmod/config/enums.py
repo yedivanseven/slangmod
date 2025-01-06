@@ -6,6 +6,7 @@ __all__ = [
     'LiteralDevice',
     'Tokenizers',
     'Positions',
+    'Activations',
     'FeedForward',
     'Optimizers',
     'Scaling',
@@ -34,8 +35,18 @@ class Positions(StrEnum):
     ROTARY = 'rotary'
 
 
+class Activations(StrEnum):
+    ELU = 'elu'
+    RELU = 'relu'
+    GELU = 'gelu'
+    SWISH = 'swish'
+    MISH = 'mish'
+
+
 class FeedForward(StrEnum):
     VANILLA = 'vanilla'
+    GLU = 'glu'
+    GRN = 'grn'
 
 
 class Optimizers(StrEnum):

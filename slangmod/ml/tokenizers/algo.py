@@ -59,7 +59,8 @@ class Algo:
         return self.tokenizer.get_vocab_size()
 
     def __getattr__(self, item: str) -> Any:
-        # Needed to safely use in multiprocessing pools. Mo idea why, though
+        # Needed if used with multiprocessing, which is discouraged.
+        # Tokenizers already work with parallelism.
         if item == 'tokenizer':
             return getattr(super(), item)
         return getattr(self.tokenizer, item)

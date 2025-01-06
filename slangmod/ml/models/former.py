@@ -7,6 +7,7 @@ from ...config import LiteralDevice, Devices
 
 __all__ = ['Former']
 
+
 class Former(Module):
 
     def __init__(
@@ -26,7 +27,7 @@ class Former(Module):
         self.mod_dim = mod_dim
         self.vocab = vocab
         self.n_layers = n_layers
-        self.emb_pos_enc = emb_pos_enc
+        self.emb_pos_enc = Identity() if layer.has_pos_enc else emb_pos_enc
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
