@@ -70,16 +70,14 @@ class TrainData(TrainDataBase):
     def __init__(
             self,
             seqs: Tensor | LazyCatDim0,
-            stride: int,
             shuffle: bool,
             jitter: int,
             device: Device | Devices | LiteralDevice,
             dtype: Dtype
     ) -> None:
         self.seqs = seqs
-        self.stride = stride
         self.shuffle = shuffle
-        self.jitter = min(max(1, jitter), stride)
+        self.jitter = jitter
         self.device = pt.device(device)
         self.dtype = dtype
         self.mask = ptn.Transformer.generate_square_subsequent_mask(
@@ -182,7 +180,6 @@ class TrainData(TrainDataBase):
 
 make_train_data = Curry[TrainData](
     TrainData,
-    stride=config.data.stride,
     shuffle=config.data.shuffle,
     jitter=config.data.jitter,
     device=config.data.device,

@@ -6,54 +6,11 @@ from ..config import config
 from .exceptions import ValidationErrors
 
 __all__ = [
-    'SequenceFolder',
     'TestSequenceFolder',
     'TrainSequenceFolder',
     'fold_train',
     'fold_test'
 ]
-
-
-class SequenceFolder(ArgRepr):
-
-    def __init__(self, seq_len: int, stride: int = 0, jitter: int = 0) -> None:
-        self.seq_len = seq_len
-        self.stride = max(0, min(stride, seq_len))
-        self.jitter = min(self.stride, jitter)
-        super().__init__(seq_len, self.stride, self.jitter)
-
-    @property
-    def width(self) -> int:
-        if self.stride > 0:
-            return self.seq_len + self.jitter
-        return self.seq_len + 1
-
-    def clamp(self, length: int) -> int:
-        if self.stride > 0:
-            return max(self.jitter + 1, length)
-        return max(0, length - 2)
-
-    def extra_rows_for(self, length: int) -> int:
-        if self.stride > 0:
-            return (self.clamp(length) - self.jitter - 1) // self.stride
-        return self.clamp(length) // self.seq_len
-
-    def padded_to(self, length: int) -> int:
-        if self.stride > 0:
-            return self.width + self.extra_rows_for(length) * self.stride
-        return self.width + self.extra_rows_for(length) * self.seq_len
-
-    def missing_for(self, length: int) -> int:
-        return self.padded_to(length) - length
-
-    def pad(self, sequence: Tensor) -> Tensor:
-        n_pad = self.missing_for(sequence.size(0))
-        return ptnf.pad(sequence, (0, n_pad), value=0)
-
-    def __call__(self, sequence: Tensor) -> Tensor:
-        if self.stride > 0:
-            return self.pad(sequence).unfold(0, self.width, self.stride)
-        return self.pad(sequence).unfold(0, self.width, self.seq_len)
 
 
 class TestSequenceFolder(ArgRepr):
@@ -62,12 +19,12 @@ class TestSequenceFolder(ArgRepr):
     Parameters
     ----------
     seq_len: int
-        The target sequence length. Because, in next-token prediction, the
+        The desired sequence length. Because, in next-token prediction, the
         target sequence is the source offset by one, the output tensor size
         will be one more than this number in its second and last dimension.
     pad_id: int, optional
         Integer index to pad sequences with so that all parts have the same
-        length,that is, `seq_len` + 1. Defaults to 0. Make sure that this
+        length, that is, `seq_len` + 1. Defaults to 0. Make sure that this
         index is consistently used also for training embeddings and in your
         loss function!
 
@@ -76,7 +33,7 @@ class TestSequenceFolder(ArgRepr):
     TypeError
         If `seq_len` is not an integer.
     ValueError
-        It `seq_len` is smaller than 2.
+        If `seq_len` is smaller than 2.
 
     """
 
@@ -154,7 +111,7 @@ class TestSequenceFolder(ArgRepr):
         row that has fewer than 2 non-padding entries because these would be
         useless in evaluating next-token prediction. However, empty sequences
         or sequences of length 1 will still be padded to a tensor of sizes 1
-        and `seq_len` + 1 in its first and second dimension, respectively.
+        and `seq_len` + 1 in their first and second dimension, respectively.
         Consequently, they should be filtered out beforehand!
 
         """
@@ -167,14 +124,32 @@ class TrainSequenceFolder(ArgRepr):
     Parameters
     ----------
     seq_len: int
-        The target sequence length. Because, in next-token prediction, the
-        target sequence is the source offset by one, the output tensor size
-        will be one more than this number in its second and last dimension.
+        The desired sequence length.
     pad_id: int, optional
         Integer index to pad sequences with so that all parts have the same
-        length,that is, `seq_len` + 1. Defaults to 0. Make sure that this
-        index is consistently used also for training embeddings and in your
-        loss function!
+        length and can be stored in a single tensor. Defaults to 0.
+        Make sure that this index is consistently used also for training
+        embeddings and in your loss function!
+    overlap: int or float, optional
+        To teach a language model longer consistent context lengths, training
+        sequences can be made to overlap to some extent, such that the
+        beginning of each sequence is the end of the last. If the `overlap`
+        is strictly smaller than 1, then it is interpreted as a fraction of
+        the sequence length. If it is 1 or larger, it is interpreted as an
+        integer number of positions to overlap. Defaults to 0.0 which means
+        no overlap between consecutive parts.
+    jitter: int
+        To introduce some variability into the training data, one can slightly
+        and randomly shift sequences by a few positions every time they are
+        used. That way, over-reliance on any specific positional alignment
+        is avoided. If jitter > 1, then the sequence parts are extended such
+        that they can be selected with an offset.
+
+    Raises
+    ------
+    ValidationErrors
+        If any of `seq_len`, `overlap`, and `jitter` have either the wrong
+        type or a value that does not make sense.
 
     """
 
@@ -283,7 +258,10 @@ class TrainSequenceFolder(ArgRepr):
 
         Each row of the output can then conveniently be split into source
         (``row[:-1]``) and target (``row[1:]``) for next-token prediction such
-        that both have the given `seq_len`.
+        that both have the given `seq_len`. If `jitter` > 1, shifted source
+        (``row[offset: seq_len + offset]``) and target sequences
+        (``row[offset + 1: seq_len + offset + 1]``) can be extracted from
+        each row, with `offset` from the interval [0, `jitter`).
 
         Parameters
         ----------
@@ -293,7 +271,7 @@ class TrainSequenceFolder(ArgRepr):
         Returns
         -------
         Tensor
-            Output tensor of size `seq_len` + 1 in its second and last
+            Output tensor of size `seq_len` + `jitter` in its second and last
             dimension and as many rows as needed to accommodate all elements
             in its first dimension.
 
@@ -303,16 +281,17 @@ class TrainSequenceFolder(ArgRepr):
         row that has fewer than 2 non-padding entries because these would be
         useless in evaluating next-token prediction. However, empty sequences
         or sequences of length 1 will still be padded to a tensor of sizes 1
-        and `seq_len` + 1 in its first and second dimension, respectively.
-        Consequently, they should be filtered out beforehand!
+        and `seq_len` + `jitter` in their first and second dimension,
+        respectively. Consequently, they should be filtered out beforehand!
 
         """
         return self._pad(sequence).unfold(0, self.width, self.stride)
 
 
-fold_train = SequenceFolder(
+fold_train = TrainSequenceFolder(
     config.data.seq_len,
-    config.data.stride,
+    config.tokens.pad_id,
+    config.data.overlap,
     config.data.jitter
 )
-fold_test = SequenceFolder(config.data.seq_len)
+fold_test = TestSequenceFolder(config.data.seq_len, config.tokens.pad_id)

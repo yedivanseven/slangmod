@@ -13,8 +13,8 @@ __all__ = [
 ]
 
 # Special tokens
-PAD = AddedToken('[PAD]', special=True)
-UNK = AddedToken('[UNK]', special=True)
+PAD = AddedToken(config.tokens.pad_symbol, special=True)
+UNK = AddedToken(config.tokens.unk_symbol, special=True)
 EOS = AddedToken(config.tokens.eos_symbol, normalized=True, special=True)
 SPECIAL_TOKENS = [PAD, UNK, EOS]
 

@@ -5,7 +5,6 @@ from .memory import MemoryTrimmer, trim_memory
 from .shuffle import Shuffle
 from .exceptions import ValidationErrors
 from .folder import (
-    SequenceFolder,
     TrainSequenceFolder,
     TestSequenceFolder,
     fold_train,
@@ -31,7 +30,6 @@ __all__ = [
     'to_frame',
     'MemoryTrimmer',
     'trim_memory',
-    'SequenceFolder',
     'TestSequenceFolder',
     'TrainSequenceFolder',
     'ValidationErrors',
