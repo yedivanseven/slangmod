@@ -288,10 +288,14 @@ class TrainSequenceFolder(ArgRepr):
         return self._pad(sequence).unfold(0, self.width, self.stride)
 
 
+# Provide a ready-to use instances of the sequence folders
 fold_train = TrainSequenceFolder(
-    config.data.seq_len,
-    config.tokens.pad_id,
-    config.data.overlap,
-    config.data.jitter
+    seq_len=config.data.seq_len,
+    pad_id=config.tokens.pad_id,
+    overlap=config.data.overlap,
+    jitter=config.data.jitter
 )
-fold_test = TestSequenceFolder(config.data.seq_len, config.tokens.pad_id)
+fold_test = TestSequenceFolder(
+    seq_len=config.data.seq_len,
+    pad_id=config.tokens.pad_id
+)
