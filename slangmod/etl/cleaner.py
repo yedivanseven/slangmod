@@ -9,6 +9,20 @@ __all__ = ['CorpusCleaner']
 
 
 class CorpusCleaner(ArgRepr):
+    """Clean a single pandas series where each entry represents one document.
+
+    Parameters
+    ----------
+    process: callable
+        A callable object that accepts a single (raw) string as input and
+        returns the cleaned string.
+    *args
+        Optional arguments to pass through to the ``tqdm`` progress bar.
+    **kwargs
+        Optional keyword arguments to pass through to the ``tqdm``
+        progress bar.
+
+    """
 
     def __init__(
             self,
@@ -22,6 +36,25 @@ class CorpusCleaner(ArgRepr):
         self.kwargs = kwargs
 
     def __call__(self, corpus: Series, **kwargs: Any) -> tuple[DataFrame, str]:
+        """Apply the cached processor to each document in a corpus.
+
+        Parameters
+        ----------
+        corpus: Series
+            Pandas Series with each entry representing a single document to
+            clean, that is, a single string.
+        **kwargs
+            Optional keyword arguments are merged into the keyword arguments
+            given at instantiation and passed on to the ``tqdm`` progress bar.
+
+        Returns
+        -------
+        DataFrame
+            A pandas dataframe with the cleaned series as a sole column.
+        str
+            The SHA256 hash of the cleaned series for downstream deduplication.
+
+        """
         merged_kwargs = self.kwargs | kwargs
         wrapped = tqdm(corpus, *self.args, **merged_kwargs)
         corpus[:] = [self.process(document) for document in wrapped]

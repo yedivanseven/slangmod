@@ -9,22 +9,48 @@ __all__ = [
 
 
 class EncodingEnforcer(ArgRepr):
+    """Force a text into an encoding, replacing unrepresentable characters.
 
-    pattern = re.compile(r'(?:\\N{.+?})')
+    Parameters
+    ----------
+    encoding: str
+        The target encoding. Chose one from `the list of built-in codecs <
+        https://docs.python.org/3/library/codecs.html>`__.
+    repl: str, optional
+        The string to replace unrepresentable characters with.
+        Defaults to a single space.
 
-    def __init__(self, encoding: str, repl: str = ' ', count: int = 0) -> None:
+    """
+
+    pattern = re.compile(r'\\N{.+?}')
+
+    def __init__(self, encoding: str, repl: str = ' ') -> None:
         self.encoding = encoding
         self.repl = repl
-        self.count = count
-        super().__init__(encoding, repl, count)
+        super().__init__(encoding, repl)
 
-    def __call__(self, text: str, count: int | None = None) -> str:
-        count = self.count if count is None else count
+    def __call__(self, text: str) -> str:
+        """Replace unrepresentable characters in the given text.
+
+        Parameters
+        ----------
+        text: str
+            The text to force into the specified encoding by replacing
+            unrepresentable characters.
+
+        Returns
+        -------
+        str
+            The text in the target encoding with unrepresentable characters
+            replaced.
+
+        """
         replaced = text.encode(
             self.encoding,
             'namereplace'
         ).decode(self.encoding)
-        return self.pattern.sub(self.repl, replaced, count)
+        return self.pattern.sub(self.repl, replaced)
 
 
+# Provide a ready-to use instance of the EncodingEnforcer
 enforce_encoding = EncodingEnforcer(config.tokens.encoding)

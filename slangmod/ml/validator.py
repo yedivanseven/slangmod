@@ -53,6 +53,7 @@ class Validator(ArgRepr):
         perplexity = 0.0
         n_batches = math.ceil(data.n / self.batch_size)
 
+        ema = None
         model.eval()
         self.loss.eval()
         with pt.inference_mode():
@@ -65,7 +66,9 @@ class Validator(ArgRepr):
 
                 batch_loss = self.loss(logits, targets).item()
                 val_loss += batch_n * (batch_loss - val_loss) / (n + batch_n)
-                progress.set_postfix(loss=f'{val_loss:4.2f}')
+                # Exponential moving average for reporting in progress bar
+                ema = batch_loss if ema is None else 0.5 * (ema + batch_loss)
+                progress.set_postfix(loss=f'{ema:4.2f}')
 
                 batch_px = self.perplexity(logits, targets)
                 perplexity += batch_n * (batch_px - perplexity) / (n + batch_n)

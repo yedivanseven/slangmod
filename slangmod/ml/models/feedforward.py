@@ -5,7 +5,7 @@ from swak.pt.blocks import (
     GatedHiddenBlock,
     ActivatedGatedBlock
 )
-from ...config import config, FeedForward, Activations
+from ...config import config, FeedForward, Activations, Gates
 
 __all__ = [
     'feedforward',
@@ -18,6 +18,16 @@ activation = {
     Activations.SWISH: ptn.SiLU(),
     Activations.MISH: ptn.Mish(),
 }[config.model.feedforward.activation]
+
+gate = {
+    Gates.SIGMOID: ptn.Sigmoid(),
+    Gates.ELU: ptn.ELU(),
+    Gates.RELU: ptn.ReLU(),
+    Gates.GELU: ptn.GELU(),
+    Gates.SWISH: ptn.SiLU(),
+    Gates.MISH: ptn.Mish(),
+    Gates.NONE: Identity()
+}[config.model.feedforward.gate]
 
 if config.model.reference:
     feedforward = Identity()
@@ -34,7 +44,7 @@ elif config.model.feedforward.flavour == FeedForward.VANILLA:
 elif config.model.feedforward.flavour == FeedForward.GLU:
     feedforward = GatedHiddenBlock(
         mod_dim=config.model.dim,
-        gate=activation,
+        gate=gate,
         drop=ptn.Dropout(config.model.dropout),
         hidden_factor=config.model.feedforward.factor,
         bias=config.model.bias,
@@ -45,7 +55,7 @@ elif config.model.feedforward.flavour == FeedForward.GRN:
     feedforward = ActivatedGatedBlock(
         mod_dim=config.model.dim,
         activate=activation,
-        gate=activation,
+        gate=gate,
         drop=ptn.Dropout(config.model.dropout),
         hidden_factor=config.model.feedforward.factor,
         bias=config.model.bias,

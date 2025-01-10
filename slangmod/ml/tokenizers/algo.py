@@ -75,24 +75,28 @@ class Algo:
     def save(self, path: str, pretty: bool = True) -> None:
         self.tokenizer.save(path, pretty)
 
+    def terminate(self, encodings: list[int]) -> list[int]:
+        if encodings and encodings[-1] == self.eos_id:
+            return encodings
+        return encodings + [self.eos_id]
+
     def __call__(
             self,
             sequence: str | Iterable[str],
             pair: str | None = None,
-            is_pretokenized: bool = False,
-            add_special_tokens: bool = True
+            is_pretokenized: bool = False
     ) -> list[list[int]]:
         if isinstance(sequence, str):
             encodings = [self.tokenizer.encode(
                 sequence,
                 pair,
                 is_pretokenized,
-                add_special_tokens
+                add_special_tokens=True
             )]
         else:
             encodings = self.tokenizer.encode_batch_fast(
                 list(sequence),
                 is_pretokenized,
-                add_special_tokens
+                add_special_tokens=True
             )
-        return [encoding.ids + [self.eos_id] for encoding in encodings]
+        return [self.terminate(encoding.ids) for encoding in encodings]

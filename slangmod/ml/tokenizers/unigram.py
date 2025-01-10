@@ -9,13 +9,13 @@ from tokenizers.models import Unigram
 from tokenizers.decoders import Metaspace as MetaspaceDecoder
 from tokenizers.trainers import UnigramTrainer
 from ...config import config
-from .common import PAD, UNK, EOS, SPECIAL_TOKENS, normalizer
+from .common import UNK, SPECIAL_TOKENS, normalizer
 from .algo import Algo
 
 __all__ = ['unigram']
 
-vocab = [(PAD.content, 0.0), (UNK.content, 0.0), (EOS.content, 0.0)]
-model = Unigram(vocab, unk_id=1)
+vocab = [(token.content, 0.0) for token in SPECIAL_TOKENS]
+model = Unigram(vocab, unk_id=SPECIAL_TOKENS.index(UNK))
 trainer = UnigramTrainer(
     vocab_size=config.tokens.vocab,
     special_tokens=SPECIAL_TOKENS,

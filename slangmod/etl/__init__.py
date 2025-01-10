@@ -1,10 +1,16 @@
-from .duplicates import DuplicateDropper, drop_duplicates
 from .encoding import EncodingEnforcer, enforce_encoding
-from .folder import SequenceFolder, fold_train, fold_test
 from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame
 from .memory import MemoryTrimmer, trim_memory
 from .shuffle import Shuffle
+from .exceptions import ValidationErrors
+from .folder import (
+    SequenceFolder,
+    TrainSequenceFolder,
+    TestSequenceFolder,
+    fold_train,
+    fold_test
+)
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -18,8 +24,6 @@ from .regex import (
 )
 
 __all__ = [
-    'DuplicateDropper',
-    'drop_duplicates',
     'EncodingEnforcer',
     'enforce_encoding',
     'CorpusCleaner',
@@ -28,6 +32,9 @@ __all__ = [
     'MemoryTrimmer',
     'trim_memory',
     'SequenceFolder',
+    'TestSequenceFolder',
+    'TrainSequenceFolder',
+    'ValidationErrors',
     'fold_train',
     'fold_test',
     'Shuffle',

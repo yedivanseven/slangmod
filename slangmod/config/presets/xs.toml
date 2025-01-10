@@ -13,6 +13,6 @@ vocab = 16384
 
 [train]
 batch_size = 192
-learning_rate = 0.07
+learning_rate = 0.05
 warmup = 2_000
-cooldown = 30_000
+cooldown = 15_000

@@ -12,9 +12,7 @@ __all__ = ['bpe']
 model = BPE(
     dropout=config.tokens.dropout,
     unk_token=UNK.content,
-    end_of_word_suffix='</w>',
-    fuse_unk=True,
-    ignore_merges=False
+    end_of_word_suffix='</w>'
 )
 trainer = BpeTrainer(
     vocab_size=config.tokens.vocab,

@@ -1,12 +1,13 @@
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower
-from ..enums import Positions, FeedForward, Activations
+from ..enums import Positions, FeedForward, Activations, Gates
 
 
 class FF(JsonObject):
     flavour: Lower() = FeedForward.VANILLA
     activation: Lower() = Activations.GELU
-    factor: int = 3
+    gate: Lower() = Gates.GELU
+    factor: int = 4
 
 
 class Model(JsonObject):

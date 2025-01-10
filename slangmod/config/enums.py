@@ -7,6 +7,7 @@ __all__ = [
     'Tokenizers',
     'Positions',
     'Activations',
+    'Gates',
     'FeedForward',
     'Optimizers',
     'Scaling',
@@ -41,6 +42,16 @@ class Activations(StrEnum):
     GELU = 'gelu'
     SWISH = 'swish'
     MISH = 'mish'
+
+
+class Gates(StrEnum):
+    SIGMOID = 'sigmoid'
+    ELU = 'elu'
+    RELU = 'relu'
+    GELU = 'gelu'
+    SWISH = 'swish'
+    MISH = 'mish'
+    NONE = 'none'
 
 
 class FeedForward(StrEnum):

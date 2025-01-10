@@ -12,6 +12,10 @@ class Tokens(JsonObject):
     max_length: int = 16
     shrink_factor: float = 0.75
     n_iter: int = 2
+    pad_symbol = '[PAD]'
+    pad_id = 0
+    unk_symbol = '[UNK]'
+    unk_id = 1
     eos_symbol: str = '[EOS]'
     eos_string: str = '\n\n'
 

@@ -13,16 +13,9 @@ __all__ = [
 ]
 
 # Special tokens
-PAD = AddedToken('[PAD]', single_word=True, special=True)
-UNK = AddedToken('[UNK]', single_word=True, special=True)
-EOS = AddedToken(
-    config.tokens.eos_symbol,
-    single_word=True,
-    lstrip=True,
-    rstrip=True,
-    normalized=True,
-    special=True
-)
+PAD = AddedToken('[PAD]', special=True)
+UNK = AddedToken('[UNK]', special=True)
+EOS = AddedToken(config.tokens.eos_symbol, normalized=True, special=True)
 SPECIAL_TOKENS = [PAD, UNK, EOS]
 
 # Normalizer
