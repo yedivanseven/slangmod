@@ -13,7 +13,7 @@ class Validator(ArgRepr):
 
     def __init__(self, loss: Module, batch_size: int) -> None:
         super().__init__(loss, batch_size)
-        self.loss = loss
+        self.loss = loss  # ToDo: Make a new CrossEntropyLoss here!
         self.batch_size = batch_size
 
     @staticmethod
