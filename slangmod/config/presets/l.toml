@@ -5,7 +5,6 @@ n_layers = 8
 
 [data]
 seq_len = 512
-stride = 384
 jitter = 32
 
 [tokens]
@@ -15,3 +14,4 @@ vocab = 16384
 batch_size = 96
 learning_rate = 0.002
 warmup = 5000
+cooldown = 30_000

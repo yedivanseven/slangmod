@@ -21,6 +21,13 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_process(self):
         self.assertIs(self.clean.process, proc)
 
+    def test_has_min_len(self):
+        self.assertTrue(hasattr(self.clean, 'min_len'))
+
+    def test_min_len(self):
+        self.assertIsInstance(self.clean.min_len, int)
+        self.assertEqual(0, self.clean.min_len)
+
     def test_has_args(self):
         self.assertTrue(hasattr(self.clean, 'args'))
 
@@ -37,9 +44,18 @@ class TestDefaultAttributes(unittest.TestCase):
 class TestCustomAttributes(unittest.TestCase):
 
     def setUp(self):
+        self.min_len = 3
         self.args = 'docs',
         self.kwargs = {'leave': False}
-        self.clean = CorpusCleaner(proc, *self.args, **self.kwargs)
+        self.clean = CorpusCleaner(
+            proc,
+            self.min_len,
+            *self.args,
+            **self.kwargs
+        )
+
+    def test_min_len(self):
+        self.assertEqual(self.min_len, self.clean.min_len)
 
     def test_args(self):
         self.assertTupleEqual(self.args, self.clean.args)
@@ -51,10 +67,12 @@ class TestCustomAttributes(unittest.TestCase):
 class TestUsage(unittest.TestCase):
 
     def setUp(self):
+        self.min_len = 5
         self.args = 'docs',
         self.kwargs = {'leave': False}
         self.name = 'text'
-        self.corpus = Series(['hello', 'world'])
+        self.data = ['hello', 'world', '42']
+        self.corpus = Series(self.data, name=self.name)
 
     def test_callable(self):
         clean = CorpusCleaner(proc)
@@ -70,7 +88,7 @@ class TestUsage(unittest.TestCase):
     @patch('slangmod.etl.cleaner.tqdm')
     def test_tqdm_called_custom(self, mock):
         mock.return_value = self.corpus
-        clean = CorpusCleaner(proc, *self.args, **self.kwargs)
+        clean = CorpusCleaner(proc, self.min_len, *self.args, **self.kwargs)
         _ = clean(self.corpus)
         mock.assert_called_once_with(self.corpus, *self.args, **self.kwargs)
 
@@ -79,7 +97,7 @@ class TestUsage(unittest.TestCase):
         mock.return_value = self.corpus
         kwargs = {'leave': True, 'total': 42}
         merged_kwargs = self.kwargs | kwargs
-        clean = CorpusCleaner(proc, *self.args, **kwargs)
+        clean = CorpusCleaner(proc, self.min_len, *self.args, **kwargs)
         _ = clean(self.corpus)
         mock.assert_called_once_with(self.corpus, *self.args, **merged_kwargs)
 
@@ -98,27 +116,50 @@ class TestUsage(unittest.TestCase):
         self.assertIsInstance(frame, DataFrame)
         self.assertIsInstance(name, str)
 
-    def test_returned_frame_shape(self):
+    def test_returned_frame_shape_default(self):
         clean = CorpusCleaner(proc)
         actual, _ = clean(self.corpus)
-        self.assertTupleEqual((len(self.corpus), 1), actual.shape)
+        self.assertTupleEqual((len(self.data), 1), actual.shape)
 
-    def test_returned_frame_content(self):
+    def test_returned_frame_shape_custom(self):
+        clean = CorpusCleaner(proc, self.min_len)
+        actual, _ = clean(self.corpus)
+        self.assertTupleEqual((len(self.data) - 1, 1), actual.shape)
+
+    def test_returned_frame_content_default(self):
         clean = CorpusCleaner(proc)
         actual, _ = clean(self.corpus)
-        expected = Series([self.corpus[0].upper(), self.corpus[1].upper()])
+        expected = Series([doc.upper() for doc in self.data], name=self.name)
+        testing.assert_frame_equal(actual, expected.to_frame())
+
+    def test_returned_frame_content_custom(self):
+        clean = CorpusCleaner(proc, self.min_len)
+        actual, _ = clean(self.corpus)
+        expected = Series(
+            [doc.upper() for doc in self.data[:-1]],
+            name=self.name
+        )
         testing.assert_frame_equal(actual, expected.to_frame())
 
     def test_returned_frame_column_names(self):
-        self.corpus.name = 'text'
         clean = CorpusCleaner(proc)
         actual, _ = clean(self.corpus)
-        self.assertEqual('text', actual.columns[0])
+        self.assertEqual(self.name, actual.columns[0])
 
-    def test_returned_hash(self):
+    def test_returned_hash_default(self):
         clean = CorpusCleaner(proc)
         _, actual = clean(self.corpus)
-        series = Series([self.corpus[0].upper(), self.corpus[1].upper()])
+        series = Series([doc.upper() for doc in self.data], name=self.name)
+        expected = sha256(str(series).encode()).hexdigest()
+        self.assertEqual(expected, actual)
+
+    def test_returned_hash_custom(self):
+        clean = CorpusCleaner(proc, self.min_len)
+        _, actual = clean(self.corpus)
+        series = Series(
+            [doc.upper() for doc in self.data[:-1]],
+            name=self.name
+        )
         expected = sha256(str(series).encode()).hexdigest()
         self.assertEqual(expected, actual)
 
@@ -127,16 +168,16 @@ class TestMisc(unittest.TestCase):
 
     def test_default_repr(self):
         clean = CorpusCleaner(proc)
-        expected = 'CorpusCleaner(proc)'
+        expected = 'CorpusCleaner(proc, 0)'
         self.assertEqual(expected, repr(clean))
 
     def test_custom_repr(self):
-        clean = CorpusCleaner(proc, 'docs', leave=False)
-        expected = "CorpusCleaner(proc, 'docs', leave=False)"
+        clean = CorpusCleaner(proc, 5,'docs', leave=False)
+        expected = "CorpusCleaner(proc, 5, 'docs', leave=False)"
         self.assertEqual(expected, repr(clean))
 
     def test_pickle_works(self):
-        clean = CorpusCleaner(proc, 'docs', leave=False)
+        clean = CorpusCleaner(proc, 3,'docs', leave=False)
         _ = pickle.dumps(clean)
 
 

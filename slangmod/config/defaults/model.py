@@ -1,10 +1,10 @@
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower
-from ..enums import Positions, FeedForward, Activations, Gates
+from ..enums import Positions, FeedForwards, Activations, Gates
 
 
-class FF(JsonObject):
-    flavour: Lower() = FeedForward.VANILLA
+class FeedForward(JsonObject):
+    flavour: Lower() = FeedForwards.VANILLA
     activation: Lower() = Activations.GELU
     gate: Lower() = Gates.GELU
     factor: int = 4
@@ -18,7 +18,7 @@ class Model(JsonObject):
     context: int = 4096
     n_heads: int = 2
     n_layers: int = 2
-    feedforward: FF = FF()
+    feedforward: FeedForward = FeedForward()
     dropout: float = 0.1
     bias: bool = True
     norm_first: bool = True

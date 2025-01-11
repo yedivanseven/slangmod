@@ -38,6 +38,7 @@ class DirectoryCleaner(ArgRepr):
         return ()
 
 
+# ToDo: Do we really need the separator? maybe string contain is enough?
 class FileTypeExtractor(ArgRepr):
 
     def __init__(self, sep: str, file_type: str, *file_types: str) -> None:

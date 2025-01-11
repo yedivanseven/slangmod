@@ -38,7 +38,11 @@ wiki40b_processor = Pipe[[str], str](
     replace_double_quote,
     enforce_encoding
 )
-process_wiki40b_docs = CorpusCleaner(wiki40b_processor, 'Documents')
+process_wiki40b_docs = CorpusCleaner(
+    wiki40b_processor,
+    config.data.jitter,
+    'Documents'
+)
 process_wiki40b_file = Pipe[[str], tuple[()]](
     Fork[[str], tuple[str, DataFrame, str]](
         Pipe[[str], tuple[()]](
@@ -67,7 +71,11 @@ gutenberg_processor = Pipe[[str], str](
     replace_double_quote,
     enforce_encoding
 )
-process_gutenberg_docs = CorpusCleaner(gutenberg_processor, 'Documents')
+process_gutenberg_docs = CorpusCleaner(
+    gutenberg_processor,
+    config.data.jitter,
+    'Documents'
+)
 process_gutenberg_file = Pipe[[str], tuple[()]](
     Fork[[str], tuple[str, DataFrame, str]](
         Pipe[[str], tuple[()]](

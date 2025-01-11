@@ -21,7 +21,7 @@ class MemoryTrimmer[T, *Ts](ArgRepr):
     """
 
     def __init__(self, cdll: str = 'libc.so.6') -> None:
-        self.cdll = cdll.strip()
+        self.cdll = str(cdll).strip()
         super().__init__(self.cdll)
 
     @cached_property

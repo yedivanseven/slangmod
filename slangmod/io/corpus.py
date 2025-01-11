@@ -24,92 +24,178 @@ __all__ = [
 
 
 class CorpusDiscovery(ArgRepr):
+    """Discover files in a given directory and filter by name and suffix.
+
+    Parameters
+    ----------
+    folder: str, optional
+        Parent directory to search for files. Subdirectories can be specified
+        when calling instances. Defaults to the working directory of the
+        current python interpreter.
+    *file_types: str, optional
+        File names must contain at least one of these strings.
+    suffix: str, optional
+        Extension glob pattern that files must match (without leading dot).
+        Defaults to "parquet".
+    not_found: str, optional
+        What to if either the directory does not exist or no matching files
+        are found in the given directory. One of "ignore", "warn", or "raise".
+        Use the ``NotFound`` enum to avoid typos. Defaults to "raise".
+        If set otherwise, an empty tuple of file names might be returned.
+
+    """
 
     def __init__(
             self,
-            path: str = '',
+            folder: str = '',
+            *file_types: str,
             suffix: str = 'parquet',
-            train: str = 'train',
-            test: str = 'test',
-            validation: str = 'validation',
-            not_found: NotFound | LiteralNotFound = NotFound.RAISE
+            not_found: NotFound | LiteralNotFound = NotFound.RAISE,
     ) -> None:
-        self.path = str(path).strip()
-        self.suffix = suffix.strip(' .')
-        self.train = train.strip()
-        self.test = test.strip()
-        self.validation = validation.strip()
+        self.folder = str(folder).strip()
+        self.types = tuple(
+            str(file_type).strip() for file_type in file_types
+        ) if file_types else ('',)
+        self.suffix = str(suffix).strip(' .')
         self.not_found = str(not_found).strip().lower()
         super().__init__(
-            self.path,
-            self.suffix,
-            self.train,
-            self.test,
-            self.validation,
-            self.not_found
+            self.folder,
+            *self.types,
+            suffix=self.suffix,
+            not_found=self.not_found
         )
 
-    @property
-    def prefixes(self) -> tuple[str, str, str]:
-        return self.train, self.test, self.validation
+    def __call__(self, subfolder: str = '') -> list[str]:
+        """Chose subdirectory and filter names of files found therein.
 
-    def __call__(self, path: str = '') -> list[str]:
-        path = Path(self.path) / str(path).strip()
-        corpus =  [
+        Parameters
+        ----------
+        subfolder: str, optional
+            Subdirectory relative to the parent given at instantiation.
+            Defaults to an empty string, resulting in the that parent
+            directory to be searched.
+
+        Returns
+        -------
+        list
+            Fully resolved names of files that match the given criteria
+            from within the specified directory.
+
+        Raises
+        ------
+        FileNotFoundError
+            Only if `not_found` is set to "raise", and then only if either the
+            directory was not found or no files matching the specified criteria
+            were found in that directory.
+
+        """
+        path = Path(self.folder) / str(subfolder).strip()
+        corpus = [
             str(item.resolve())
-            for item in path.iterdir()
+            for item in path.glob(f'*.{self.suffix}')
             if item.is_file()
-                and item.suffix == f'.{self.suffix}'
-                and any(prefix in item.name for prefix in self.prefixes)
+            and any(prefix in item.name for prefix in self.types)
         ] if path.exists() and path.is_dir() else []
         if corpus:
             return corpus
-        msg = 'No *.{} files found in folder "{}"!'
-        interpolated = msg.format(self.suffix, path.resolve())
+        # If no files were found, act according to the not_found flag
+        template = 'No *.{} files with any of {} in their name in folder "{}"!'
+        msg = template.format(self.suffix, self.types, path.resolve())
         match self.not_found:
             case NotFound.WARN:
-                warnings.warn(interpolated)
+                warnings.warn(msg)
             case NotFound.RAISE:
-                raise FileNotFoundError(interpolated)
+                raise FileNotFoundError(msg)
         return corpus
 
 
-class CorpusFilter(ArgRepr):
-
-    def __init__(self, prefix: str) -> None:
-        self.prefix = prefix.strip()
-        super().__init__(self.prefix)
-
-    def __call__(self, file: str) -> bool:
-        return self.prefix in Path(file).name
-
-
 class CorpusLoader(ArgRepr):
+    """Read files with multiple documents and provide an iterator over all.
+
+    Parameters
+    ----------
+    reader: callable
+        Must return some sort of iterable over documents (=strings), when
+        given a file name.
+
+    """
 
     def __init__(self, reader: Callable[[str], Iterable[str]]) -> None:
         super().__init__(reader)
         self.reader = reader
 
-    def __call__(self, files: list[str]) -> chain[str]:
+    def __call__(self, files: Iterable[str]) -> chain[str]:
+        """Read files with multiple documents and provide an iterator over all.
+
+        Parameters
+        ----------
+        files: iterable over str
+            Names of files to chain documents from.
+
+        Returns
+        -------
+        Iterator
+            An ``itertools.chain`` iterator over all documents from all files.
+
+        """
         return chain.from_iterable(map(self.reader, files))
 
 
+class CorpusFilter(ArgRepr):
+    """Determine whether a given string is part of a fully resolved file name.
+
+    Parameters
+    ----------
+    part: str
+        Part of the file name to filter for.
+
+    """
+
+    def __init__(self, part: str) -> None:
+        self.part = part
+        super().__init__(self.part)
+
+    def __call__(self, file: str) -> bool:
+        """Determine whether the cached string is part of the file name.
+
+        Parameters
+        ----------
+        file: str
+            Name of the file to test. Can include parent folder(s).
+
+        Returns
+        -------
+        bool
+            Whether the cached `part` occurs in the file name at least once.
+
+        """
+        return self.part in Path(file).name
+
+
 discover_wiki40b = CorpusDiscovery(
-    path=config.files.wiki40b,
+    config.files.wiki40b,
+    *config.files.types,
     suffix=config.files.suffix,
-    train=config.files.train,
-    test=config.files.test,
-    validation=config.files.validation
+    not_found=NotFound.RAISE
 )
 discover_gutenberg = CorpusDiscovery(
-    path=config.files.gutenberg,
+    config.files.gutenberg,
+    *config.files.types,
     suffix=config.files.suffix,
-    train=config.files.train,
-    test=config.files.test,
-    validation=config.files.validation
+    not_found=NotFound.RAISE
 )
-discover_corpus = CorpusDiscovery(config.corpus)
-discover_encodings = CorpusDiscovery(config.encodings)
+discover_corpus = CorpusDiscovery(
+    config.corpus,
+    *config.files.types,
+    suffix=config.files.suffix,
+    not_found=NotFound.RAISE
+)
+discover_encodings = CorpusDiscovery(
+    config.encodings,
+    *config.files.types,
+    suffix=config.files.suffix,
+    not_found=NotFound.RAISE
+)
 
 load_corpus = CorpusLoader(read_column)
 

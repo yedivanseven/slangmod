@@ -27,11 +27,13 @@ class CorpusCleaner(ArgRepr):
     def __init__(
             self,
             process: Callable[[str], str],
+            min_len: int = 0,
             *args: Any,
             **kwargs: Any
     ) -> None:
-        super().__init__(process, *args, **kwargs)
+        super().__init__(process, min_len, *args, **kwargs)
         self.process = process
+        self.min_len = min_len
         self.args = args
         self.kwargs = kwargs
 
@@ -57,6 +59,9 @@ class CorpusCleaner(ArgRepr):
         """
         merged_kwargs = self.kwargs | kwargs
         wrapped = tqdm(corpus, *self.args, **merged_kwargs)
-        corpus[:] = [self.process(document) for document in wrapped]
+        processed = (self.process(document) for document in wrapped)
+        filtered = filter(lambda doc: len(doc) >= self.min_len, processed)
+        corpus = Series(filtered, name=corpus.name)
+        #corpus[:] = [self.process(document) for document in wrapped]
         hashed = sha256(str(corpus).encode()).hexdigest()
         return corpus.to_frame(), hashed

@@ -30,7 +30,11 @@ class TestCustomAttributes(unittest.TestCase):
         self.trim = MemoryTrimmer('libc.so')
 
     def test_cdll(self):
-            self.assertEqual('libc.so', self.trim.cdll)
+        self.assertEqual('libc.so', self.trim.cdll)
+
+    def test_cdll_stripped(self):
+        trim = MemoryTrimmer('  libc.so ')
+        self.assertEqual('libc.so', trim.cdll)
 
 
 class TestUsage(unittest.TestCase):
