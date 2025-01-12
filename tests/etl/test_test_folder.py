@@ -187,7 +187,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         fold = TestSequenceFolder(512, -100)
-        _ = pickle.dumps(fold)
+        _ = pickle.loads(pickle.dumps(fold))
 
 
 if __name__ == '__main__':

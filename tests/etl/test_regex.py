@@ -104,7 +104,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         replace = RegexReplacer(r'a{2}', '[UNK]', 2, 5)
-        _ = pickle.dumps(replace)
+        _ = pickle.loads(pickle.dumps(replace))
 
 
 if __name__ == '__main__':

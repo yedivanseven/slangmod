@@ -113,7 +113,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         extract = FileTypeExtractor('test', 'train', 'validation')
-        _ = pickle.dumps(extract)
+        _ = pickle.loads(pickle.dumps(extract))
 
 
 if __name__ == '__main__':

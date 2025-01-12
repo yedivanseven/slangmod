@@ -72,7 +72,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         shuffle = Shuffle()
-        _ = pickle.dumps(shuffle)
+        _ = pickle.loads(pickle.dumps(shuffle))
 
 
 if __name__ == '__main__':

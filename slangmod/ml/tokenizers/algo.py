@@ -5,7 +5,6 @@ from tokenizers.pre_tokenizers import PreTokenizer
 from tokenizers.models import Model
 from tokenizers.processors import PostProcessor
 from tokenizers.decoders import Decoder
-from tokenizers.tokenizers import AddedToken
 from tokenizers.trainers import Trainer
 from tokenizers import Tokenizer
 
@@ -18,6 +17,8 @@ class Algo:
             self,
             model: Model | Tokenizer,
             trainer: Trainer,
+            unk_id: int,
+            eos_id: int,
             normalizer: Normalizer | None = None,
             pre_tokenizer: PreTokenizer | None = None,
             post_processor: PostProcessor | None = None,
@@ -28,7 +29,8 @@ class Algo:
         else:
             self.tokenizer = Tokenizer(model)
         self.trainer = trainer
-        self.pad, self.unk, *self.extra, self.eos = trainer.special_tokens
+        self.eos_id = eos_id
+        self.unk_id = unk_id
         if normalizer is not None:
             self.tokenizer.normalizer = normalizer
         if pre_tokenizer is not None:
@@ -43,34 +45,26 @@ class Algo:
         return f'{cls}(...)'
 
     @property
-    def special(self) -> list[AddedToken]:
-        return [self.pad, self.unk, *self.extra, self.eos]
-
-    @property
-    def pad_id(self) -> int:
-        return 0
-
-    @property
-    def unk_id(self) -> int:
-        return 1
-
-    @property
-    def eos_id(self) -> int:
-        return len(self.special) - 1
-
-    @property
     def vocab(self) -> int:
         return self.tokenizer.get_vocab_size()
 
-    def __getattr__(self, item: str) -> Any:
-        # Needed if used with multiprocessing, which is discouraged.
-        # Tokenizers already work with parallelism.
-        if item == 'tokenizer':
-            return getattr(super(), item)
-        return getattr(self.tokenizer, item)
+    def __getattr__(self, attr: str) -> Any:
+        """Redirect attribute/method access to the wrapped tokenizer."""
+        # This is needed for un-pickling to work
+        if attr == '__setstate__':
+            cls = self.__class__.__name__
+            msg = f"'{cls}' object has no attribute {attr}"
+            raise AttributeError(msg)
+        # This is the actual forwarding
+        return getattr(self.tokenizer, attr)
 
     def from_file(self, path: str) -> Self:
-        return self.__class__(Tokenizer.from_file(path), self.trainer)
+        return self.__class__(
+            Tokenizer.from_file(path),
+            self.trainer,
+            self.unk_id,
+            self.eos_id
+        )
 
     def train(self, docs: Iterable[str]) -> Self:
         self.tokenizer.train_from_iterator(docs, self.trainer)

@@ -234,7 +234,7 @@ class TestMisc(unittest.TestCase):
             suffix='txt',
             not_found='warn'
         )
-        _ = pickle.dumps(discover)
+        _ = pickle.loads(pickle.dumps(discover))
 
 
 if __name__ == '__main__':

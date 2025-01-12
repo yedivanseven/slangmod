@@ -3,20 +3,22 @@ from tokenizers.models import BPE
 from tokenizers.decoders import BPEDecoder
 from tokenizers.trainers import BpeTrainer
 from ...config import config
-from .common import UNK, SPECIAL_TOKENS, normalizer
+from .common import normalizer
+from .special import special
 from .algo import Algo
 
 __all__ = ['bpe']
 
 model = BPE(
     dropout=config.tokens.dropout,
-    unk_token=UNK.content,
-    end_of_word_suffix='</w>'
+    unk_token=special.unk.content,
+    end_of_word_suffix='</w>',
+    byte_fallback=False
 )
 trainer = BpeTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
-    special_tokens=SPECIAL_TOKENS,
+    special_tokens=special.tokens,
     end_of_word_suffix='</w>',
     max_token_length=config.tokens.max_length
 )
@@ -31,5 +33,7 @@ bpe = Algo(
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,
-    decoder=decoder
+    decoder=decoder,
+    unk_id=special.unk_id,
+    eos_id=special.eos_id
 )

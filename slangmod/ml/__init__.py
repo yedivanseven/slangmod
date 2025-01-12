@@ -1,4 +1,4 @@
-from .tokenizers import Algo, tokenizer
+from .tokenizers import Special, special, Algo, tokenizer
 from .data import (
     TrainData,
     TestData,
@@ -11,6 +11,8 @@ from .validator import Validator, validate
 from .generators import Generator, create_generator
 
 __all__ = [
+    'Special',
+    'special',
     'Algo',
     'tokenizer',
     'TrainData',

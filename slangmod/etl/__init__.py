@@ -7,8 +7,8 @@ from .exceptions import ValidationErrors
 from .folder import (
     TrainSequenceFolder,
     TestSequenceFolder,
-    fold_train,
-    fold_test
+    fold_train_sequences,
+    fold_test_sequences
 )
 from .regex import (
     RegexReplacer,
@@ -33,8 +33,8 @@ __all__ = [
     'TestSequenceFolder',
     'TrainSequenceFolder',
     'ValidationErrors',
-    'fold_train',
-    'fold_test',
+    'fold_train_sequences',
+    'fold_test_sequences',
     'Shuffle',
     'RegexReplacer',
     'replace_article',

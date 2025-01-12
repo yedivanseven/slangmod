@@ -80,7 +80,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         encode = EncodingEnforcer('ascii', 'repl')
-        _ = pickle.dumps(encode)
+        _ = pickle.loads(pickle.dumps(encode))
 
 
 if __name__ == '__main__':

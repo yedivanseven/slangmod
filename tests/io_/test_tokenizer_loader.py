@@ -73,7 +73,7 @@ class TestMisc(unittest.TestCase):
         self.assertEqual(expected, repr(self.load))
 
     def test_pickle_works(self):
-        _ = pickle.dumps(self.load)
+        _ = pickle.loads(pickle.dumps(self.load))
 
 
 if __name__ == '__main__':

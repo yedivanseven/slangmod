@@ -451,7 +451,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         fold = TrainSequenceFolder(512, -100, 0.25, 32)
-        _ = pickle.dumps(fold)
+        _ = pickle.loads(pickle.dumps(fold))
 
 
 if __name__ == '__main__':

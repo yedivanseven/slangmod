@@ -8,18 +8,18 @@ from tokenizers.models import Unigram
 from tokenizers.decoders import Metaspace as MetaspaceDecoder
 from tokenizers.trainers import UnigramTrainer
 from ...config import config
-from .common import UNK, SPECIAL_TOKENS, normalizer
+from .common import normalizer
+from .special import special
 from .algo import Algo
 
 __all__ = ['unigram']
 
-vocab = [(token.content, 0.0) for token in SPECIAL_TOKENS]
-model = Unigram(vocab, unk_id=SPECIAL_TOKENS.index(UNK))
+model = Unigram(special.unigram_vocab, special.unk_id, False)
 trainer = UnigramTrainer(
     vocab_size=config.tokens.vocab,
-    special_tokens=SPECIAL_TOKENS,
+    special_tokens=special.tokens,
     shrinking_factor=config.tokens.shrink_factor,
-    unk_token=UNK.content,
+    unk_token=special.unk.content,
     max_piece_length=config.tokens.max_length,
     n_sub_iterations=config.tokens.n_iter
 )
@@ -35,5 +35,7 @@ unigram = Algo(
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,
-    decoder=decoder
+    decoder=decoder,
+    unk_id=special.unk_id,
+    eos_id=special.eos_id
 )

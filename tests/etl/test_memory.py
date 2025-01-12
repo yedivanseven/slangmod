@@ -99,7 +99,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         trim = MemoryTrimmer()
-        _ = pickle.dumps(trim)
+        _ = pickle.loads(pickle.dumps(trim))
 
 
 if __name__ == '__main__':

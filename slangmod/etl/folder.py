@@ -3,13 +3,14 @@ import torch.nn.functional as ptnf
 from swak.misc import ArgRepr
 from swak.pt.types import Tensor
 from ..config import config
+# from ..ml import special  ToDo: Restructure to avoid circular import!
 from .exceptions import ValidationErrors
 
 __all__ = [
     'TestSequenceFolder',
     'TrainSequenceFolder',
-    'fold_train',
-    'fold_test'
+    'fold_train_sequences',
+    'fold_test_sequences'
 ]
 
 
@@ -289,13 +290,13 @@ class TrainSequenceFolder(ArgRepr):
 
 
 # Provide a ready-to use instances of the sequence folders
-fold_train = TrainSequenceFolder(
+fold_train_sequences = TrainSequenceFolder(
     seq_len=config.data.seq_len,
-    pad_id=config.tokens.pad_id,
+    pad_id=0,  # special.pad_id,
     overlap=config.data.overlap,
     jitter=config.data.jitter
 )
-fold_test = TestSequenceFolder(
+fold_test_sequences = TestSequenceFolder(
     seq_len=config.data.seq_len,
-    pad_id=config.tokens.pad_id
+    pad_id=0, #special.pad_id
 )

@@ -19,6 +19,7 @@ VERSION = meta.version(PACKAGE)
 class Main(JsonObject):
     package = PACKAGE
     version = VERSION
+
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     workdir: resolve = '/home/georg/Projects/slangmod/data'
     size: Maybe[str](Lower()) = 'xxs'

@@ -93,7 +93,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         to_frame = ToFrame('text', hello='world', answer=42)
-        _ = pickle.dumps(to_frame)
+        _ = pickle.loads(pickle.dumps(to_frame))
 
 
 if __name__ == '__main__':

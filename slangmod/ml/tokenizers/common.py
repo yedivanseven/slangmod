@@ -1,24 +1,11 @@
-from tokenizers import AddedToken, Regex
+from tokenizers import Regex
 from tokenizers.normalizers import Sequence
 from tokenizers.normalizers import Strip, NFD, StripAccents, Replace
 from ...config import config
 from ...etl.regex import PARAGRAPH_REGEX
 
-__all__ = [
-    'PAD',
-    'UNK',
-    'EOS',
-    'SPECIAL_TOKENS',
-    'normalizer',
-]
+__all__ = ['normalizer']
 
-# Special tokens
-PAD = AddedToken(config.tokens.pad_symbol, special=True)
-UNK = AddedToken(config.tokens.unk_symbol, special=True)
-EOS = AddedToken(config.tokens.eos_symbol, normalized=True, special=True)
-SPECIAL_TOKENS = [PAD, UNK, EOS]
-
-# Normalizer
 normalizer = Sequence([
     Strip(),
     NFD(),

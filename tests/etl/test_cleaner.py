@@ -178,7 +178,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         clean = CorpusCleaner(proc, 3,'docs', leave=False)
-        _ = pickle.dumps(clean)
+        _ = pickle.loads(pickle.dumps(clean))
 
 
 if __name__ == '__main__':

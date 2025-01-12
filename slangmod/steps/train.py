@@ -7,7 +7,12 @@ from swak.pt.misc import Cat, LazyCatDim0
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
 from ..config import config
-from ..etl import fold_train, fold_test, trim_memory, Shuffle
+from ..etl import (
+    fold_train_sequences,
+    fold_test_sequences,
+    trim_memory,
+    Shuffle
+)
 from ..ml import (
     TrainData,
     TestData,
@@ -62,7 +67,7 @@ LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences.'),
-    Map[[Tensor], Tensor, list](fold_train),
+    Map[[Tensor], Tensor, list](fold_train_sequences),
     cat_sequences
 )
 process_test_file = Pipe[[str], Tensor](
@@ -75,7 +80,7 @@ LOGGER.debug('Dropping sequences shorter than 2.'),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
     LOGGER.debug('Folding sequences.'),
-    Map[[Tensor], Tensor, list](fold_test),
+    Map[[Tensor], Tensor, list](fold_test_sequences),
     cat_sequences
 )
 

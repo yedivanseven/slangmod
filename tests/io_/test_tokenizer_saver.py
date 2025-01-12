@@ -160,7 +160,7 @@ class TestMisc(unittest.TestCase):
 
     def test_pickle_works(self):
         save = TokenizerSaver('path', True)
-        _ = pickle.dumps(save)
+        _ = pickle.loads(pickle.dumps(save))
 
 
 if __name__ == '__main__':
