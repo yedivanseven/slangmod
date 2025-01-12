@@ -99,6 +99,12 @@ class TestUsage(unittest.TestCase):
             with Path(name).open('wt') as file:
                 file.write('Hello world!')
 
+    def tearDown(self):
+        self.subfolder.cleanup()
+        self.folder.cleanup()
+        del self.subfolder
+        del self.folder
+
     def test_callable(self):
         discover = CorpusDiscovery()
         self.assertTrue(callable(discover))
@@ -200,12 +206,6 @@ class TestUsage(unittest.TestCase):
         )
         actual = discover()
         self.assertSetEqual(self.matches, set(actual))
-
-    def tearDown(self):
-        self.subfolder.cleanup()
-        self.folder.cleanup()
-        del self.subfolder
-        del self.folder
 
 
 class TestMisc(unittest.TestCase):

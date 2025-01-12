@@ -1,6 +1,5 @@
 from pandas import DataFrame
 from swak.funcflow.loggers import PassThroughStdOut
-from swak.pd import ParquetWriter
 from swak.funcflow import Pipe, Map, Sum, Fork
 from ..config import config
 from ..io import (
@@ -8,6 +7,7 @@ from ..io import (
     discover_gutenberg,
     clean_corpus_directory,
     extract_file_type,
+    write_clean_file,
     read_column
 )
 from ..etl import (
@@ -26,7 +26,6 @@ from .log_messages import log_total_number_of_files
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-write_parquet = ParquetWriter(config.clean_files, create=True)
 
 wiki40b_processor = Pipe[[str], str](
     replace_article,
@@ -51,15 +50,15 @@ process_wiki40b_file = Pipe[[str], tuple[()]](
         ),
         extract_file_type
     ),
-    write_parquet,
+    write_clean_file,
     trim_memory
 )
-process_wiki40b_corpus = Map[[str], tuple[()], list](process_wiki40b_file)
+process_wiki40b = Map[[str], tuple[()], list](process_wiki40b_file)
 clean_wiki40b = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(f'Scanning "{config.files.wiki40b}" for *.parquet files.'),
     discover_wiki40b,
     LOGGER.debug(log_total_number_of_files),
-    process_wiki40b_corpus,
+    process_wiki40b,
     LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
     Sum(()),
 )
@@ -84,15 +83,15 @@ process_gutenberg_file = Pipe[[str], tuple[()]](
         ),
         extract_file_type,
     ),
-    write_parquet,
+    write_clean_file,
     trim_memory
 )
-process_gutenberg_corpus = Map[[str], tuple[()], list](process_gutenberg_file)
+process_gutenberg = Map[[str], tuple[()], list](process_gutenberg_file)
 clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(f'Scanning "{config.files.gutenberg}" for *.parquet files.'),
     discover_gutenberg,
     LOGGER.debug(log_total_number_of_files),
-    process_gutenberg_corpus,
+    process_gutenberg,
     LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
     Sum(()),
 )

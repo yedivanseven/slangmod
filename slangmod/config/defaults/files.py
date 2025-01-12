@@ -8,7 +8,6 @@ class Files(JsonObject):
     model: Lower() = 'model.pt'
     config: Lower() = 'config.toml'
     suffix: str = 'parquet'
-    sep: str = '-'
     train: str = 'train'
     test: str = 'test'
     column: str = 'text'

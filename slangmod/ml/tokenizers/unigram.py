@@ -1,4 +1,3 @@
-from tokenizers import Tokenizer
 from tokenizers.pre_tokenizers import (
     Sequence,
     WhitespaceSplit,
@@ -32,7 +31,7 @@ pre_tokenizer = Sequence([
 decoder = MetaspaceDecoder()
 
 unigram = Algo(
-    tokenizer=Tokenizer(model),
+    model=model,
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,

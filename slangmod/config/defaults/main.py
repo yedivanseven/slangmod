@@ -79,7 +79,7 @@ class Main(JsonObject):
 
     @property
     def clean_files(self) -> str:
-        return self.corpus + '/{}' + self.files.sep + '{}.' + self.files.suffix
+        return self.corpus + '/{}-{}.' + self.files.suffix
 
     @property
     def encoded_files(self) -> str:

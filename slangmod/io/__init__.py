@@ -1,4 +1,5 @@
 from .config import save_config
+from .model import save_model
 from .clients import ConsoleClient, console_client
 from .corpus import (
     CorpusDiscovery,
@@ -9,17 +10,19 @@ from .corpus import (
     discover_wiki40b,
     discover_gutenberg,
     discover_encodings,
-    train_filter,
-    test_filter,
-    validation_filter
+    filter_train_files,
+    filter_test_files,
+    filter_validation_files
 )
-from .misc import (
+from .files import (
     DirectoryCleaner,
     clean_corpus_directory,
     clean_encodings_directory,
+    write_clean_file,
     FileTypeExtractor,
     extract_file_type,
     extract_file_name,
+    write_encoded_file,
     read_column
 )
 from .tokenizer import (
@@ -31,23 +34,26 @@ from .tokenizer import (
 
 __all__ = [
     'save_config',
+    'save_model',
     'CorpusDiscovery',
     'discover_corpus',
     'discover_wiki40b',
     'discover_gutenberg',
     'discover_encodings',
     'CorpusFilter',
-    'train_filter',
-    'test_filter',
-    'validation_filter',
+    'filter_train_files',
+    'filter_test_files',
+    'filter_validation_files',
     'CorpusLoader',
     'load_corpus',
     'DirectoryCleaner',
     'clean_corpus_directory',
     'clean_encodings_directory',
+    'write_clean_file',
     'FileTypeExtractor',
     'extract_file_type',
     'extract_file_name',
+    'write_encoded_file',
     'read_column',
     'TokenizerSaver',
     'save_tokenizer',

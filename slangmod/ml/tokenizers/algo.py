@@ -2,6 +2,7 @@ from typing import Self, Any
 from collections.abc import Iterable
 from tokenizers.normalizers import Normalizer
 from tokenizers.pre_tokenizers import PreTokenizer
+from tokenizers.models import Model
 from tokenizers.processors import PostProcessor
 from tokenizers.decoders import Decoder
 from tokenizers.tokenizers import AddedToken
@@ -15,14 +16,17 @@ class Algo:
 
     def __init__(
             self,
-            tokenizer: Tokenizer,
+            model: Model | Tokenizer,
             trainer: Trainer,
             normalizer: Normalizer | None = None,
             pre_tokenizer: PreTokenizer | None = None,
             post_processor: PostProcessor | None = None,
             decoder: Decoder | None = None,
     ) -> None:
-        self.tokenizer = tokenizer
+        if isinstance(model, Tokenizer):
+            self.tokenizer = model
+        else:
+            self.tokenizer = Tokenizer(model)
         self.trainer = trainer
         self.pad, self.unk, *self.extra, self.eos = trainer.special_tokens
         if normalizer is not None:

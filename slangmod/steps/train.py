@@ -3,7 +3,6 @@ from numpy import ndarray
 from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
-from swak.pt.io import ModelSaver
 from swak.pt.misc import Cat, LazyCatDim0
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
@@ -20,11 +19,12 @@ from ..ml import (
 )
 from ..io import (
     save_config,
+    save_model,
     discover_encodings,
     read_column,
-    train_filter,
-    test_filter,
-    validation_filter
+    filter_train_files,
+    filter_test_files,
+    filter_validation_files
 )
 from .log_messages import (
     log_total_number_of_files,
@@ -38,9 +38,6 @@ from .log_messages import (
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-filter_train = Filter[str, list](train_filter)
-filter_test = Filter[str, list](test_filter)
-filter_validation = Filter[str, list](validation_filter)
 
 read_file = Pipe[[str], list[ndarray]](
     LOGGER.debug(log_process_file),
@@ -102,19 +99,19 @@ process_test = Pipe[[list[str]], TestData](
 
 load_train = Pipe[[list[str]], TrainData](
     LOGGER.debug('Loading train data.'),
-    filter_train,
+    filter_train_files,
     LOGGER.debug(log_total_number_of_files),
     process_train
 )
 load_test = Pipe[[list[str]], TestData](
     LOGGER.debug('Loading test data.'),
-    filter_test,
+    filter_test_files,
     LOGGER.debug(log_total_number_of_files),
     process_test
 )
 load_validation = Pipe[[list[str]], TestData](
     LOGGER.debug('Loading validation data.'),
-    filter_validation,
+    filter_validation_files,
     LOGGER.debug(log_total_number_of_files),
     process_test
 )
@@ -139,7 +136,7 @@ train_model = Pipe[[Module, TrainData, TestData], Module](
     LOGGER.debug(f'Saving model to "{config.model_file}".'),
     Fork[[Module], Module](
         identity,
-        ModelSaver(config.model_file, True)
+        save_model
     )
 )
 

@@ -1,4 +1,3 @@
-from tokenizers import Tokenizer
 from tokenizers.pre_tokenizers import Sequence, WhitespaceSplit, Digits
 from tokenizers.models import BPE
 from tokenizers.decoders import BPEDecoder
@@ -28,7 +27,7 @@ pre_tokenizer = Sequence([
 decoder = BPEDecoder(suffix='</w>')
 
 bpe = Algo(
-    tokenizer=Tokenizer(model),
+    model=model,
     trainer=trainer,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,

@@ -1,5 +1,4 @@
 from pandas import Series, DataFrame
-from swak.pd import ParquetWriter
 from swak.funcflow import apply, Fork, Pipe, Route, Sum, Map
 from swak.funcflow.loggers import PassThroughStdOut
 from ..etl import to_frame, trim_memory
@@ -12,12 +11,12 @@ from ..io import (
     discover_corpus,
     read_column,
     extract_file_name,
+    write_encoded_file,
     save_config
 )
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
-write_parquet = ParquetWriter(config.encoded_files, create=True)
 
 load_column = Pipe[[str], Series](
     LOGGER.debug(log_encode_file),
@@ -40,7 +39,7 @@ encode_file = Pipe[[str], tuple[()]](
         ),
         extract_file_name
     ),
-    write_parquet,
+    write_encoded_file,
     trim_memory,
 )
 

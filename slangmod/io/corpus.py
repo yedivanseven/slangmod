@@ -4,8 +4,9 @@ from itertools import chain
 from pathlib import Path
 from swak.misc import ArgRepr
 from swak.text import NotFound, LiteralNotFound
+from swak.funcflow import Filter
 from ..config import config
-from .misc import read_column
+from .files import read_column
 
 __all__ = [
     'NotFound',
@@ -17,9 +18,9 @@ __all__ = [
     'discover_wiki40b',
     'discover_gutenberg',
     'discover_encodings',
-    'train_filter',
-    'test_filter',
-    'validation_filter'
+    'filter_train_files',
+    'filter_test_files',
+    'filter_validation_files'
 ]
 
 
@@ -172,6 +173,7 @@ class CorpusFilter(ArgRepr):
         return self.part in Path(file).name
 
 
+# Provide ready-to-use instances of the CorpusDiscovery
 discover_wiki40b = CorpusDiscovery(
     config.files.wiki40b,
     *config.files.types,
@@ -196,9 +198,13 @@ discover_encodings = CorpusDiscovery(
     suffix=config.files.suffix,
     not_found=NotFound.RAISE
 )
-
+# Provide a ready-to-use instance of the CorpusLoader
 load_corpus = CorpusLoader(read_column)
-
-train_filter = CorpusFilter(config.files.train)
-test_filter = CorpusFilter(config.files.test)
-validation_filter = CorpusFilter(config.files.validation)
+# Provide ready-to-use instances of the CorpusFilter ...
+train_files_filter = CorpusFilter(config.files.train)
+test_files_filter = CorpusFilter(config.files.test)
+validation_files_filter = CorpusFilter(config.files.validation)
+# ... and the actual filters
+filter_train_files = Filter[str, list](train_files_filter)
+filter_test_files = Filter[str, list](test_files_filter)
+filter_validation_files = Filter[str, list](validation_files_filter)

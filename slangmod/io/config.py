@@ -4,10 +4,10 @@ from ..config import config
 
 __all__ = ['save_config']
 
-config_writer = TomlWriter(
+write_toml = TomlWriter(
     path=config.config_file,
     overwrite=True,
     create=True,
     prune=True
 )
-save_config = Partial[tuple[()]](config_writer, config)
+save_config = Partial[tuple[()]](write_toml, config)
