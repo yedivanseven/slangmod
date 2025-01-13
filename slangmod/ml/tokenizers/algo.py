@@ -12,6 +12,50 @@ __all__ = ['Algo']
 
 
 class Algo:
+    """Wrap a Tokenizer instance for save, convenient, and consistent usage.
+
+    In particular, the ``train`` and ``train_from_iterator`` methods are
+    overwritten to always use the `trainer` provided at instantiation of
+    this wrapper, and the ``from_*`` methods are overwritten to return an
+    instance of this wrapper instead of a tokenizer. All other method calls
+    are simply be forwarded to the underlying ``Tokenizer``.
+
+    Parameters
+    ----------
+    model: Model or Tokenizer
+        Instance of a `Model`_ or a `Tokenizer`_ from the HuggingFace
+        `tokenizers`_ package. If it is a ``Model``, a fresh ``Tokenizer``
+        instance will be created from it.
+    trainer: Trainer
+        An instance of a `Trainer`_ from the HuggingFace `tokenizers`_
+        package.
+    unk_id: int
+        The token index that should be used to encode unknown symbols.
+    eos_id: int
+        The token index to use for indicating the end of a sequence.
+    normalizer: Normalizer, optional
+        An instance of a `Normalizer`_ from the HuggingFace `tokenizers`_
+        package. Defaults to ``None``.
+    pre_tokenizer: PreTokenizer, optional
+        An instance of a `PreTokenizer`_ from the HuggingFace `tokenizers`_
+        package. Defaults to ``None``.
+    decoder: Decoder, optional
+        An instance of a `Decoder`_ from the HuggingFace `tokenizers`_
+        package. Defaults to ``None``.
+    post_processor: Processor, optional
+        An instance of a `Processor`_ from the HuggingFace `tokenizers`_
+        package. Defaults to ``None``.
+
+    .. _tokenizers: https://huggingface.co/docs/tokenizers/index
+    .. _Model: https://huggingface.co/docs/tokenizers/api/models
+    .. _Tokenizer: https://huggingface.co/docs/tokenizers/api/tokenizer
+    .. _Trainer: https://huggingface.co/docs/tokenizers/api/trainers
+    .. _Normalizer: https://huggingface.co/docs/tokenizers/api/normalizers
+    .. _PreTokenizer: https://huggingface.co/docs/tokenizers/api/pre-tokenizers
+    .. _Decoder: https://huggingface.co/docs/tokenizers/api/decoders
+    .. _Processor: https://huggingface.co/docs/tokenizers/api/post-processors
+
+    """
 
     def __init__(
             self,
@@ -21,8 +65,8 @@ class Algo:
             eos_id: int,
             normalizer: Normalizer | None = None,
             pre_tokenizer: PreTokenizer | None = None,
-            post_processor: PostProcessor | None = None,
             decoder: Decoder | None = None,
+            post_processor: PostProcessor | None = None
     ) -> None:
         if isinstance(model, Tokenizer):
             self.tokenizer = model
@@ -35,10 +79,10 @@ class Algo:
             self.tokenizer.normalizer = normalizer
         if pre_tokenizer is not None:
             self.tokenizer.pre_tokenizer = pre_tokenizer
-        if post_processor is not None:
-            self.tokenizer.post_processor = post_processor
         if decoder is not None:
             self.tokenizer.decoder = decoder
+        if post_processor is not None:
+            self.tokenizer.post_processor = post_processor
 
     def __repr__(self) -> str:
         cls = self.tokenizer.model.__class__.__name__
@@ -46,6 +90,7 @@ class Algo:
 
     @property
     def vocab(self) -> int:
+        """The vocabulary size of the wrapped tokenizer."""
         return self.tokenizer.get_vocab_size()
 
     def __getattr__(self, attr: str) -> Any:
@@ -58,6 +103,14 @@ class Algo:
         # This is the actual forwarding
         return getattr(self.tokenizer, attr)
 
+    def from_buffer(self, buffer: bytes) -> Self:
+        return self.__class__(
+            Tokenizer.from_buffer(buffer),
+            self.trainer,
+            self.unk_id,
+            self.eos_id
+        )
+
     def from_file(self, path: str) -> Self:
         return self.__class__(
             Tokenizer.from_file(path),
@@ -66,12 +119,34 @@ class Algo:
             self.eos_id
         )
 
-    def train(self, docs: Iterable[str]) -> Self:
-        self.tokenizer.train_from_iterator(docs, self.trainer)
+    def from_pretrained(
+            self,
+            identifier: str,
+            revision: str = 'main',
+            token: str | None = None
+    ) -> Self:
+        return self.__class__(
+            Tokenizer.from_pretrained(identifier, revision, token),
+            self.trainer,
+            self.unk_id,
+            self.eos_id
+        )
+
+    def from_str(self, json: str) -> Self:
+        return self.__class__(
+            Tokenizer.from_str(json),
+            self.trainer,
+            self.unk_id,
+            self.eos_id
+        )
+
+    def train(self, files: list[str]) -> Self:
+        self.tokenizer.train(files, self.trainer)
         return self
 
-    def save(self, path: str, pretty: bool = True) -> None:
-        self.tokenizer.save(path, pretty)
+    def train_from_iterator(self, docs: Iterable[str]) -> Self:
+        self.tokenizer.train_from_iterator(docs, self.trainer)
+        return self
 
     def terminate(self, encodings: list[int]) -> list[int]:
         if encodings and encodings[-1] == self.eos_id:

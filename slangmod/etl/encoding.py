@@ -18,7 +18,7 @@ class EncodingEnforcer(ArgRepr):
         https://docs.python.org/3/library/codecs.html>`__.
     repl: str, optional
         The string to replace unrepresentable characters with.
-        Defaults to a single space.
+        Defaults to a single space (" ").
 
     """
 

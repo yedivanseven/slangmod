@@ -7,13 +7,10 @@ from swak.pt.misc import Cat, LazyCatDim0
 from swak.funcflow.loggers import PassThroughStdOut
 from swak.funcflow import identity
 from ..config import config
-from ..etl import (
+from ..etl import trim_memory, Shuffle
+from ..ml import (
     fold_train_sequences,
     fold_test_sequences,
-    trim_memory,
-    Shuffle
-)
-from ..ml import (
     TrainData,
     TestData,
     make_train_data,

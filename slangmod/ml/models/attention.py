@@ -14,6 +14,7 @@ __all__ = [
     'attention'
 ]
 
+from torch.nn import MultiheadAttention
 
 # ToDo: Remove positional encodings on src
 class Attention(Module):

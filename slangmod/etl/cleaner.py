@@ -16,6 +16,9 @@ class CorpusCleaner(ArgRepr):
     process: callable
         A callable object that accepts a single (raw) string as input and
         returns the cleaned string.
+    min_len: int, optional
+        The minimum number of characters that a document should have. Shorter
+        documents are filtered out. Defaults to 1.,
     *args
         Optional arguments to pass through to the ``tqdm`` progress bar.
     **kwargs
@@ -27,7 +30,7 @@ class CorpusCleaner(ArgRepr):
     def __init__(
             self,
             process: Callable[[str], str],
-            min_len: int = 0,
+            min_len: int = 1,
             *args: Any,
             **kwargs: Any
     ) -> None:
@@ -62,6 +65,5 @@ class CorpusCleaner(ArgRepr):
         processed = (self.process(document) for document in wrapped)
         filtered = filter(lambda doc: len(doc) >= self.min_len, processed)
         corpus = Series(filtered, name=corpus.name)
-        #corpus[:] = [self.process(document) for document in wrapped]
         hashed = sha256(str(corpus).encode()).hexdigest()
         return corpus.to_frame(), hashed

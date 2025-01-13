@@ -3,13 +3,6 @@ from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame
 from .memory import MemoryTrimmer, trim_memory
 from .shuffle import Shuffle
-from .exceptions import ValidationErrors
-from .folder import (
-    TrainSequenceFolder,
-    TestSequenceFolder,
-    fold_train_sequences,
-    fold_test_sequences
-)
 from .regex import (
     RegexReplacer,
     replace_article,
@@ -30,11 +23,6 @@ __all__ = [
     'to_frame',
     'MemoryTrimmer',
     'trim_memory',
-    'TestSequenceFolder',
-    'TrainSequenceFolder',
-    'ValidationErrors',
-    'fold_train_sequences',
-    'fold_test_sequences',
     'Shuffle',
     'RegexReplacer',
     'replace_article',

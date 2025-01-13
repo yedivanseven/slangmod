@@ -31,9 +31,9 @@ decoder = BPEDecoder(suffix='</w>')
 bpe = Algo(
     model=model,
     trainer=trainer,
+    unk_id=special.unk_id,
+    eos_id=special.eos_id,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,
-    decoder=decoder,
-    unk_id=special.unk_id,
-    eos_id=special.eos_id
+    decoder=decoder
 )

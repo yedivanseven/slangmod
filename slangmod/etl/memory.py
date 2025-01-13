@@ -26,6 +26,7 @@ class MemoryTrimmer[T, *Ts](ArgRepr):
 
     @cached_property
     def libc(self) -> CDLL:
+        """The loaded C library."""
         return CDLL(self.cdll)
 
     @overload

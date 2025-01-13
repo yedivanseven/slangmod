@@ -3,4 +3,4 @@ from ..config import config
 
 __all__ = ['save_model']
 
-save_model = ModelSaver(config.model_file, True)
+save_model = ModelSaver(config.model_file, create=True)

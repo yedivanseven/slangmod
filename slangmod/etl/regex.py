@@ -44,7 +44,6 @@ class RegexReplacer(ArgRepr):
         Up to how many occurrences of `pattern` to replace. Defaults to 0,
         which results in all occurrences to be replaced.
 
-
     """
 
     def __init__(
