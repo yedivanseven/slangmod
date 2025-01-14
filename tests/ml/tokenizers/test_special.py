@@ -4,6 +4,68 @@ from tokenizers import AddedToken
 from slangmod.ml.tokenizers import Special
 
 
+class TestAddedTokens(unittest.TestCase):
+
+    def test_hashable(self):
+        token = AddedToken('[EOS]')
+        _ = hash(token)
+
+    def test_default_equality(self):
+        one = AddedToken('[EOS]')
+        two = AddedToken('[EOS]')
+        self.assertEqual(one, two)
+
+    def test_custom_equality(self):
+        one = AddedToken(
+            '[EOS]',
+            single_word=True,
+            lstrip=True,
+            rstrip=True,
+            normalized=True,
+            special=True
+        )
+        two = AddedToken(
+            '[EOS]',
+            single_word=True,
+            lstrip=True,
+            rstrip=True,
+            normalized=True,
+            special=True
+        )
+        self.assertEqual(one, two)
+
+    def test_default_inequality(self):
+        one = AddedToken('[EOS]')
+        two = AddedToken('[PAD]')
+        self.assertNotEqual(one, two)
+
+    def test_single_word_inequality(self):
+        one = AddedToken('[EOS]', single_word=True)
+        two = AddedToken('[EOS]', single_word=False)
+        self.assertNotEqual(one, two)
+
+    def test_lstrip_inequality(self):
+        one = AddedToken('[EOS]', lstrip=True)
+        two = AddedToken('[EOS]', lstrip=False)
+        self.assertNotEqual(one, two)
+
+    def test_rstrip_inequality(self):
+        one = AddedToken('[EOS]', rstrip=True)
+        two = AddedToken('[EOS]', rstrip=False)
+        self.assertNotEqual(one, two)
+
+    def test_normalized_inequality(self):
+        one = AddedToken('[EOS]', normalized=True)
+        two = AddedToken('[EOS]', normalized=False)
+        self.assertNotEqual(one, two)
+
+    def test_special_inequality(self):
+        one = AddedToken('[EOS]', special=True)
+        two = AddedToken('[EOS]', special=False)
+        self.assertNotEqual(one, two)
+
+
+
 class TestDefaultAttributes(unittest.TestCase):
 
     def setUp(self):
