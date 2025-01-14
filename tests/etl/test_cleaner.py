@@ -26,7 +26,7 @@ class TestDefaultAttributes(unittest.TestCase):
 
     def test_min_len(self):
         self.assertIsInstance(self.clean.min_len, int)
-        self.assertEqual(0, self.clean.min_len)
+        self.assertEqual(1, self.clean.min_len)
 
     def test_has_args(self):
         self.assertTrue(hasattr(self.clean, 'args'))
@@ -168,7 +168,7 @@ class TestMisc(unittest.TestCase):
 
     def test_default_repr(self):
         clean = CorpusCleaner(proc)
-        expected = 'CorpusCleaner(proc, 0)'
+        expected = 'CorpusCleaner(proc, 1)'
         self.assertEqual(expected, repr(clean))
 
     def test_custom_repr(self):

@@ -1,7 +1,7 @@
 import pickle
 import unittest
 import torch as pt
-from slangmod.etl import TestSequenceFolder
+from slangmod.ml import TestSequenceFolder
 
 
 class TestDefaultAttributes(unittest.TestCase):

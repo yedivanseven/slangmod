@@ -1,7 +1,7 @@
 import pickle
 import unittest
 import torch as pt
-from slangmod.etl import TrainSequenceFolder, ValidationErrors
+from slangmod.ml import TrainSequenceFolder, ValidationErrors
 
 
 class TestDefaultAttributes(unittest.TestCase):

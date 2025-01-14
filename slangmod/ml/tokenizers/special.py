@@ -1,6 +1,6 @@
 from collections.abc import Iterable, Iterator
+from functools import singledispatchmethod
 from tokenizers import AddedToken
-from swak.misc import ArgRepr
 from ...config import config
 
 __all__ = [
@@ -13,7 +13,7 @@ UNK = AddedToken(config.tokens.unk_symbol, special=True)
 EOS = AddedToken(config.tokens.eos_symbol, special=True, normalized=True)
 
 
-class Special(ArgRepr):
+class Special:
     """Wrapper around special tokens for consistent access across projects.
 
     Parameters
@@ -45,6 +45,13 @@ class Special(ArgRepr):
     .. _tokenizers: https://huggingface.co/docs/tokenizers/index
     .. _AddedToken: https://huggingface.co/docs/tokenizers/api/added-tokens
 
+    Important
+    ---------
+    Various token IDs and string representations are needed at seemingly
+    disjoint parts of the overall workflow. It is, therefore, deceptively easy
+    to make a mistake somewhere, somehow. Instances of this class are to serve
+    as the single ground truth for your entire project.
+
     """
 
     def __init__(
@@ -60,13 +67,25 @@ class Special(ArgRepr):
         self.pad = pad
         self.unk = unk
         self.eos = eos
-        super().__init__(
-            tuple(token.content for token in self.unpredictable),
-            tuple(token.content for token in self.predictable),
-            pad=self.pad.content,
-            unk=self.unk.content,
-            eos=self.eos.content,
-        )
+
+    def __repr__(self) -> str:
+        cls = self.__class__.__name__
+        contents = ', '.join([token.content for token in self])
+        return f'{cls}({contents})'
+
+    def __iter__(self) -> Iterator[AddedToken]:
+        return iter(self.tokens)
+
+    def __len__(self) -> int:
+        return len(self.tokens)
+
+    @singledispatchmethod
+    def __getitem__(self, token_id: int) -> AddedToken:
+        return self.tokens[token_id]
+
+    @__getitem__.register
+    def _(self, token_ids: slice) -> list[AddedToken]:
+        return self.tokens[token_ids]
 
     @property
     def tokens(self) -> list[AddedToken]:
@@ -80,35 +99,39 @@ class Special(ArgRepr):
         ]
 
     @property
-    def id_to_token(self) -> dict[int, AddedToken]:
-        """Dictionary from special token ids to the added tokens themselves."""
-        return dict(enumerate(self.tokens))
+    def ids(self) -> list[int]:
+        """Only the IDs of all special tokens."""
+        return list(range(len(self.tokens)))
+
+    @property
+    def contents(self) -> list[str]:
+        """Only the string representations of all special tokens."""
+        return [token.content for token in self.tokens]
+
+    @property
+    def items(self) -> list[tuple[int, AddedToken]]:
+        """Tuples of (ID, added token) for all special tokens"""
+        return list(enumerate(self.tokens))
 
     @property
     def pad_id(self) -> int:
-        """Id of the padding token. Always 0."""
+        """ID of the padding token. Always 0."""
         return 0
 
     @property
     def unk_id(self) -> int:
-        """Id of the unknown token. Always 1."""
+        """ID of the unknown token. Always 1."""
         return 1
 
     @property
     def eos_id(self) -> int:
-        """Id of the end-of-sequence token."""
+        """ID of the end-of-sequence token."""
         return self.tokens.index(self.eos)
 
     @property
     def unigram_vocab(self) -> list[tuple[str, float]]:
         """Initial vocabulary of special tokens for the Unigram tokenizer."""
         return [(token.content, 0.0) for token in self.tokens]
-
-    def __iter__(self) -> Iterator[AddedToken]:
-        return iter(self.tokens)
-
-    def __len__(self) -> int:
-        return len(self.tokens)
 
 
 # Provide a ready-to-use instance of Special
