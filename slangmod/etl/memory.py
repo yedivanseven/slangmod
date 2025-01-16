@@ -16,7 +16,7 @@ class MemoryTrimmer[T, *Ts](ArgRepr):
     ----------
     cdll: str, optional
         The name of the standard C dynamic-link library.
-        Defaults to 'libc.so.6'
+        Defaults to `libc.so.6`.
 
     """
 

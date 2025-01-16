@@ -1,7 +1,7 @@
 from .config import save_config
 from .model import save_model
-from .clients import ConsoleClient, console_client
 from .corpus import (
+    NotFound,
     CorpusDiscovery,
     CorpusFilter,
     CorpusLoader,
@@ -35,6 +35,7 @@ from .tokenizer import (
 __all__ = [
     'save_config',
     'save_model',
+    'NotFound',
     'CorpusDiscovery',
     'discover_corpus',
     'discover_wiki40b',
@@ -58,7 +59,5 @@ __all__ = [
     'TokenizerSaver',
     'save_tokenizer',
     'TokenizerLoader',
-    'load_tokenizer',
-    'ConsoleClient',
-    'console_client'
+    'load_tokenizer'
 ]

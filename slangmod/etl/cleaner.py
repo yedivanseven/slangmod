@@ -46,7 +46,7 @@ class CorpusCleaner(ArgRepr):
         Parameters
         ----------
         corpus: Series
-            Pandas Series with each entry representing a single document to
+            Pandas series with each entry representing a single document to
             clean, that is, a single string.
         **kwargs
             Optional keyword arguments are merged into the keyword arguments

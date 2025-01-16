@@ -11,9 +11,9 @@ class ToFrame(ArgRepr):
     name: Hashable
         The name of the single column in the dataframe.
     **kwargs
-        Additional keyword arguments are forwarded to the pandas ``Series``
-        `constructor <https://pandas.pydata.org/pandas-docs/stable/reference
-        /api/pandas.Series.html>`__.
+        Additional keyword arguments are forwarded to the pandas
+        ``Series`` `constructor <https://pandas.pydata.org/pandas-docs/stable/
+        reference/api/pandas.Series.html>`_.
 
     """
 

@@ -14,8 +14,8 @@ class EncodingEnforcer(ArgRepr):
     Parameters
     ----------
     encoding: str
-        The target encoding. Chose one from `the list of built-in codecs <
-        https://docs.python.org/3/library/codecs.html>`__.
+        The target encoding. Chose one from `the list of built-in codecs
+        <https://docs.python.org/3/library/codecs.html>`_.
     repl: str, optional
         The string to replace unrepresentable characters with.
         Defaults to a single space (" ").

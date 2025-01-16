@@ -1,6 +1,13 @@
 Welcome to slangmod's documentation!
-=================================
+====================================
 *One-line description of slangmod.*
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Usage
+
+   clean
 
 
 .. toctree::
@@ -8,9 +15,9 @@ Welcome to slangmod's documentation!
    :maxdepth: 1
    :caption: API Reference
 
-   files
-   to
-   include
+   io
+   etl
+
 
 
 Indices and tables
