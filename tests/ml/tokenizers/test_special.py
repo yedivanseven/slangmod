@@ -69,9 +69,9 @@ class TestAddedTokens(unittest.TestCase):
 class TestDefaultAttributes(unittest.TestCase):
 
     def setUp(self):
-        self.pad = AddedToken('[PAD]')
-        self.unk = AddedToken('[UNK]')
-        self.eos = AddedToken('[EOS]')
+        self.pad = AddedToken('[PAD]', special=True)
+        self.unk = AddedToken('[UNK]', special=True)
+        self.eos = AddedToken('[EOS]', special=True)
         self.special = Special(pad=self.pad, unk=self.unk, eos=self.eos)
 
     def test_has_unpredictable(self):
@@ -132,6 +132,24 @@ class TestDefaultAttributes(unittest.TestCase):
         expected = [(0, self.pad), (1, self.unk), (2, self.eos)]
         self.assertListEqual(expected, self.special.items)
 
+    def test_has_decoder(self):
+        self.assertTrue(hasattr(self.special, 'decoder'))
+
+    def test_decoder(self):
+        expected = {0: self.pad, 1: self.unk, 2: self.eos}
+        self.assertDictEqual(expected, self.special.decoder)
+
+    def test_has_encoder(self):
+        self.assertTrue(hasattr(self.special, 'encoder'))
+
+    def test_encoder(self):
+        expected = {
+            self.pad.content: 0,
+            self.unk.content: 1,
+            self.eos.content: 2
+        }
+        self.assertDictEqual(expected, self.special.encoder)
+
     def test_has_pad_id(self):
         self.assertTrue(hasattr(self.special, 'pad_id'))
 
@@ -164,15 +182,27 @@ class TestDefaultAttributes(unittest.TestCase):
         ]
         self.assertListEqual(expected, self.special.unigram_vocab)
 
+    def test_raises_on_one_not_special(self):
+        unk = AddedToken('[UNK]')
+        with self.assertRaises(TypeError):
+            _ = Special(pad=self.pad, unk=unk, eos=self.eos)
+
+    def test_raises_on_all_not_special(self):
+        pad = AddedToken('[PAD]')
+        unk = AddedToken('[UNK]')
+        eos = AddedToken('[EOS]')
+        with self.assertRaises(TypeError):
+            _ = Special(pad=pad, unk=unk, eos=eos)
+
 
 class TestCustomAttributes(unittest.TestCase):
 
     def setUp(self):
-        self.pad = AddedToken('[PAD]')
-        self.unk = AddedToken('[UNK]')
-        self.eos = AddedToken('[EOS]')
-        self.cls = AddedToken('[CLS]')
-        self.mask = AddedToken('[MASK]')
+        self.pad = AddedToken('[PAD]', special=True)
+        self.unk = AddedToken('[UNK]', special=True)
+        self.eos = AddedToken('[EOS]', special=True)
+        self.cls = AddedToken('[CLS]', special=True)
+        self.mask = AddedToken('[MASK]', special=True)
         self.special = Special(
             [self.cls],
             self.mask,
@@ -224,6 +254,26 @@ class TestCustomAttributes(unittest.TestCase):
         ]
         self.assertListEqual(expected, self.special.items)
 
+    def test_decoder(self):
+        expected = {
+            0: self.pad,
+            1: self.unk,
+            2: self.cls,
+            3: self.eos,
+            4: self.mask
+        }
+        self.assertDictEqual(expected, self.special.decoder)
+
+    def test_encoder(self):
+        expected = {
+            self.pad.content: 0,
+            self.unk.content: 1,
+            self.cls.content: 2,
+            self.eos.content: 3,
+            self.mask.content: 4
+        }
+        self.assertDictEqual(expected, self.special.encoder)
+
     def test_pad_id(self):
         self.assertIsInstance(self.special.pad_id, int)
         self.assertEqual(0, self.special.pad_id)
@@ -246,16 +296,26 @@ class TestCustomAttributes(unittest.TestCase):
         ]
         self.assertListEqual(expected, self.special.unigram_vocab)
 
+    def test_raises_on_one_not_special(self):
+        cls = AddedToken('[CLS]')
+        with self.assertRaises(TypeError):
+            _ = Special([cls], pad=self.pad, unk=self.unk, eos=self.eos)
+
+    def test_raises_on_all_not_special(self):
+        cls = AddedToken('[CLS]')
+        mask = AddedToken('[MASK]')
+        with self.assertRaises(TypeError):
+            _ = Special([cls], mask, pad=self.pad, unk=self.unk, eos=self.eos)
 
 
 class TestMagic(unittest.TestCase):
 
     def setUp(self):
-        self.pad = AddedToken('[PAD]')
-        self.unk = AddedToken('[UNK]')
-        self.eos = AddedToken('[EOS]')
-        self.cls = AddedToken('[CLS]')
-        self.mask = AddedToken('[MASK]')
+        self.pad = AddedToken('[PAD]', special=True)
+        self.unk = AddedToken('[UNK]', special=True)
+        self.eos = AddedToken('[EOS]', special=True)
+        self.cls = AddedToken('[CLS]', special=True)
+        self.mask = AddedToken('[MASK]', special=True)
         self.tokens = [self.pad, self.unk, self.cls, self.eos, self.mask]
         self.special = Special(
             [self.cls],
@@ -272,6 +332,16 @@ class TestMagic(unittest.TestCase):
     def test_custom_len(self):
         self.assertEqual(5, len(self.special))
 
+    def test_str(self):
+        expected = {
+            0: self.pad.content,
+            1: self.unk.content,
+            2: self.cls.content,
+            3: self.eos.content,
+            4: self.mask.content
+        }
+        self.assertEqual(str(expected), str(self.special))
+
     def test_iter(self):
         for i, token in enumerate(self.special):
             self.assertEqual(self.tokens[i], token)
@@ -287,11 +357,11 @@ class TestMagic(unittest.TestCase):
 class TestMisc(unittest.TestCase):
 
     def setUp(self):
-        self.pad = AddedToken('[PAD]')
-        self.unk = AddedToken('[UNK]')
-        self.eos = AddedToken('[EOS]')
-        self.cls = AddedToken('[CLS]')
-        self.mask = AddedToken('[MASK]')
+        self.pad = AddedToken('[PAD]', special=True)
+        self.unk = AddedToken('[UNK]', special=True)
+        self.eos = AddedToken('[EOS]', special=True)
+        self.cls = AddedToken('[CLS]', special=True)
+        self.mask = AddedToken('[MASK]', special=True)
 
     def test_default_repr(self):
         special = Special(pad=self.pad, unk=self.unk, eos=self.eos)

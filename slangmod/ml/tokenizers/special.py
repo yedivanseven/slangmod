@@ -62,11 +62,24 @@ class Special:
             unk: AddedToken,
             eos: AddedToken,
     ) -> None:
+        self.__validate(*unpredictable, *predictable, pad, unk, eos)
         self.unpredictable = tuple(unpredictable)
         self.predictable = predictable
         self.pad = pad
         self.unk = unk
         self.eos = eos
+
+    @staticmethod
+    def __validate(*tokens: AddedToken) -> None:
+        """Ensure that all input tokens are, in fact, special tokens."""
+        invalid = [token.content for token in tokens if not token.special]
+        if len(invalid) == 1:
+            raise TypeError(f'Token {invalid[0]} is not special!')
+        if len(invalid) > 1:
+            raise TypeError(f'Tokens {', '.join(invalid)} are not special!')
+
+    def __str__(self) -> str:
+        return str(dict(zip(self.ids, self.contents)))
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -111,7 +124,17 @@ class Special:
     @property
     def items(self) -> list[tuple[int, AddedToken]]:
         """Tuples of (ID, added token) for all special tokens"""
-        return list(enumerate(self.tokens))
+        return list(zip(self.ids, self.tokens))
+
+    @property
+    def decoder(self) -> dict[int, AddedToken]:
+        """Dictionary with indices as keys and special tokens as values."""
+        return dict(zip(self.ids, self.tokens))
+
+    @property
+    def encoder(self) -> dict[str, int]:
+        """Special-token strings as keys and their indices as values."""
+        return dict(zip(self.contents, self.ids))
 
     @property
     def pad_id(self) -> int:

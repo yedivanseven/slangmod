@@ -6,6 +6,7 @@ from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
 from swak.pt.losses import XEntropyLoss
 from swak.misc import StdOutLogger
 from ..config import config, Optimizers, Scaling
+from .tokenizers import special
 
 LOGGER = StdOutLogger(__name__, config.log_level)
 
@@ -14,7 +15,7 @@ epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)
 
 loss = XEntropyLoss(
-    ignore_index=0,
+    ignore_index=special.pad_id,
     label_smoothing=config.train.label_smoothing
 )
 

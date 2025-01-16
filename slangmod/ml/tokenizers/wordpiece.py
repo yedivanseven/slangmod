@@ -27,10 +27,9 @@ pre_tokenizer = Sequence([
 decoder = WordPieceDecoder(prefix='##', cleanup=True)
 
 wordpiece = Algo(
-    model=model,
+    special=special,
+    tokenizer=model,
     trainer=trainer,
-    unk_id=special.unk_id,
-    eos_id=special.eos_id,
     normalizer=normalizer,
     pre_tokenizer=pre_tokenizer,
     decoder=decoder
