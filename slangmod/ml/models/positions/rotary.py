@@ -7,34 +7,73 @@ from slangmod.config import LiteralDevice, Devices
 
 
 class Rotary(Block):
+    """Rotary positional encodings for multi-head attention in sequence models.
+
+    Parameters
+    ----------
+    mod_dim: int
+        The model dimension. Each vector in the original sequence is expected
+        to be of that dimension.
+    context: int
+        The maximum sequence length that can be processed. Inputs are
+        expected to not exceed this size in their next-to-last dimension.
+    n_heads: int
+        The number of attention heads. Must integer divide `mod_dim` and the
+        result must still be and even number.
+    device: str or device, optional
+        Torch device to create the learnable positional encodings on.
+        Defaults to "cpu".
+    dtype: dtype, optional
+        Torch dtype of the learnable positional encodings.
+        Defaults to ``torch.float``.
+
+    Raises
+    ------
+    ValueError
+        If `n_heads` does not integer divide `mod_dim` or if the result is not
+        an even number.
+
+    """
 
     def __init__(
             self,
             mod_dim: int,
-            n_heads: int,
             context: int,
+            n_heads: int,
             device: Device | Devices | LiteralDevice = 'cpu',
             dtype: Dtype = pt.float,
             **_: Any
     ) -> None:
         super().__init__()
         self.mod_dim = mod_dim
-        self.n_heads = n_heads
         self.context = context
+        self.n_heads = self.__compatible(n_heads)
         self.device = pt.device(device)
         self.dtype = dtype
         self.register_buffer('positional_encodings', self._encodings, False)
 
+    def __compatible(self, n_heads: int) -> int:
+        """Validate compatibility of model dimension and number of heads."""
+        if self.mod_dim % n_heads != 0:
+            tmp = ('Model dimension ({}) must be integer '
+                   'divisible by the number of heads ({})!')
+            msg = tmp.format(self.mod_dim, n_heads)
+            raise ValueError(msg)
+        head_dim = self.mod_dim // n_heads
+        if head_dim % 2 != 0:
+            tmp = 'Head dimension ({}) must be even!'
+            msg = tmp.format(head_dim)
+            raise ValueError(msg)
+        return n_heads
+
     @property
     def head_dim(self) -> int:
+        """The dimension of each attention head."""
         return self.mod_dim // self.n_heads
 
     @property
-    def sizes(self) -> tuple[int, int, int]:
-        return self.n_heads, self.head_dim // 2, 2
-
-    @property
     def _span(self) -> Tensor:
+        """Even integer numbers across the embedding dimension of one head."""
         return pt.arange(
             start=0,
             end=self.head_dim,
@@ -45,10 +84,12 @@ class Rotary(Block):
 
     @property
     def _divisors(self) -> Tensor:
+        """Multiplicative factors of position indices in sin/cos arguments."""
         return pt.exp(-self._span * math.log(self.context) / self.head_dim)
 
     @property
     def _positions(self) -> Tensor:
+        """Indices of the positions in the sequence."""
         return pt.arange(
             start=0,
             end=self.context,
@@ -57,13 +98,14 @@ class Rotary(Block):
         ).unsqueeze(1)
 
     @property
-    def angles(self) -> Tensor:
+    def _angles(self) -> Tensor:
+        """Arguments of the trigonometric sine and cosine functions."""
         return self._positions * self._divisors
 
     @property
     def _encodings(self) -> Tensor:
+        """Cosine and sine terms of the rotation matrix a single tensor."""
         encodings = pt.empty(
-            1,
             1,
             self.context,
             self.head_dim // 2,
@@ -71,28 +113,52 @@ class Rotary(Block):
             device=self.device,
             dtype=self.dtype
         )
-        encodings[..., 0] = pt.cos(self.angles)
-        encodings[..., 1] = pt.sin(self.angles)
+        encodings[..., 0] = pt.cos(self._angles)
+        encodings[..., 1] = pt.sin(self._angles)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
+        """Apply rotary positional encodings across all heads of the input.
+
+        Parameters
+        ----------
+        src: Tensor
+            Input sequence(s) for all heads. Must be of dimensions
+            (..., `n_heads`, `S`, `head_dim`), where the sequence length `S`
+            must not exceed `context` and `head_dim` is the `mod_dim` divided
+            by `n_heads`.
+
+        Returns
+        -------
+        Tensor
+            The input sequence(s) with rotary positional encodings applied to
+            all heads.
+
+        """
         seq_len = src.size(-2)
+        # Reshape to n_heads, seq_len, head_dim / 2, 2 such that
+        # elements 1, 3, 5, etc. have index 0 in the last dimension and
+        # elements 2, 4, 6, etc. have index 1 in the last dimension
         reshaped = src.unflatten(-1, (-1, 2))
-        cos = self.positional_encodings[:, :, :seq_len, :, 0]
-        sin = self.positional_encodings[:, :, :seq_len, :, 1]
+        # Select suitable views on the required cosine and sine terms
+        cos = self.positional_encodings[:, :seq_len, :, 0]
+        sin = self.positional_encodings[:, :seq_len, :, 1]
+        # Apply rotary encodings to even and odd elements separately and
+        # interleave them again to restore the original order.
         return pt.stack([
             reshaped[..., 0] * cos - reshaped[..., 1] * sin,
             reshaped[..., 0] * sin + reshaped[..., 1] * cos
         ], dim=-1).flatten(-2)
 
     def reset_parameters(self) -> None:
-        pass
+        """Does nothing because there are no internal parameters to reset."""
 
     def new(self) -> Self:
+        """Return a fresh, new instance with exactly the same parameters."""
         return self.__class__(
             self.mod_dim,
-            self.n_heads,
             self.context,
+            self.n_heads,
             self.device,
             self.dtype
         )

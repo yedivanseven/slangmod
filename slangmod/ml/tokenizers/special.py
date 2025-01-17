@@ -1,5 +1,5 @@
 from collections.abc import Iterable, Iterator
-from functools import singledispatchmethod
+from typing import overload
 from tokenizers import AddedToken
 from ...config import config
 
@@ -42,15 +42,15 @@ class Special:
         HuggingFace `tokenizers`_ package. This token comes after the
         `unpredictable` tokens, but before the `predictable` tokens.
 
-    .. _tokenizers: https://huggingface.co/docs/tokenizers/index
-    .. _AddedToken: https://huggingface.co/docs/tokenizers/api/added-tokens
-
     Important
     ---------
     Various token IDs and string representations are needed at seemingly
     disjoint parts of the overall workflow. It is, therefore, deceptively easy
     to make a mistake somewhere, somehow. Instances of this class are to serve
     as the single ground truth for your entire project.
+
+    .. _AddedToken: https://huggingface.co/docs/tokenizers/api/added-tokens
+    .. _tokenizers: https://huggingface.co/docs/tokenizers/index
 
     """
 
@@ -71,7 +71,7 @@ class Special:
 
     @staticmethod
     def __validate(*tokens: AddedToken) -> None:
-        """Ensure that all input tokens are, in fact, special tokens."""
+        """Ensure that all provided tokens are, in fact, special tokens."""
         invalid = [token.content for token in tokens if not token.special]
         if len(invalid) == 1:
             raise TypeError(f'Token {invalid[0]} is not special!')
@@ -92,13 +92,16 @@ class Special:
     def __len__(self) -> int:
         return len(self.tokens)
 
-    @singledispatchmethod
+    @overload
     def __getitem__(self, token_id: int) -> AddedToken:
-        return self.tokens[token_id]
+        ...
 
-    @__getitem__.register
-    def _(self, token_ids: slice) -> list[AddedToken]:
-        return self.tokens[token_ids]
+    @overload
+    def __getitem__(self, token_id: slice) -> list[AddedToken]:
+        ...
+
+    def __getitem__(self, token_id):
+        return self.tokens[token_id]
 
     @property
     def tokens(self) -> list[AddedToken]:

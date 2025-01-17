@@ -23,7 +23,7 @@ emb_pos_enc = {
     context=config.model.context,
     n_heads=config.model.n_heads,
     device=config.data.device,
-    dtype=config.data.dtype,
+    dtype=config.data.dtype
 )
 
 src_pos_enc = {
@@ -36,7 +36,7 @@ src_pos_enc = {
     context=config.model.context,
     n_heads=config.model.n_heads,
     device=config.data.device,
-    dtype=config.data.dtype,
+    dtype=config.data.dtype
 )
 
 qk_pos_enc = {
@@ -49,5 +49,5 @@ qk_pos_enc = {
     context=config.model.context,
     n_heads=config.model.n_heads,
     device=config.data.device,
-    dtype=config.data.dtype,
+    dtype=config.data.dtype
 )

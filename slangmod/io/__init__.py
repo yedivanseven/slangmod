@@ -1,3 +1,4 @@
+from .clients import ConsoleClient, console_client
 from .config import save_config
 from .model import save_model
 from .corpus import (
@@ -33,6 +34,8 @@ from .tokenizer import (
 )
 
 __all__ = [
+    'ConsoleClient',
+    'console_client',
     'save_config',
     'save_model',
     'NotFound',

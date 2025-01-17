@@ -65,7 +65,6 @@ class TestAddedTokens(unittest.TestCase):
         self.assertNotEqual(one, two)
 
 
-
 class TestDefaultAttributes(unittest.TestCase):
 
     def setUp(self):

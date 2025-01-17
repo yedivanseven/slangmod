@@ -7,6 +7,24 @@ from ....config import LiteralDevice, Devices
 
 
 class Sinusoidal(Block):
+    """Sinusoidal positional encodings for transformer-based sequence models.
+
+    Parameters
+    ----------
+    mod_dim: int
+        The model dimension. Inputs are expected to be of that size in their
+        last dimension.
+    context: int
+        The maximum sequence length that can be processed. Inputs are
+        expected to not exceed this size in their next-to-last dimension.
+    device: str or device, optional
+        Torch device to create the learnable positional encodings on.
+        Defaults to "cpu".
+    dtype: dtype, optional
+        Torch dtype of the learnable positional encodings.
+        Defaults to ``torch.float``.
+
+    """
 
     def __init__(
             self,
@@ -25,6 +43,7 @@ class Sinusoidal(Block):
 
     @property
     def _span(self) -> Tensor:
+        """Even integer numbers across the embedding/model dimension."""
         return pt.arange(
             start=0,
             end=self.mod_dim,
@@ -35,10 +54,12 @@ class Sinusoidal(Block):
 
     @property
     def _divisors(self) -> Tensor:
+        """Multiplicative factors of position indices in sin/cos arguments."""
         return pt.exp(-self._span * math.log(self.context) / self.mod_dim)
 
     @property
     def _positions(self) -> Tensor:
+        """Indices of the positions in the sequence."""
         return pt.arange(
             start=0,
             end=self.context,
@@ -48,10 +69,12 @@ class Sinusoidal(Block):
 
     @property
     def _angles(self) -> Tensor:
+        """Arguments of the trigonometric sine and cosine functions."""
         return self._positions * self._divisors
 
     @property
     def _encodings(self) -> Tensor:
+        """Final, additive positional encodings."""
         encodings = pt.empty(
             1,
             self.context,
@@ -64,12 +87,28 @@ class Sinusoidal(Block):
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
+        """Add sinusoidal positional encodings to a sequence of embeddings.
+
+        Parameters
+        ----------
+        src: Tensor
+            Input sequence(s). Must be of dimensions (..., `S`, `mod_dim`),
+            where the sequence length `S` must not exceed `context`.
+
+        Returns
+        -------
+        Tensor
+            The input sequence(s) with sinusoidal positional encodings added.
+
+        """
         return src + self.positional_encodings[:, :src.size(-2), :]
 
     def reset_parameters(self) -> None:
-        pass
+        """Does nothing because there are no internal parameters to reset."""
+
 
     def new(self) -> Self:
+        """Return a fresh, new instance with exactly the same parameters."""
         return self.__class__(
             self.mod_dim,
             self.context,

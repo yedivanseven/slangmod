@@ -7,6 +7,24 @@ from ....config import LiteralDevice, Devices
 
 
 class Learnable(Block):
+    """Learnable positional encodings for transformer-based sequence models.
+
+    Parameters
+    ----------
+    mod_dim: int
+        The model dimension. Inputs are expected to be of that size in their
+        last dimension.
+    context: int
+        The maximum sequence length that can be processed. Inputs are
+        expected to not exceed this size in their next-to-last dimension.
+    device: str or device, optional
+        Torch device to create the learnable positional encodings on.
+        Defaults to "cpu".
+    dtype: dtype, optional
+        Torch dtype of the learnable positional encodings.
+        Defaults to ``torch.float``.
+
+    """
 
     def __init__(
             self,
@@ -27,12 +45,28 @@ class Learnable(Block):
         self.reset_parameters()
 
     def forward(self, src: Tensor) -> Tensor:
+        """Add learnable positional encodings to a sequence of embeddings.
+
+        Parameters
+        ----------
+        src: Tensor
+            Input sequence(s). Must be of dimensions (..., `S`, `mod_dim`),
+            where the sequence length `S` must not exceed `context`.
+
+        Returns
+        -------
+        Tensor
+            The input sequence(s) with positional encodings added.
+
+        """
         return src + self.positional_encodings[:, :src.size(-2), :]
 
     def reset_parameters(self) -> None:
+        """Re-initialize the learnable positional encodings."""
         ptn.init.normal_(self.positional_encodings)
 
     def new(self) -> Self:
+        """Return a fresh, new instance with exactly the same parameters."""
         return self.__class__(
             self.mod_dim,
             self.context,

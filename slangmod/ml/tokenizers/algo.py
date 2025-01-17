@@ -313,7 +313,7 @@ class Algo:
         added = tokenizer.get_added_tokens_decoder()
         # ... filter for special ones ...
         specials = filter(lambda item: item[1].special, added.items())
-        # ... get at most as many as we need ...
+        # ... get at most as many as we need, ...
         initials = sorted(specials)[:len(self.special)]
         # ... and check if they are consistent with what we specified.
         special_tokens_are_inconsistent = initials != self.special.items
@@ -326,6 +326,7 @@ class Algo:
             raise ValueError(msg)
 
         # Also the models themselves make use of the token for "unknown".
+        # The Unigram model is special in that sense.
         if isinstance(tokenizer.model, Unigram):
             actual = self.__unk_id(tokenizer.model)
             expected = self.special.unk_id
