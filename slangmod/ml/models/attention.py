@@ -1,3 +1,4 @@
+import sys
 import math
 from typing import Self
 import torch as pt
@@ -125,10 +126,10 @@ class SelfAttention(Block):
         return not isinstance(self.pos_enc, Identity)
 
     @property
-    def context(self) -> int | float:  # ToDo: Unit test this!
+    def context(self) -> int:  # ToDo: Unit test this!
         if hasattr(self.pos_enc, 'context'):
-            return int(self.pos_enc.context)
-        return float('inf')
+            return self.pos_enc.context
+        return sys.maxsize
 
     @property
     def _sizes(self) -> tuple[int, int]:

@@ -133,9 +133,9 @@ class EncoderLayer(Module):
         )
 
     @property
-    def context(self) -> int | float:  # ToDo: Unit test this!
+    def context(self) -> int:  # ToDo: Unit test this!
         if hasattr(self.pos_enc, 'context'):
-            return int(min(self.pos_enc.context, self.attention.context))
+            return min(self.pos_enc.context, self.attention.context)
         return self.attention.context
 
     def forward(
