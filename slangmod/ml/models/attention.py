@@ -3,19 +3,19 @@ from typing import Self
 import torch as pt
 import torch.nn as ptn
 import torch.nn.functional as ptnf
-from swak.pt.types import Device, Dtype, Tensor, Module
+from swak.pt.types import Device, Dtype, Tensor
 from swak.pt.misc import Identity
 from swak.pt.blocks import Block
 from ...config import config, LiteralDevice, Devices
 from .positions import qk_pos_enc
 
 __all__ = [
-    'Attention',
-    'attention'
+    'SelfAttention',
+    'self_attention'
 ]
 
 
-class Attention(Module):
+class SelfAttention(Block):
     """Multi-headed self attention with optional (rotary) positional encodings.
 
     Parameters
@@ -34,7 +34,7 @@ class Attention(Module):
         Apply dropout to the attention weights with this probability during
         training. Defaults to 0.1
     pos_enc: Block, optional
-        PyTorch Module that (a) has a ``reset_parameters`` method, (b) has
+        PyTorch ``Module`` that (a) has a ``reset_parameters`` method, (b) has
         a ``new`` method to make fresh, newly initialized copies of itself,
         and that (c) accepts and returns a tensor with dimensions
         (..., `n_heads`, `S`, `head_dim`), where `S` is the sequence length,
@@ -74,9 +74,7 @@ class Attention(Module):
         self.n_heads = self.__compatible(n_heads)
         self.bias = bias
         self.dropout = dropout
-        self.pos_enc = pos_enc
-        self.device = pt.device(device)
-        self.dtype = dtype
+        self.pos_enc = pos_enc.to(device=device, dtype=dtype)
         self.qkv = ptn.Linear(
             mod_dim,
             3 * mod_dim,
@@ -102,14 +100,19 @@ class Attention(Module):
         return n_heads
 
     @property
+    def device(self) -> Device:
+        """Device to compute self attention on."""
+        return self.qkv.weight.device
+
+    @property
+    def dtype(self) -> Dtype:
+        """Dtype to compute self attention in."""
+        return self.qkv.weight.dtype
+
+    @property
     def head_dim(self) -> int:
         """The dimension of each attention head."""
         return self.mod_dim // self.n_heads
-
-    @property
-    def _sizes(self) -> tuple[int, int]:
-        """Tuple of n_heads and head_dim to reshape intermediate tensors"""
-        return self.n_heads, self.head_dim
 
     @property
     def scale(self) -> float:
@@ -120,6 +123,17 @@ class Attention(Module):
     def has_pos_enc(self) -> bool:
         """Whether a `pos_enc` module was provided at instantiation or not."""
         return not isinstance(self.pos_enc, Identity)
+
+    @property
+    def context(self) -> int | float:  # ToDo: Unit test this!
+        if hasattr(self.pos_enc, 'context'):
+            return int(self.pos_enc.context)
+        return float('inf')
+
+    @property
+    def _sizes(self) -> tuple[int, int]:
+        """Tuple of n_heads and head_dim to reshape intermediate tensors"""
+        return self.n_heads, self.head_dim
 
     def forward(
             self,
@@ -140,6 +154,7 @@ class Attention(Module):
             supported: A boolean mask where a value of ``True`` indicates that
             the element should take part in attention or a float mask of the
             same type as `src` that is added to the attention score.
+            Defaults to ``None``.
         is_causal: bool, optional
             If set to ``True``, inputs are masked with a `S` x `S` lower
             triangular matrix and `mask` is ignored. Default to ``True``.
@@ -151,7 +166,7 @@ class Attention(Module):
 
         """
         query, key, value = self.qkv(src).chunk(3, -1)
-
+        # Reshape from (..., S, mod_dim) to (..., n_heads, S, head_dim)
         query = query.unflatten(-1, self._sizes).transpose(-2, -3)
         key = key.unflatten(-1, self._sizes).transpose(-2, -3)
         value = value.unflatten(-1, self._sizes).transpose(-2, -3)
@@ -165,7 +180,7 @@ class Attention(Module):
             is_causal=is_causal,
             scale=self.scale
         )
-
+        # Reshape back from (..., n_heads, S, head_dim) to (..., S, mod_dim)
         return self.out(attended.transpose(-2, -3).flatten(-2))
 
     def reset_parameters(self) -> None:
@@ -187,7 +202,7 @@ class Attention(Module):
         )
 
 
-attention = Identity() if config.model.reference else Attention(
+self_attention = Identity() if config.model.reference else SelfAttention(
     mod_dim=config.model.dim,
     n_heads=config.model.n_heads,
     bias=config.model.bias,

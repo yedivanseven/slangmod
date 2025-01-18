@@ -21,10 +21,10 @@ class Rotary(Block):
         The number of attention heads. Must integer divide `mod_dim` and the
         result must still be and even number.
     device: str or device, optional
-        Torch device to create the learnable positional encodings on.
+        Torch device to first create the rotary positional encodings on.
         Defaults to "cpu".
     dtype: dtype, optional
-        Torch dtype of the learnable positional encodings.
+        Torch dtype to first create the rotary positional encodings in.
         Defaults to ``torch.float``.
 
     Raises
@@ -48,9 +48,11 @@ class Rotary(Block):
         self.mod_dim = mod_dim
         self.context = context
         self.n_heads = self.__compatible(n_heads)
-        self.device = pt.device(device)
-        self.dtype = dtype
-        self.register_buffer('positional_encodings', self._encodings, False)
+        self.register_buffer(
+            'positional_encodings',
+            self._precomputed_encodings_for(device, dtype),
+            False
+        )
 
     def __compatible(self, n_heads: int) -> int:
         """Validate compatibility of model dimension and number of heads."""
@@ -67,54 +69,56 @@ class Rotary(Block):
         return n_heads
 
     @property
+    def device(self) -> Device:
+        """Device that the rotary positional encodings reside on."""
+        return self.positional_encodings.device
+
+    @property
+    def dtype(self) -> Dtype:
+        """Dtype of the rotary positional encodings."""
+        return self.positional_encodings.dtype
+
+    @property
     def head_dim(self) -> int:
         """The dimension of each attention head."""
         return self.mod_dim // self.n_heads
 
-    @property
-    def _span(self) -> Tensor:
-        """Even integer numbers across the embedding dimension of one head."""
-        return pt.arange(
+    def _precomputed_encodings_for(
+            self,
+            device: Device | Devices | LiteralDevice = 'cpu',
+            dtype: Dtype = pt.float
+    ) -> Tensor:
+        """Generate sinusoidal positional encodings for the given context."""
+        # Even integer numbers across the embedding/model dimension
+        span = pt.arange(
             start=0,
             end=self.head_dim,
             step=2,
-            device=self.device,
-            dtype=self.dtype
+            device=device,
+            dtype=dtype
         )
-
-    @property
-    def _divisors(self) -> Tensor:
-        """Multiplicative factors of position indices in sin/cos arguments."""
-        return pt.exp(-self._span * math.log(self.context) / self.head_dim)
-
-    @property
-    def _positions(self) -> Tensor:
-        """Indices of the positions in the sequence."""
-        return pt.arange(
+        # Indices of the positions in the sequence.
+        positions = pt.arange(
             start=0,
             end=self.context,
-            device=self.device,
-            dtype=self.dtype
+            device=device,
+            dtype=dtype
         ).unsqueeze(1)
-
-    @property
-    def _angles(self) -> Tensor:
-        """Arguments of the trigonometric sine and cosine functions."""
-        return self._positions * self._divisors
-
-    @property
-    def _encodings(self) -> Tensor:
-        """Cosine and sine terms of the rotation matrix a single tensor."""
+        # Multiplicative factors of position indices in sin/cos arguments
+        divisors = pt.exp(-span * math.log(self.context) / self.head_dim)
+        # Arguments of the trigonometric sine and cosine functions.
+        angles = positions * divisors
+        # Cosine and sine terms of the rotation matrix for a single tensor.
         encodings = pt.empty(
             1,
             self.context,
             self.head_dim // 2,
             2,
-            device=self.device,
-            dtype=self.dtype
+            device=device,
+            dtype=dtype
         )
-        encodings[..., 0] = pt.cos(self._angles)
-        encodings[..., 1] = pt.sin(self._angles)
+        encodings[..., 0] = pt.cos(angles)
+        encodings[..., 1] = pt.sin(angles)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
@@ -136,7 +140,7 @@ class Rotary(Block):
 
         """
         seq_len = src.size(-2)
-        # Reshape to n_heads, seq_len, head_dim / 2, 2 such that
+        # Reshape to (..., n_heads, seq_len, head_dim / 2, 2) such that
         # elements 1, 3, 5, etc. have index 0 in the last dimension and
         # elements 2, 4, 6, etc. have index 1 in the last dimension
         reshaped = src.unflatten(-1, (-1, 2))
@@ -144,7 +148,8 @@ class Rotary(Block):
         cos = self.positional_encodings[:, :seq_len, :, 0]
         sin = self.positional_encodings[:, :seq_len, :, 1]
         # Apply rotary encodings to even and odd elements separately and
-        # interleave them again to restore the original order.
+        # interleave them again to restore the original shape:
+        # (..., n_heads, seq_len, head_dim)
         return pt.stack([
             reshaped[..., 0] * cos - reshaped[..., 1] * sin,
             reshaped[..., 0] * sin + reshaped[..., 1] * cos

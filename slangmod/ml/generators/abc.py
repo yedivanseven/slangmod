@@ -51,7 +51,7 @@ class Generator(ABC):
 
     @property
     def context(self) -> int:
-        return self.model.pos_enc.context
+        return self.model.context
 
     @cached_property
     def zero(self) -> Tensor:

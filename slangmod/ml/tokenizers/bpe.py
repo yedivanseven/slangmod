@@ -12,21 +12,21 @@ __all__ = ['bpe']
 model = BPE(
     dropout=config.tokens.dropout,
     unk_token=special.unk.content,
-    end_of_word_suffix='</w>',
+    end_of_word_suffix=config.tokens.end_of_word_suffix,
     byte_fallback=False
 )
 trainer = BpeTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
     special_tokens=special.tokens,
-    end_of_word_suffix='</w>',
+    end_of_word_suffix=config.tokens.end_of_word_suffix,
     max_token_length=config.tokens.max_length
 )
 pre_tokenizer = Sequence([
     WhitespaceSplit(),
     Digits()
 ])
-decoder = BPEDecoder(suffix='</w>')
+decoder = BPEDecoder(suffix=config.tokens.end_of_word_suffix)
 
 bpe = Algo(
     special=special,

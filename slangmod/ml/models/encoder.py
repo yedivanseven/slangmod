@@ -2,21 +2,21 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
 from swak.pt.misc import Identity
-from .layer import Layer
+from .layer import EncoderLayer
 from ...config import LiteralDevice, Devices
 
-__all__ = ['Former']
+__all__ = ['Encoder']
 
 
-class Former(Module):
+class Encoder(Module):
 
     def __init__(
             self,
-            mod_dim: int,
             vocab: int,
-            layer: Layer,
+            pad_id: int,
             n_layers: int,
-            emb_pos_enc: Module = Identity(),
+            layer: EncoderLayer,
+            pos_enc: Module = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
@@ -24,25 +24,27 @@ class Former(Module):
             dtype: Dtype = pt.float
     ) -> None:
         super().__init__()
-        self.mod_dim = mod_dim
         self.vocab = vocab
+        self.pad_id = pad_id
+        self.n_layers = max(1, n_layers)
+        self.layers = ptn.ModuleList([
+            layer.new().to(device=device, dtype=dtype)
+            for _ in range(self.n_layers)
+        ])
         self.n_layers = n_layers
-        self.emb_pos_enc = Identity() if layer.has_pos_enc else emb_pos_enc
+        self.pos_enc = pos_enc.to(device=device, dtype=dtype)
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
-        self.device = pt.device(device)
-        self.dtype = dtype
         self.embed = ptn.Embedding(
             num_embeddings=vocab,
-            embedding_dim=mod_dim,
-            padding_idx=0,
+            embedding_dim=self.mod_dim,
+            padding_idx=pad_id,
             scale_grad_by_freq=scale_grad_by_freq,
             device=device,
             dtype=dtype
         )
         self.drop = ptn.Dropout(dropout)
-        self.layers = ptn.ModuleList([layer.new() for _ in range(n_layers)])
         self.norm = ptn.LayerNorm(
             self.mod_dim,
             eps=layer.norm1.eps,
@@ -52,12 +54,33 @@ class Former(Module):
             dtype=dtype
         ) if layer.norm_first else Identity()
         self.finalize = ptn.Linear(
-            in_features=mod_dim,
+            in_features=self.mod_dim,
             out_features=vocab,
             bias=bias,
             device=device,
             dtype=dtype
         )
+
+    @property
+    def mod_dim(self) -> int:
+        """The model dimension."""
+        return self.layers[0].mod_dim
+
+    @property
+    def device(self) -> Device:
+        """The device all weights, biases, activations, etc. reside on."""
+        return self.finalize.weight.device
+
+    @property
+    def dtype(self) -> Dtype:
+        """The dtype of all weights, biases, activations, and parameters."""
+        return self.finalize.weight.dtype
+
+    @property
+    def context(self) -> int:  # ToDo: Unit test this!
+        if hasattr(self.pos_enc, 'context'):
+            return int(min(self.pos_enc.context, self.layer.context))
+        return int(self.layer.context)
 
     def forward(
             self,
@@ -77,7 +100,7 @@ class Former(Module):
             sizes = -1, padding_mask.size(-1), -1
             attn_mask = mask + padding_mask.unsqueeze(-2).expand(*sizes)
 
-        out = self.drop(self.emb_pos_enc(self.embed(src)))
+        out = self.drop(self.pos_enc(self.embed(src)))
         for layer in self.layers:
             out = layer(out, attn_mask, is_causal)
 
@@ -87,5 +110,5 @@ class Former(Module):
         for layer in self.layers:
             layer.reset_parameters()
         self.embed.reset_parameters()
-        self.emb_pos_enc.reset_parameters()
+        self.pos_enc.reset_parameters()
         self.finalize.reset_parameters()

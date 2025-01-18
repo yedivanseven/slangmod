@@ -37,12 +37,20 @@ class Learnable(Block):
         super().__init__()
         self.mod_dim = mod_dim
         self.context = context
-        self.device = pt.device(device)
-        self.dtype = dtype
         self.positional_encodings = ptn.Parameter(
             pt.empty(1, context, mod_dim, device=device, dtype=dtype)
         )
         self.reset_parameters()
+
+    @property
+    def device(self) -> Device:
+        """Device that the learnable positional encodings reside on."""
+        return self.positional_encodings.device
+
+    @property
+    def dtype(self) -> Dtype:
+        """Dtype of the learnable positional encodings."""
+        return self.positional_encodings.dtype
 
     def forward(self, src: Tensor) -> Tensor:
         """Add learnable positional encodings to a sequence of embeddings.

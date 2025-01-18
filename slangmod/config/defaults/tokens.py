@@ -4,6 +4,8 @@ from ..enums import Tokenizers
 
 
 class Tokens(JsonObject):
+    end_of_word_suffix = '</w>'
+
     encoding: Lower() = 'cp1252'
     algo: Lower() = Tokenizers.UNIGRAM
     vocab: int = 16384

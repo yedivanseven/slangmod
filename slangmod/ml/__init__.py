@@ -22,7 +22,6 @@ __all__ = [
     'tokenizer',
     'TestSequenceFolder',
     'TrainSequenceFolder',
-    'ValidationErrors',
     'fold_test_sequences',
     'fold_train_sequences',
     'TrainData',
@@ -35,5 +34,6 @@ __all__ = [
     'Validator',
     'validate',
     'Generator',
-    'create_generator'
+    'create_generator',
+    'ValidationErrors'
 ]

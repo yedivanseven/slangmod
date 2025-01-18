@@ -18,10 +18,10 @@ class Sinusoidal(Block):
         The maximum sequence length that can be processed. Inputs are
         expected to not exceed this size in their next-to-last dimension.
     device: str or device, optional
-        Torch device to create the learnable positional encodings on.
+        Torch device to first create the sinusoidal positional encodings on.
         Defaults to "cpu".
     dtype: dtype, optional
-        Torch dtype of the learnable positional encodings.
+        Torch dtype to first create the sinusoidal positional encodings in.
         Defaults to ``torch.float``.
 
     """
@@ -37,53 +37,57 @@ class Sinusoidal(Block):
         super().__init__()
         self.mod_dim = mod_dim
         self.context = context
-        self.device = pt.device(device)
-        self.dtype = dtype
-        self.register_buffer('positional_encodings', self._encodings, False)
-
-    @property
-    def _span(self) -> Tensor:
-        """Even integer numbers across the embedding/model dimension."""
-        return pt.arange(
-            start=0,
-            end=self.mod_dim,
-            step=2,
-            device=self.device,
-            dtype=self.dtype
+        self.register_buffer(
+            'positional_encodings',
+            self._precomputed_encodings_for(device, dtype),
+            False
         )
 
     @property
-    def _divisors(self) -> Tensor:
-        """Multiplicative factors of position indices in sin/cos arguments."""
-        return pt.exp(-self._span * math.log(self.context) / self.mod_dim)
+    def device(self) -> Device:
+        """Device that the sinusoidal positional encodings reside on."""
+        return self.positional_encodings.device
 
     @property
-    def _positions(self) -> Tensor:
-        """Indices of the positions in the sequence."""
-        return pt.arange(
+    def dtype(self) -> Dtype:
+        """Dtype of the sinusoidal positional encodings."""
+        return self.positional_encodings.dtype
+
+    def _precomputed_encodings_for(
+            self,
+            device: Device | Devices | LiteralDevice = 'cpu',
+            dtype: Dtype = pt.float
+    ) -> Tensor:
+        """Generate sinusoidal positional encodings for the given context."""
+        # Even integer numbers across the embedding/model dimension
+        span = pt.arange(
+            start=0,
+            end=self.mod_dim,
+            step=2,
+            device=device,
+            dtype=dtype
+        )
+        # Indices of the positions in the sequence.
+        positions = pt.arange(
             start=0,
             end=self.context,
-            device=self.device,
-            dtype=self.dtype
+            device=device,
+            dtype=dtype
         ).unsqueeze(1)
-
-    @property
-    def _angles(self) -> Tensor:
-        """Arguments of the trigonometric sine and cosine functions."""
-        return self._positions * self._divisors
-
-    @property
-    def _encodings(self) -> Tensor:
-        """Final, additive positional encodings."""
+        # Multiplicative factors of position indices in sin/cos arguments
+        divisors = pt.exp(-span * math.log(self.context) / self.mod_dim)
+        # Arguments of the trigonometric sine and cosine functions.
+        angles = positions * divisors
+        # Final, additive positional encodings.
         encodings = pt.empty(
             1,
             self.context,
             self.mod_dim,
-            device=self.device,
-            dtype=self.dtype
+            device=device,
+            dtype=dtype
         )
-        encodings[:, :, 0::2] = pt.sin(self._angles)
-        encodings[:, :, 1::2] = pt.cos(self._angles)
+        encodings[:, :, 0::2] = pt.sin(angles)
+        encodings[:, :, 1::2] = pt.cos(angles)
         return encodings
 
     def forward(self, src: Tensor) -> Tensor:
@@ -105,7 +109,6 @@ class Sinusoidal(Block):
 
     def reset_parameters(self) -> None:
         """Does nothing because there are no internal parameters to reset."""
-
 
     def new(self) -> Self:
         """Return a fresh, new instance with exactly the same parameters."""

@@ -90,6 +90,7 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_call_new(self):
         new = self.pos_enc.new()
         self.assertIsInstance(new, Learnable)
+        self.assertIsNot(new, self.pos_enc)
         self.assertEqual(self.pos_enc.mod_dim, new.mod_dim)
         self.assertEqual(self.pos_enc.context, new.context)
         self.assertEqual(self.pos_enc.device.type, new.device.type)

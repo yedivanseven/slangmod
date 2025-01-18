@@ -17,14 +17,13 @@ model = WordPiece(
 trainer = WordPieceTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
-    special_tokens=special.tokens,
-    continuing_subword_prefix='##'
+    special_tokens=special.tokens
 )
 pre_tokenizer = Sequence([
     WhitespaceSplit(),
     Digits()
 ])
-decoder = WordPieceDecoder(prefix='##', cleanup=True)
+decoder = WordPieceDecoder(cleanup=True)
 
 wordpiece = Algo(
     special=special,

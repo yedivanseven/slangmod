@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 import torch as pt
 from swak.pt.misc import Identity
-from slangmod.ml.models import Attention
+from slangmod.ml.models import SelfAttention
 
 
 class TestDefaultAttributes(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestDefaultAttributes(unittest.TestCase):
         self.mod_dim = 16
         self.n_heads = 2
         self.head_dim = self.mod_dim // self.n_heads
-        self.attention = Attention(self.mod_dim, self.n_heads)
+        self.attention = SelfAttention(self.mod_dim, self.n_heads)
 
     def test_has_mod_dim(self):
         self.assertTrue(hasattr(self.attention, 'mod_dim'))
@@ -29,7 +29,7 @@ class TestDefaultAttributes(unittest.TestCase):
 
     def test_incompatible_n_heads_raises(self):
         with self.assertRaises(ValueError):
-            _ = Attention(16, 3)
+            _ = SelfAttention(16, 3)
 
     def test_has_bias(self):
         self.assertTrue(hasattr(self.attention, 'bias'))
@@ -49,6 +49,15 @@ class TestDefaultAttributes(unittest.TestCase):
 
     def test_pos_enc(self):
         self.assertIsInstance(self.attention.pos_enc, Identity)
+
+    def test_pos_enc_to_called(self):
+        pos_enc = Mock()
+        pos_enc.to.return_value = pos_enc
+        attention = SelfAttention(self.mod_dim, self.n_heads, pos_enc=pos_enc)
+        pos_enc.to.assert_called_once_with(
+            device=attention.device.type,
+            dtype=attention.dtype
+        )
 
     def test_has_device(self):
         self.assertTrue(hasattr(self.attention, 'device'))
@@ -118,7 +127,8 @@ class TestDefaultAttributes(unittest.TestCase):
     @patch('torch.nn.Linear.reset_parameters')
     def test_call_reset_parameters(self, mock):
         pos_enc = Mock()
-        attention = Attention(self.mod_dim, self.n_heads, pos_enc=pos_enc)
+        pos_enc.to.return_value = pos_enc
+        attention = SelfAttention(self.mod_dim, self.n_heads, pos_enc=pos_enc)
         self.assertEqual(2, mock.call_count)
         attention.reset_parameters()
         self.assertEqual(4, mock.call_count)
@@ -132,9 +142,11 @@ class TestDefaultAttributes(unittest.TestCase):
 
     def test_call_new(self):
         pos_enc = Mock()
-        attention = Attention(self.mod_dim, self.n_heads, pos_enc=pos_enc)
+        pos_enc.to.return_value = pos_enc
+        attention = SelfAttention(self.mod_dim, self.n_heads, pos_enc=pos_enc)
         new = attention.new()
-        self.assertIsInstance(new, Attention)
+        self.assertIsInstance(new, SelfAttention)
+        self.assertIsNot(new, attention)
         self.assertEqual(attention.mod_dim, new.mod_dim)
         self.assertEqual(attention.n_heads, new.n_heads)
         self.assertEqual(attention.bias, new.bias)
@@ -142,6 +154,7 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertEqual(attention.device, new.device)
         self.assertEqual(attention.dtype, new.dtype)
         self.assertIsInstance(new.pos_enc, Mock)
+        self.assertIsNot(new.pos_enc, attention.pos_enc)
         pos_enc.new.assert_called_once_with()
 
 
@@ -154,8 +167,9 @@ class TestAttributes(unittest.TestCase):
         self.dropout = 0.2
         self.dtype = pt.double
         self.pos_enc = Mock()
+        self.pos_enc.to.return_value = self.pos_enc
         self.head_dim = self.mod_dim // self.n_heads
-        self.attention = Attention(
+        self.attention = SelfAttention(
             self.mod_dim,
             self.n_heads,
             self.bias,
@@ -190,7 +204,7 @@ class TestAttributes(unittest.TestCase):
 
     def test_call_new(self):
         new = self.attention.new()
-        self.assertIsInstance(new, Attention)
+        self.assertIsInstance(new, SelfAttention)
         self.assertEqual(self.attention.mod_dim, new.mod_dim)
         self.assertEqual(self.attention.n_heads, new.n_heads)
         self.assertEqual(self.attention.bias, new.bias)
@@ -207,7 +221,7 @@ class TestUsage(unittest.TestCase):
         self.mod_dim = 16
         self.n_heads = 2
         self.head_dim = self.mod_dim // self.n_heads
-        self.attention = Attention(self.mod_dim, self.n_heads, bias=False)
+        self.attention = SelfAttention(self.mod_dim, self.n_heads, bias=False)
         self.attention.qkv.weight.data = pt.ones(
             3 * self.mod_dim,
             self.mod_dim,
