@@ -39,7 +39,7 @@ class CorpusDiscovery(ArgRepr):
         Extension glob pattern that files must match (without leading dot).
         Defaults to "parquet".
     not_found: str, optional
-        What to if either the directory does not exist or no matching files
+        What to do if either the directory does not exist or no matching files
         are found in the given directory. One of "ignore", "warn", or "raise".
         Use the ``NotFound`` enum to avoid typos. Defaults to "raise".
         If set otherwise, an empty tuple of file names might be returned.
