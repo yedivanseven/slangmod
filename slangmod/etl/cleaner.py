@@ -18,7 +18,7 @@ class CorpusCleaner(ArgRepr):
         returns the cleaned string.
     min_len: int, optional
         The minimum number of characters that a document should have. Shorter
-        documents are filtered out. Defaults to 1.,
+        documents are filtered out. Defaults to 1.
     *args
         Optional arguments to pass through to the ``tqdm`` progress bar.
     **kwargs
