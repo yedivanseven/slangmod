@@ -4,8 +4,11 @@ from ...config import config
 from ...ml.generators import Generator
 
 
-# ToDo: Rethink the logic with EOS here! Make sure the tokenizer get's it!
+# ToDo: Rethink the logic with EOS here! Make sure the tokenizer gets it!
 # ToDo: The style should probably be part of the client, not the generator!
+# ToDo: Make history writer!
+# ToDo: If the model did not finish, call it again!
+# ToDo: Stop only when the max_tokens here is reached and ask to continue!
 class ConsoleClient(ArgRepr):
 
     def __init__(

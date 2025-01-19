@@ -138,7 +138,7 @@ def extract_file_name(path: str) -> str:
     Returns
     -------
     str
-        The bar file name without the leading slashes and (sub-)directories.
+        The bare file name without the leading slashes and (sub-)directories.
 
     """
     return Path(path).name

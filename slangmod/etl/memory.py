@@ -4,6 +4,7 @@ from functools import cached_property
 from swak.misc import ArgRepr
 
 
+# ToDo: Move to a separate "misc" sub-package
 class MemoryTrimmer[T, *Ts](ArgRepr):
     """Free up memory no longer used by NumPy arrays, PyTorch tensors, etc.
 

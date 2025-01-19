@@ -188,6 +188,12 @@ class Algo:
         Algo
             The new algo.
 
+        Warnings
+        -----
+        Because this package does not depend on the HuggingFace `transformers
+        <https://huggingface.co/docs/transformers/index>`_ package, this
+        method might work as anticipated or simply not work at all.
+
         """
         return self.__class__(
             self.special,
