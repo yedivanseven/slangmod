@@ -54,7 +54,7 @@ class MemoryTrimmer[T, *Ts](ArgRepr):
         Returns
         -------
         object or tuple
-            An empty tuple if called with no arguments. With called with a
+            An empty tuple if called with no arguments. When called with
             a single argument, that argument. When called with multiple
             arguments, a tuple of all of these arguments.
 
