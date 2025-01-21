@@ -158,11 +158,11 @@ class Evaluator(ArgRepr):
         # Initialize counters and accumulation variables
         n_tok = pt.tensor(0, device=data.device, dtype=pt.long)
         n_seq = pt.tensor(0, device=data.device, dtype=pt.long)
-        top_1 = pt.tensor(0.0, device=data.device, dtype=pt.float)
-        top_2 = pt.tensor(0.0, device=data.device, dtype=pt.float)
-        top_5 = pt.tensor(0.0, device=data.device, dtype=pt.float)
-        val_loss = pt.tensor(0.0, device=data.device, dtype=pt.float)
-        perplexity = pt.tensor(0.0, device=data.device, dtype=pt.float)
+        top_1 = pt.tensor(0.0, device=data.device, dtype=pt.double)
+        top_2 = pt.tensor(0.0, device=data.device, dtype=pt.double)
+        top_5 = pt.tensor(0.0, device=data.device, dtype=pt.double)
+        val_loss = pt.tensor(0.0, device=data.device, dtype=pt.double)
+        perplexity = pt.tensor(0.0, device=data.device, dtype=pt.double)
 
         # Loop over patches of validation data and accumulate metrics
         ema = None
