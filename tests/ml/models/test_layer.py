@@ -1,3 +1,4 @@
+import sys
 import unittest
 from unittest.mock import patch, Mock
 import torch as pt
@@ -138,6 +139,13 @@ class TestDefaultAttributes(unittest.TestCase):
         layer = EncoderLayer(self.attention, self.feedforward, pos_enc=pos_enc)
         self.assertTrue(layer.has_pos_enc)
 
+    def test_has_context(self):
+        self.assertTrue(hasattr(self.layer, 'context'))
+
+    def test_context(self):
+        self.assertIsInstance(self.layer.context, int)
+        self.assertEqual(sys.maxsize, self.layer.context)
+
     def test_has_reset_parameters(self):
         self.assertTrue(hasattr(self.layer, 'reset_parameters'))
 
@@ -192,9 +200,11 @@ class TestAttributes(unittest.TestCase):
     def setUp(self):
         self.mod_dim = 16
         self.n_heads = 2
+        self.context = 128
+        self.dtype = pt.double
         self.attention = SelfAttention(self.mod_dim, self.n_heads)
         self.feedforward = ActivatedBlock(self.mod_dim)
-        self.pos_enc = Sinusoidal(self.mod_dim, 128)
+        self.pos_enc = Sinusoidal(self.mod_dim, self.context)
         self.layer = EncoderLayer(
             self.attention,
             self.feedforward,
@@ -202,7 +212,8 @@ class TestAttributes(unittest.TestCase):
             False,
             0.2,
             False,
-            1e-4
+            1e-4,
+            dtype=self.dtype
         )
 
     def test_pos_enc(self):
@@ -218,7 +229,14 @@ class TestAttributes(unittest.TestCase):
         self.assertFalse(self.layer.norm_first)
 
     def test_eps(self):
-        self.assertEqual(1e-4, self.layer.eps)
+        self.assertEqual(1e-4, self.layer.eps),
+
+    def test_dtype(self):
+        self.assertIs(self.layer.dtype, self.dtype)
+        self.assertIs(self.attention.dtype, self.dtype)
+        self.assertIs(self.pos_enc.dtype, self.dtype)
+        self.assertIs(self.layer.attention.dtype, self.dtype)
+        self.assertIs(self.layer.pos_enc.dtype, self.dtype)
 
     def test_has_pos_enc_correct(self):
         self.assertTrue(self.layer.has_pos_enc)
@@ -232,6 +250,37 @@ class TestAttributes(unittest.TestCase):
         with self.assertWarns(UserWarning):
             _ = EncoderLayer(attention, self.feedforward, self.pos_enc)
 
+    def test_context_pos_enc_on_layer(self):
+        self.assertEqual(self.context, self.layer.context)
+
+    def test_context_pos_enc_on_attention(self):
+        attention = SelfAttention(
+            self.mod_dim,
+            self.n_heads,
+            pos_enc=self.pos_enc
+        )
+        _ = EncoderLayer(attention, self.feedforward)
+        self.assertEqual(self.context, self.layer.context)
+
+    def test_context_pos_enc_on_attn_smaller(self):
+        pos_enc = Sinusoidal(self.mod_dim, 64)
+        attention = SelfAttention(
+            self.mod_dim,
+            self.n_heads,
+            pos_enc=pos_enc
+        )
+        layer = EncoderLayer(attention, self.feedforward, self.pos_enc)
+        self.assertEqual(64, layer.context)
+
+    def test_context_pos_enc_on_layer_smaller(self):
+        pos_enc = Sinusoidal(self.mod_dim, 64)
+        attention = SelfAttention(
+            self.mod_dim,
+            self.n_heads,
+            pos_enc=self.pos_enc
+        )
+        layer = EncoderLayer(attention, self.feedforward, pos_enc)
+        self.assertEqual(64, layer.context)
 
 class TestUsageNormFirst(unittest.TestCase):
 
@@ -482,6 +531,49 @@ class TestUsageNormLast(unittest.TestCase):
         ):
             out = self.layer(self.inp)
             pt.testing.assert_close(out, self.inp)
+
+
+class TestUsageOutputShape(unittest.TestCase):
+
+    def setUp(self):
+        self.mod_dim = 16
+        self.n_heads = 2
+        self.context = 61
+        self.batch_size = 17
+        self.attention = SelfAttention(self.mod_dim, self.n_heads)
+        self.feedforward = ActivatedBlock(self.mod_dim)
+        self.pos_enc = Sinusoidal(self.mod_dim, self.context)
+        self.layer = EncoderLayer(
+            self.attention,
+            self.feedforward,
+            self.pos_enc
+        )
+
+    def test_2d(self):
+        inp = pt.rand(self.context, self.mod_dim, device='cpu')
+        actual = self.attention(inp)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.context,
+            self.mod_dim,
+            device='cpu'
+        )
+        actual = self.attention(inp)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_4d(self):
+        inp = pt.rand(
+            7,
+            self.batch_size,
+            self.context,
+            self.mod_dim,
+            device='cpu'
+        )
+        actual = self.attention(inp)
+        self.assertTupleEqual(inp.shape, actual.shape)
 
 
 if __name__ == '__main__':

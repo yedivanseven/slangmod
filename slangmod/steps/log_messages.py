@@ -36,15 +36,15 @@ def log_data_sizes(
             f'test={test.n}, and validation={validation.n}.')
 
 
-def log_validation_metrics(
+def log_evaluation_metrics(
         loss: float,
         perplexity: float,
-        acc: tuple[float, float],
-        top_2: tuple[float, float],
-        top_5: tuple[float, float],
+        acc: float,
+        top_2: float,
+        top_5: float,
 ) -> str:
     return (f'Validation loss: {loss:7.5f} | '
             f'perplexity: {perplexity:6.2f} | '
-            f'accuracy: {acc[0]:4.2f}±{acc[1]:4.2f} | '
-            f'top-2 acc.: {top_2[0]:4.2f}±{top_2[1]:4.2f} | '
-            f'top-5 acc.: {top_5[0]:4.2f}±{top_5[1]:4.2f}')
+            f'accuracy: {acc:4.2f} | '
+            f'top-2 acc.: {top_2:4.2f} | '
+            f'top-5 acc.: {top_5:4.2f}')

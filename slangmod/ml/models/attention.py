@@ -35,14 +35,17 @@ class SelfAttention(Block):
         Apply dropout to the attention weights with this probability during
         training. Defaults to 0.1
     pos_enc: Block, optional
-        PyTorch ``Module`` that (a) has a ``reset_parameters`` method, (b) has
-        a ``new`` method to make fresh, newly initialized copies of itself,
-        and that (c) accepts and returns a tensor with dimensions
-        (..., `n_heads`, `S`, `head_dim`), where `S` is the sequence length,
-        and `head_dim` is the `mod_dim` divided by `n_heads`. If given, it will
-        be called on queries and keys. Typically, this would be an instance of
-        ``Rotary`` positional encodings. Defaults to an instance of
-        ``Identity``, which does nothing.
+        PyTorch ``Module`` that
+
+        * has a ``reset_parameters()`` method,
+        * has a ``new()`` method to make fresh copies of itself,
+        * has a ``context`` attribute specifying the maximum sequence length,
+        * processes tensors with dimensions (..., `n_heads`, `S`, `head_dim`),
+
+        where `S` is the sequence length, and `head_dim` is the `mod_dim`
+        divided by `n_heads`. If given, it will  be called on queries and keys.
+        Typically, this would be an instance of ``Rotary`` positional
+        encodings. Defaults to an instance of ``Identity``, which does nothing.
     device: str or device, optional
         Torch device to compute self attention on. Defaults to "cpu".
     dtype: dtype, optional
@@ -55,8 +58,7 @@ class SelfAttention(Block):
 
     See Also
     --------
-    `scaled_dot_product_attention <https://pytorch.org/docs/stable/
-    generated/torch.nn.functional.scaled_dot_product_attention.html>`_
+    Rotary
 
     """
 
@@ -126,7 +128,8 @@ class SelfAttention(Block):
         return not isinstance(self.pos_enc, Identity)
 
     @property
-    def context(self) -> int:  # ToDo: Unit test this!
+    def context(self) -> int:
+        """Maximum context length of the positional encodings, if present."""
         if hasattr(self.pos_enc, 'context'):
             return self.pos_enc.context
         return sys.maxsize
@@ -150,11 +153,15 @@ class SelfAttention(Block):
             Input sequence(s) of dimensions (..., `S`, `mod_dim`), with
             sequence length `S`.
         mask: Tensor, optional
-            Attention mask with a shape broadcastable to the shape of attention
-            weights, which is (..., `S`, `S`). Two types of masks are
+            Attention mask with a shape broadcastable to the shape of the
+            attention weights (..., `S`, `S`). Two types of masks are
             supported: A boolean mask where a value of ``True`` indicates that
-            the element should take part in attention or a float mask of the
-            same type as `src` that is added to the attention score.
+            the element *should* take part in attention or a float mask of the
+            same dtype as `src` that is added to the product of queries and
+            keys, before taking the softmax. In the latter case, a value of
+            0.0 (resulting in unchanged attention weights) indicates that an
+            element *should* take part in the attention and a value of "-inf"
+            (resulting in a zero attention weight) that it should *not*.
             Defaults to ``None``.
         is_causal: bool, optional
             If set to ``True``, inputs are masked with a `S` x `S` lower
@@ -164,6 +171,17 @@ class SelfAttention(Block):
         -------
         Tensor
             The output has the same shape as the input.
+
+        Important
+        ---------
+        In adhering to the convention of the `scaled_dot_product_attention
+        <https://pytorch.org/docs/stable/generated/torch.nn.functional.
+        scaled_dot_product_attention.html>`_, the meaning of ``True`` and
+        ``False`` (attend to and *not* attend to, respectively) in boolean
+        attention masks is exactly the **opposite** of what it means in the
+        `MultiheadAttention <https://pytorch.org/docs/stable/generated/torch.
+        nn.MultiheadAttention.html#torch.nn.MultiheadAttention.forward>`_.
+        Therefore, to stay compatible, use float masks!
 
         """
         query, key, value = self.qkv(src).chunk(3, -1)

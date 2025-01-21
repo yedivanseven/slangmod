@@ -1,3 +1,4 @@
+import sys
 import unittest
 from unittest.mock import patch, Mock
 import torch as pt
@@ -118,6 +119,13 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertIsInstance(self.attention.has_pos_enc, bool)
         self.assertFalse(self.attention.has_pos_enc)
 
+    def test_has_context(self):
+        self.assertTrue(hasattr(self.attention, 'context'))
+
+    def test_context(self):
+        self.assertIsInstance(self.attention.context, int)
+        self.assertEqual(sys.maxsize, self.attention.context)
+
     def test_has_reset_parameters(self):
         self.assertTrue(hasattr(self.attention, 'reset_parameters'))
 
@@ -166,8 +174,10 @@ class TestAttributes(unittest.TestCase):
         self.bias = False
         self.dropout = 0.2
         self.dtype = pt.double
+        self.context = 1234
         self.pos_enc = Mock()
         self.pos_enc.to.return_value = self.pos_enc
+        self.pos_enc.context = self.context
         self.head_dim = self.mod_dim // self.n_heads
         self.attention = SelfAttention(
             self.mod_dim,
@@ -201,6 +211,9 @@ class TestAttributes(unittest.TestCase):
 
     def test_has_pos_enc_correct(self):
         self.assertTrue(self.attention.has_pos_enc)
+
+    def test_context(self):
+        self.assertEqual(self.context, self.attention.context)
 
     def test_call_new(self):
         new = self.attention.new()

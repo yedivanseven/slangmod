@@ -16,6 +16,7 @@ PACKAGE = __name__.split('.')[0]
 VERSION = meta.version(PACKAGE)
 
 
+# ToDo: Flag to switch off progress bars
 class Main(JsonObject):
     package = PACKAGE
     version = VERSION

@@ -1,3 +1,4 @@
+import warnings
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
@@ -9,13 +10,68 @@ __all__ = ['Encoder']
 
 
 class Encoder(Module):
+    """Flexible transformer encoder for natural language modeling.
+
+    Parameters
+    ----------
+    vocab: int
+        The vocabulary size of the tokenizer, i.e., the highest possible token
+        id plus one.
+    layer: EncoderLayer
+        A suitably parameterized instance of ``EncoderLayer``.
+    n_layers: int, optional
+        How often the `layer` is repeated in the transformer stack.
+        Defaults to 2, but must be at least 1.
+    pad_id: int, optional
+        The id of the padding token. Defaults to 0.
+    pos_enc: Module, optional
+        PyTorch ``Module`` that
+
+        * has a ``reset_parameters()`` method,
+        * has a ``new()`` method to make fresh copies of itself,
+        * has a ``context`` attribute specifying the maximum sequence length,
+        * processes tensors with dimensions (..., `S`, `D`),
+
+        where `S` is the sequence length and `D` is the model dimension
+        specified in the `layer`. If given, it will be called on the input
+        tensor first thing. Typically, this would be an instance of
+        ``Sinusoidal`` or ``Learnable`` positional encodings. Defaults to an
+        instance of ``Identity``, which does nothing.
+    bias: bool, optional
+        Whether to apply bias in the final projection from the transformer
+        output onto the vocabulary size. Defaults to ``True``.
+    dropout: float, optional
+        Apply dropout to the sum of token embedding and positional encodings
+        with this probability during training. Defaults to 0.1
+    scale_grad_by_freq: bool, optional
+        Whether to scale the gradients on the token embeddings by the inverse
+        frequency of their occurrence.
+    device: str or device, optional
+        Torch device to first create the transformer on. Defaults to "cpu".
+    dtype: dtype, optional
+        Torch dtype to first create the transformer encoder stack in.
+        Defaults to ``torch.float``.
+
+    Raises
+    ------
+    TypeError
+        If neither the encoder itself nor the `layer` applies any positional
+        encodings.
+
+    See Also
+    --------
+    EncoderLayer
+    Sinusoidal
+    Learnable
+
+    """
 
     def __init__(
             self,
             vocab: int,
-            pad_id: int,
-            n_layers: int,
             layer: EncoderLayer,
+            n_layers: int = 2,
+            pad_id: int = 0,
             pos_enc: Module = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
@@ -25,14 +81,13 @@ class Encoder(Module):
     ) -> None:
         super().__init__()
         self.vocab = vocab
-        self.pad_id = pad_id
-        self.n_layers = max(1, n_layers)
+        self.n_layers = self.__valid(n_layers)
         self.layers = ptn.ModuleList([
             layer.new().to(device=device, dtype=dtype)
             for _ in range(self.n_layers)
         ])
-        self.n_layers = n_layers
-        self.pos_enc = pos_enc.to(device=device, dtype=dtype)
+        self.pad_id = pad_id
+        self.pos_enc = self.__check(pos_enc).to(device=device, dtype=dtype)
         self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
@@ -61,6 +116,26 @@ class Encoder(Module):
             dtype=dtype
         )
 
+    @staticmethod
+    def __valid(n_layers: int) -> int:
+        """Check that the number of layers is at least one."""
+        if n_layers < 1:
+            msg = 'The transformer must have at least 1 layer, not {}!'
+            raise ValueError(msg.format(n_layers))
+        return n_layers
+
+    def __check(self, pos_enc: Module) -> Module:
+        """Check compatibility of encoder and layer positional encodings."""
+        if not isinstance(pos_enc, Identity) and self.layers[0].has_pos_enc:
+            msg = ("Encoder and layer(s) both apply positional encodings! "
+                   "Hope you know what you're doing ...")
+            warnings.warn(msg)
+        if isinstance(pos_enc, Identity) and not self.layers[0].has_pos_enc:
+            msg = ('Either the encoder or the layer(s) must apply positional'
+                   ' encodings for a transformer architecture to work!')
+            raise TypeError(msg)
+        return pos_enc
+
     @property
     def mod_dim(self) -> int:
         """The model dimension."""
@@ -77,36 +152,79 @@ class Encoder(Module):
         return self.finalize.weight.dtype
 
     @property
-    def context(self) -> int:  # ToDo: Unit test this!
+    def context(self) -> int:
+        """Maximum context length permitted by the positional encodings."""
         if hasattr(self.pos_enc, 'context'):
-            return min(self.pos_enc.context, self.layer.context)
-        return self.layer.context
+            return min(self.pos_enc.context, self.layers[0].context)
+        return self.layers[0].context
 
     def forward(
             self,
             src: Tensor,
-            mask: Tensor | None,
-            padding_mask: Tensor | None,
-            is_causal: bool
+            attn_mask: Tensor | None = None,
+            src_mask: Tensor | None = None,
+            is_causal: bool = True
     ) -> Tensors1T:
-        if is_causal or (mask is None and padding_mask is None):
-            attn_mask = None
-        elif mask is None:
-            sizes = -1, padding_mask.size(-1), -1
-            attn_mask = padding_mask.unsqueeze(-2).expand(*sizes)
-        elif padding_mask is None:
-            attn_mask = mask
+        """Forward pass through the transformer encoder with optional masking.
+
+        Parameters
+        ----------
+        src: Tensor
+            Input sequence(s) of token indices. Must be of dtype int64 (=long).
+            Expected dimensions are (..., `S`), with `S` the sequence length.
+        attn_mask: Tensor, optional
+            Floating-point attention mask with a shape broadcastable to the
+            shape of the attention weights (..., `S`, `S`) to be added to the
+            product of queries and keys, before taking the softmax. A value of
+            0.0 (resulting in unchanged attention weights) indicates that an
+            element *should* be attended to and a value of "-inf" (resulting
+            in a zero attention weight) that it should *not* be attended to.
+            Defaults to ``None``.
+        src_mask: Tensor, optional
+            Floating-point attention mask with a shape broadcastable to the
+            shape of `src` (..., `S`). A value of 0.0 indicates that an
+            element *should* be attended to and a value of "-inf" that it
+            should *not* be attended to. Defaults to ``None``.
+        is_causal: bool, optional
+            If set to ``True``, inputs are masked with a causal `S` x `S`
+            triangular matrix (as produced by `generate_square_subsequent_mask
+            <https://pytorch.org/docs/stable/generated/torch.nn.Transformer.
+            html#torch.nn.Transformer.generate_square_subsequent_mask>`_) and
+            both `attn_mask` and `src_mask` are ignored.
+            Default to ``True``.
+
+        Returns
+        -------
+        Tensor
+            Un-normalized logits over the next-token probabilities for each
+            position with dimensions (..., `vocab`, `S`), where `S` is again
+            the sequence length.
+
+        Note
+        ----
+        Boolean attention masks are not accepted!
+
+        """
+        if is_causal or (attn_mask is None and src_mask is None):
+            mask = None
+        elif src_mask is None:
+            mask = attn_mask
         else:
-            sizes = -1, padding_mask.size(-1), -1
-            attn_mask = mask + padding_mask.unsqueeze(-2).expand(*sizes)
+            # Construct the arguments to PyTorch tensors' expand method
+            sizes = [-1] * max(2, src_mask.dim())
+            sizes[-2] = src_mask.size(-1)
+            # Repeat the src_mask along the next to last dimension to a square
+            src_mask = src_mask.expand(*sizes)
+            # Add src mask to attn_mask if present
+            mask = src_mask if attn_mask is None else attn_mask + src_mask
 
         out = self.drop(self.pos_enc(self.embed(src)))
         for layer in self.layers:
-            out = layer(out, attn_mask, is_causal)
-
+            out = layer(out, mask, is_causal)
         return self.finalize(self.norm(out)).transpose(-1, -2).contiguous(),
 
     def reset_parameters(self) -> None:
+        """Reset all learnable parameters in all components of the model."""
         for layer in self.layers:
             layer.reset_parameters()
         self.embed.reset_parameters()

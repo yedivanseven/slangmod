@@ -39,9 +39,9 @@ model = Reference(
     dtype=config.data.dtype
 ) if config.model.reference else Encoder(
     vocab=config.tokens.vocab,
-    pad_id=special.pad_id,
-    n_layers=config.model.n_layers,
     layer=encoder_layer,
+    n_layers=config.model.n_layers,
+    pad_id=special.pad_id,
     pos_enc=emb_pos_enc,
     bias=config.model.bias,
     dropout=config.model.dropout,
@@ -54,5 +54,5 @@ model = Reference(
 compile_model = Compile(
     inplace=True,
     model=model,
-    disable=config.model.disable
+    disable=config.model.disable_compile
 )

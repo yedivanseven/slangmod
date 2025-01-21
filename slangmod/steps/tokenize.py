@@ -11,7 +11,10 @@ from ..io import (
 )
 from .log_messages import log_total_number_of_files
 
+__all__ = ['tokenize']
+
 LOGGER = PassThroughStdOut(__name__, config.log_level)
+
 
 tokenize = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(f'Saving config file to "{config.config_file}".'),

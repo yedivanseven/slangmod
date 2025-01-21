@@ -15,6 +15,8 @@ from ..io import (
     save_config
 )
 
+__all__ = ['encode']
+
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 

@@ -6,7 +6,10 @@ from ..config import config
 from ..io import load_tokenizer, ConsoleClient, console_client
 from ..ml import Algo, create_generator
 
+__all__ = ['chat']
+
 LOGGER = PassThroughStdOut(__name__, config.log_level)
+
 
 chat = Pipe[[tuple[()]], ConsoleClient](
     Fork[[tuple[()]], tuple[Algo, Module]](

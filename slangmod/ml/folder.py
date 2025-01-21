@@ -4,14 +4,18 @@ from swak.misc import ArgRepr
 from swak.pt.types import Tensor
 from ..config import config
 from .tokenizers import special
-from .exceptions import ValidationErrors
 
 __all__ = [
     'TestSequenceFolder',
     'TrainSequenceFolder',
     'fold_train_sequences',
-    'fold_test_sequences'
+    'fold_test_sequences',
+    'ValidationErrors'
 ]
+
+
+class ValidationErrors(ExceptionGroup):
+    pass
 
 
 class TestSequenceFolder(ArgRepr):
@@ -106,8 +110,8 @@ class TestSequenceFolder(ArgRepr):
             dimension and as many rows as needed to accommodate all elements
             in its first dimension.
 
-        Notes
-        -----
+        Note
+        ----
         Sequences that are folded into more than one row will never have any
         row that has fewer than 2 non-padding entries because these would be
         useless in evaluating next-token prediction. However, empty sequences
@@ -139,7 +143,7 @@ class TrainSequenceFolder(ArgRepr):
         the sequence length. If it is 1 or larger, it is interpreted as an
         integer number of positions to overlap. Defaults to 0.0 which means
         no overlap between consecutive parts.
-    jitter: int
+    jitter: int, optional
         To introduce some variability into the training data, one can slightly
         and randomly shift sequences by a few positions every time they are
         used. That way, over-reliance on any specific positional alignment
@@ -276,8 +280,8 @@ class TrainSequenceFolder(ArgRepr):
             dimension and as many rows as needed to accommodate all elements
             in its first dimension.
 
-        Notes
-        -----
+        Note
+        ----
         Sequences that are folded into more than one row will never have any
         row that has fewer than 2 non-padding entries because these would be
         useless in evaluating next-token prediction. However, empty sequences

@@ -1,20 +1,20 @@
 from .tokenizers import Algo, tokenizer
 from .models import compile_model
-from .trainer import Trainer, trainer
-from .validator import Validator, validate
+from .trainer import trainer
+from .evaluator import Evaluator, evaluate_model
 from .generators import Generator, create_generator
-from .exceptions import ValidationErrors
 from .folder import (
     TestSequenceFolder,
     TrainSequenceFolder,
     fold_test_sequences,
-    fold_train_sequences
+    fold_train_sequences,
+    ValidationErrors
 )
 from .data import (
     TrainData,
     TestData,
-    make_train_data,
-    make_test_data
+    wrap_train_data,
+    wrap_test_data
 )
 
 __all__ = [
@@ -26,13 +26,12 @@ __all__ = [
     'fold_train_sequences',
     'TrainData',
     'TestData',
-    'make_train_data',
-    'make_test_data',
+    'wrap_train_data',
+    'wrap_test_data',
     'compile_model',
-    'Trainer',
     'trainer',
-    'Validator',
-    'validate',
+    'Evaluator',
+    'evaluate_model',
     'Generator',
     'create_generator',
     'ValidationErrors'

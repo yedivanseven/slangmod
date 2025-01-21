@@ -13,11 +13,11 @@ from ..ml import (
     fold_test_sequences,
     TrainData,
     TestData,
-    make_train_data,
-    make_test_data,
+    wrap_train_data,
+    wrap_test_data,
     compile_model,
     trainer,
-    validate
+    evaluate_model
 )
 from ..io import (
     save_config,
@@ -35,8 +35,10 @@ from .log_messages import (
     log_remaining_number_of_sequences,
     log_number_of_tokens,
     log_data_sizes,
-    log_validation_metrics
+    log_evaluation_metrics
 )
+
+__all__ = ['train']
 
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
@@ -87,7 +89,7 @@ process_train = Pipe[[list[str]], TrainData](
     trim_memory,
     LazyCatDim0,
     trim_memory,
-    make_train_data,
+    wrap_train_data,
     trim_memory
 )
 process_test = Pipe[[list[str]], TestData](
@@ -95,7 +97,7 @@ process_test = Pipe[[list[str]], TestData](
     trim_memory,
     Cat(dim=0),
     trim_memory,
-    make_test_data,
+    wrap_test_data,
     trim_memory
 )
 
@@ -157,8 +159,8 @@ train = Pipe[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
         identity,
     ),
     LOGGER.info('Validating model.'),
-    validate,
-    LOGGER.info(log_validation_metrics),
+    evaluate_model,
+    LOGGER.info(log_evaluation_metrics),
     LOGGER.info('Finished step "train".'),
     unit
 )

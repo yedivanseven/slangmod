@@ -8,13 +8,18 @@ from swak.misc import StdOutLogger
 from ..config import config, Optimizers, Scaling
 from .tokenizers import special
 
+__all__ = [
+    'trainer',
+    'criterion'
+]
+
 LOGGER = StdOutLogger(__name__, config.log_level)
 
 checkpoint = OnDisk(config.checkpoint_file, create=True)
 epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)
 
-loss = XEntropyLoss(
+criterion = XEntropyLoss(
     ignore_index=special.pad_id,
     label_smoothing=config.train.label_smoothing
 )
@@ -37,7 +42,7 @@ scaling = {
 scheduler = Curry[pts.LambdaLR](pts.LambdaLR, scaling)
 
 trainer = Trainer(
-    loss=loss,
+    loss=criterion,
     optimizer=optimizer,
     batch_size=config.train.batch_size,
     max_epochs=config.train.max_epochs,

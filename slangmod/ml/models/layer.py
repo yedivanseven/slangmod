@@ -22,7 +22,7 @@ class EncoderLayer(Module):
     Parameters
     ----------
     attention: SelfAttention
-        A suitable parameterized instance of ``SelfAttention``.
+        A suitably parameterized instance of ``SelfAttention``.
     feed_forward: Module
         PyTorch ``Module`` that (a) has a ``reset_parameters`` method, (b) has
         a ``new`` method to make fresh, newly initialized copies of itself,
@@ -30,12 +30,16 @@ class EncoderLayer(Module):
         (..., `S`, `D`), where `S` is the sequence length and `D` is the model
         dimension specified in the `attention`.
     pos_enc: Module, optional
-        PyTorch ``Module`` that (a) has a ``reset_parameters`` method, (b) has
-        a ``new`` method to make fresh, newly initialized copies of itself,
-        and that (c) accepts and returns a tensor with dimensions
-        (..., `S`, `D`), where `S` is the sequence length and `D` is the model
-        dimension specified in the `attention`. If given, it will be called on
-        the input tensor first thing. Typically, this would be an instance of
+        PyTorch ``Module`` that
+
+        * has a ``reset_parameters()`` method,
+        * has a ``new()`` method to make fresh copies of itself,
+        * has a ``context`` attribute specifying the maximum sequence length,
+        * processes tensors with dimensions (..., `S`, `D`),
+
+        where `S` is the sequence length and `D` is the model dimension
+        specified in the `attention`. If given, it will be called on the input
+        tensor first thing. Typically, this would be an instance of
         ``Sinusoidal`` or ``Learnable`` positional encodings. Defaults to an
         instance of ``Identity``, which does nothing.
     bias: bool, optional
@@ -58,6 +62,8 @@ class EncoderLayer(Module):
     See Also
     --------
     SelfAttention
+    Sinusoidal
+    Learnable
 
     """
 
@@ -133,7 +139,8 @@ class EncoderLayer(Module):
         )
 
     @property
-    def context(self) -> int:  # ToDo: Unit test this!
+    def context(self) -> int:
+        """Maximum context length given by the positional encodings."""
         if hasattr(self.pos_enc, 'context'):
             return min(self.pos_enc.context, self.attention.context)
         return self.attention.context
@@ -152,11 +159,15 @@ class EncoderLayer(Module):
             Input sequence(s) of dimensions (..., `S`, `D`), with sequence
             length `S` and model dimension `D`.
         mask: Tensor, optional
-            Attention mask with a shape broadcastable to the shape of attention
-            weights, which is (..., `S`, `S`). Two types of masks are
+            Attention mask with a shape broadcastable to the shape of the
+            attention weights (..., `S`, `S`). Two types of masks are
             supported: A boolean mask where a value of ``True`` indicates that
-            the element should take part in attention or a float mask of the
-            same type as `src` that is added to the attention score.
+            the element *should* take part in attention or a float mask of the
+            same dtype as `src` that is added to the product of queries and
+            keys, before taking the softmax. In the latter case, a value of
+            0.0 (resulting in unchanged attention weights) indicates that an
+            element *should* take part in the attention and a value of "-inf"
+            (resulting in a zero attention weight) that it should *not*.
             Defaults to ``None``.
         is_causal: bool, optional
             If set to ``True``, inputs are masked with a `S` x `S` lower
@@ -166,6 +177,17 @@ class EncoderLayer(Module):
         -------
         Tensor
             The output has the same shape as the input.
+
+        Important
+        ---------
+        In adhering to the convention of the `scaled_dot_product_attention
+        <https://pytorch.org/docs/stable/generated/torch.nn.functional.
+        scaled_dot_product_attention.html>`_, the meaning of ``True`` and
+        ``False`` (attend to and *not* attend to, respectively) in boolean
+        attention masks is exactly the **opposite** of what it means in the
+        `Transformer <https://pytorch.org/docs/stable/generated/torch.nn.
+        Transformer.html#torch.nn.Transformer.forward>`_.
+        Therefore, to stay compatible, use float masks!
 
         """
         positioned = self.pos_enc(src)
@@ -196,7 +218,9 @@ class EncoderLayer(Module):
             self.bias,
             self.dropout,
             self.norm_first,
-            self.eps
+            self.eps,
+            self.device,
+            self.dtype
         )
 
 

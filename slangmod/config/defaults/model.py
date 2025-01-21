@@ -25,5 +25,5 @@ class Model(JsonObject):
     compile: bool = True
 
     @property
-    def disable(self) -> bool:
+    def disable_compile(self) -> bool:
         return not self.compile

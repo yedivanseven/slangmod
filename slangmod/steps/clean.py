@@ -24,6 +24,8 @@ from ..etl import (
 )
 from .log_messages import log_total_number_of_files
 
+__all__ = ['clean']
+
 LOGGER = PassThroughStdOut(__name__, config.log_level)
 
 
