@@ -144,7 +144,7 @@ train_model = Pipe[[Module, TrainData, TestData], Module](
     )
 )
 
-train = Pipe[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
+train = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(f'Saving config file to "{config.config_file}".'),
     save_config,
     LOGGER.info('Starting step "train".'),

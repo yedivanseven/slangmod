@@ -28,48 +28,32 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertIsInstance(self.clean.min_len, int)
         self.assertEqual(1, self.clean.min_len)
 
-    def test_has_args(self):
-        self.assertTrue(hasattr(self.clean, 'args'))
+    def test_has_show_progress(self):
+        self.assertTrue(hasattr(self.clean, 'show_progress'))
 
-    def test_args(self):
-        self.assertTupleEqual((), self.clean.args)
-
-    def test_has_kwargs(self):
-        self.assertTrue(hasattr(self.clean, 'kwargs'))
-
-    def test_kwargs(self):
-        self.assertDictEqual({}, self.clean.kwargs)
+    def test_show_progress(self):
+        self.assertIsInstance(self.clean.show_progress, bool)
+        self.assertTrue(self.clean.show_progress)
 
 
 class TestCustomAttributes(unittest.TestCase):
 
     def setUp(self):
         self.min_len = 3
-        self.args = 'docs',
-        self.kwargs = {'leave': False}
-        self.clean = CorpusCleaner(
-            proc,
-            self.min_len,
-            *self.args,
-            **self.kwargs
-        )
+        self.show_progress = False
+        self.clean = CorpusCleaner(proc, self.min_len, self.show_progress)
 
     def test_min_len(self):
         self.assertEqual(self.min_len, self.clean.min_len)
 
-    def test_args(self):
-        self.assertTupleEqual(self.args, self.clean.args)
-
-    def test_kwargs(self):
-        self.assertDictEqual(self.kwargs, self.clean.kwargs)
+    def test_show_progress(self):
+        self.assertFalse(self.clean.show_progress)
 
 
 class TestUsage(unittest.TestCase):
 
     def setUp(self):
         self.min_len = 5
-        self.args = 'docs',
-        self.kwargs = {'leave': False}
         self.name = 'text'
         self.data = ['hello', 'world', '42']
         self.corpus = Series(self.data, name=self.name)
@@ -83,23 +67,14 @@ class TestUsage(unittest.TestCase):
         mock.return_value = self.corpus
         clean = CorpusCleaner(proc)
         _ = clean(self.corpus)
-        mock.assert_called_once_with(self.corpus)
+        mock.assert_called_once_with(self.corpus, 'Documents', disable=False)
 
     @patch('slangmod.etl.cleaner.tqdm')
     def test_tqdm_called_custom(self, mock):
         mock.return_value = self.corpus
-        clean = CorpusCleaner(proc, self.min_len, *self.args, **self.kwargs)
+        clean = CorpusCleaner(proc, self.min_len, show_progress=False)
         _ = clean(self.corpus)
-        mock.assert_called_once_with(self.corpus, *self.args, **self.kwargs)
-
-    @patch('slangmod.etl.cleaner.tqdm')
-    def test_kwargs_merged(self, mock):
-        mock.return_value = self.corpus
-        kwargs = {'leave': True, 'total': 42}
-        merged_kwargs = self.kwargs | kwargs
-        clean = CorpusCleaner(proc, self.min_len, *self.args, **kwargs)
-        _ = clean(self.corpus)
-        mock.assert_called_once_with(self.corpus, *self.args, **merged_kwargs)
+        mock.assert_called_once_with(self.corpus, 'Documents', disable=True)
 
     def test_process_called(self):
         mock = Mock(return_value='42')
@@ -168,16 +143,16 @@ class TestMisc(unittest.TestCase):
 
     def test_default_repr(self):
         clean = CorpusCleaner(proc)
-        expected = 'CorpusCleaner(proc, 1)'
+        expected = 'CorpusCleaner(proc, 1, True)'
         self.assertEqual(expected, repr(clean))
 
     def test_custom_repr(self):
-        clean = CorpusCleaner(proc, 5,'docs', leave=False)
-        expected = "CorpusCleaner(proc, 5, 'docs', leave=False)"
+        clean = CorpusCleaner(proc, 5,False)
+        expected = "CorpusCleaner(proc, 5, False)"
         self.assertEqual(expected, repr(clean))
 
     def test_pickle_works(self):
-        clean = CorpusCleaner(proc, 3,'docs', leave=False)
+        clean = CorpusCleaner(proc, 3,False)
         _ = pickle.loads(pickle.dumps(clean))
 
 

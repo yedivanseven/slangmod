@@ -28,9 +28,9 @@ class Evaluator(ArgRepr):
     batch_size: int
         The batch size to request from the data producer when computing
         evaluation metrics.
-    disable_progress: bool, optional
-        Whether to disable the progress bar that provides visual feedback
-        during the validation process. Defaults to ``False``.
+    show_progress: bool, optional
+        Whether to show a progress bar that provides visual feedback in the
+        console during the validation process. Defaults to ``True``.
 
     Raises
     ------
@@ -43,19 +43,19 @@ class Evaluator(ArgRepr):
             self,
             loss: CrossEntropyLoss,
             batch_size: int,
-            disable_progress: bool = False
+            show_progress: bool = True
     ) -> None:
-        super().__init__(loss, batch_size, disable_progress)
+        super().__init__(loss, batch_size, show_progress)
         self.loss = self.__sane(loss)
         self.batch_size = batch_size
-        self.disable_progress = disable_progress
+        self.show_progress = show_progress
 
     @staticmethod
     def __sane(loss: CrossEntropyLoss) -> CrossEntropyLoss:
         """Check that the "reduction" of the CrossEntropyLoss is "mean"."""
         if loss.reduction != 'mean':
             tmp = ('The "reduction" of the CrossEntropyLoss'
-                   'must be "mean" and not "{}"!')
+                   ' must be "mean" and not "{}"!')
             msg = tmp.format(loss.reduction )
             raise ValueError(msg)
         return loss
@@ -112,8 +112,8 @@ class Evaluator(ArgRepr):
 
         Note
         ----
-        Batches with sequences consisting of only padding tokens are not
-        expected and will lead to a division by zero.
+        Sequences consisting of only padding tokens are not expected and will
+        lead to a division by zero.
 
         """
         # Set the "reduction" of the loss to "none" ...
@@ -156,28 +156,27 @@ class Evaluator(ArgRepr):
 
         """
         # Initialize counters and accumulation variables
+        ema = None
         n_tok = pt.tensor(0, device=data.device, dtype=pt.long)
         n_seq = pt.tensor(0, device=data.device, dtype=pt.long)
-        top_1 = pt.tensor(0.0, device=data.device, dtype=pt.double)
-        top_2 = pt.tensor(0.0, device=data.device, dtype=pt.double)
-        top_5 = pt.tensor(0.0, device=data.device, dtype=pt.double)
+        top_1 = pt.tensor(0.0, device=data.device, dtype=pt.float)
+        top_2 = pt.tensor(0.0, device=data.device, dtype=pt.float)
+        top_5 = pt.tensor(0.0, device=data.device, dtype=pt.float)
         val_loss = pt.tensor(0.0, device=data.device, dtype=pt.double)
-        perplexity = pt.tensor(0.0, device=data.device, dtype=pt.double)
-
-        # Loop over patches of validation data and accumulate metrics
-        ema = None
+        perplexity = pt.tensor(0.0, device=data.device, dtype=pt.float)
+        # Initialize iterator over the validation data
+        n_batches = math.ceil(data.n / self.batch_size)
+        progress = tqdm(
+            data.sample(self.batch_size),
+            desc='Validate',
+            total=n_batches,
+            leave=False,
+            disable=not self.show_progress
+        )
+        # Set model (and loss) into evaluation mode.
         model.eval()
         self.loss.eval()
-        n_batches = math.ceil(data.n / self.batch_size)
         with pt.inference_mode():
-            batches = data.sample(self.batch_size)
-            progress = tqdm(
-                batches,
-                desc='Validate',
-                total=n_batches,
-                leave=False,
-                disable=self.disable_progress
-            )
             # Targets are of sizes (batch_size, seq_len)
             for features, targets in progress:
                 # Mask of same size to select all non-padding tokens.
@@ -208,20 +207,13 @@ class Evaluator(ArgRepr):
                 progress.set_postfix(loss=f'{ema:4.2f}')
 
                 # Perplexity summed over all sequences in the batch.
-                batch_perplexity = self.perplexity(valid_logits, valid_targets)
-                perplexity += batch_perplexity
-
+                perplexity += self.perplexity(valid_logits, valid_targets)
                 # Accuracy averaged over all non-padding tokens in the batch.
-                batch_top_1 = self.top(1, valid_logits, valid_targets)
-                top_1 += batch_top_1
-
+                top_1 += self.top(1, valid_logits, valid_targets)
                 # Top-2 accuracy averaged over all non-padding tokens.
-                batch_top_2 = self.top(1, valid_logits, valid_targets)
-                top_2 += batch_top_2
-
+                top_2 += self.top(2, valid_logits, valid_targets)
                 # Top-5 accuracy averaged over all non-padding tokens.
-                batch_top_5 = self.top(5, valid_logits, valid_targets)
-                top_5 += batch_top_5
+                top_5 += self.top(5, valid_logits, valid_targets)
 
                 # Increment counters for total numbers of tokens and sequences.
                 n_tok += batch_n_tok
@@ -235,4 +227,10 @@ class Evaluator(ArgRepr):
             (top_5 / n_tok).item()
         )
 
-evaluate_model = Evaluator(criterion, config.train.batch_size)
+
+# Provide a ready-to-use instance of the Evaluator
+evaluate_model = Evaluator(
+    loss=criterion,
+    batch_size=config.train.batch_size,
+    show_progress=config.progress
+)

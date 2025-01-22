@@ -16,7 +16,6 @@ PACKAGE = __name__.split('.')[0]
 VERSION = meta.version(PACKAGE)
 
 
-# ToDo: Flag to switch off progress bars
 class Main(JsonObject):
     package = PACKAGE
     version = VERSION
@@ -26,6 +25,7 @@ class Main(JsonObject):
     size: Maybe[str](Lower()) = 'xxs'
     toml: Maybe[str](resolve) = None
     name: Maybe[str](Lower()) = 'xxs'
+    progress: bool = True
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()

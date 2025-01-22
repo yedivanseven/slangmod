@@ -1,4 +1,3 @@
-from typing import Any
 from collections.abc import Callable
 from hashlib import sha256
 from tqdm import tqdm
@@ -19,11 +18,9 @@ class CorpusCleaner(ArgRepr):
     min_len: int, optional
         The minimum number of characters that a document should have. Shorter
         documents are filtered out. Defaults to 1.
-    *args
-        Optional arguments to pass through to the ``tqdm`` progress bar.
-    **kwargs
-        Optional keyword arguments to pass through to the ``tqdm``
-        progress bar.
+    show_progress: bool, optional
+        Whether to show a progress bar that provides visual feedback in the
+        console during the cleaning process. Defaults to ``True``.
 
     """
 
@@ -31,16 +28,14 @@ class CorpusCleaner(ArgRepr):
             self,
             process: Callable[[str], str],
             min_len: int = 1,
-            *args: Any,
-            **kwargs: Any
+            show_progress: bool = True
     ) -> None:
-        super().__init__(process, min_len, *args, **kwargs)
+        super().__init__(process, min_len, show_progress)
         self.process = process
         self.min_len = min_len
-        self.args = args
-        self.kwargs = kwargs
+        self.show_progress = show_progress
 
-    def __call__(self, corpus: Series, **kwargs: Any) -> tuple[DataFrame, str]:
+    def __call__(self, corpus: Series) -> tuple[DataFrame, str]:
         """Apply the cached processor to each document in a corpus.
 
         Parameters
@@ -48,9 +43,6 @@ class CorpusCleaner(ArgRepr):
         corpus: Series
             Pandas series with each entry representing a single document to
             clean, that is, a single string.
-        **kwargs
-            Optional keyword arguments are merged into the keyword arguments
-            given at instantiation and passed on to the ``tqdm`` progress bar.
 
         Returns
         -------
@@ -60,8 +52,7 @@ class CorpusCleaner(ArgRepr):
             The SHA256 hash of the cleaned series for downstream deduplication.
 
         """
-        merged_kwargs = self.kwargs | kwargs
-        wrapped = tqdm(corpus, *self.args, **merged_kwargs)
+        wrapped = tqdm(corpus, 'Documents', disable=not self.show_progress)
         processed = (self.process(document) for document in wrapped)
         filtered = filter(lambda doc: len(doc) >= self.min_len, processed)
         corpus = Series(filtered, name=corpus.name)

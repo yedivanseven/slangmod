@@ -6,6 +6,7 @@ from ..tokenizers import Algo
 from .abc import Generator
 
 
+# ToDo: Can we move eos sequences to CPU?
 class BeamSearch(Generator):
 
     def __init__(
