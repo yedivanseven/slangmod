@@ -1,7 +1,13 @@
 import torch.optim as pto
 import torch.optim.lr_scheduler as pts
 from swak.funcflow import Curry
-from swak.pt.train import Trainer, EpochPrinter, TrainPrinter, OnDisk
+from swak.pt.train import (
+    Trainer,
+    StepPrinter,
+    EpochPrinter,
+    TrainPrinter,
+    OnDisk
+)
 from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
 from swak.pt.losses import XEntropyLoss
 from swak.misc import StdOutLogger
@@ -16,8 +22,10 @@ __all__ = [
 LOGGER = StdOutLogger(__name__, config.log_level)
 
 checkpoint = OnDisk(config.checkpoint_file, create=True)
+step_cb = StepPrinter()  # ToDo: Add step printer here
 epoch_cb = EpochPrinter(LOGGER.info)
-train_cb = TrainPrinter(LOGGER.info)
+train_cb = TrainPrinter(LOGGER.info)  # ToDo: Write history in custom callback
+
 
 criterion = XEntropyLoss(
     ignore_index=special.pad_id,
@@ -53,6 +61,7 @@ trainer = Trainer(
     step_freq=config.train.step_freq,
     clip_grad=config.train.clip_grad,
     checkpoint=checkpoint,
+    show_progress=config.progress,
     epoch_cb=epoch_cb,
     train_cb=train_cb
 )
