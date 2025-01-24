@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from swak.funcflow.loggers import PassThroughStdOut
+from swak.funcflow.loggers import PassThroughStdLogger
 from swak.funcflow import Pipe, Map, Sum, Fork
 from ..config import config
 from ..io import (
@@ -26,7 +26,7 @@ from .log_messages import log_total_number_of_files
 
 __all__ = ['clean']
 
-LOGGER = PassThroughStdOut(__name__, config.log_level)
+LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 wiki40b_processor = Pipe[[str], str](

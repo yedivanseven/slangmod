@@ -1,5 +1,5 @@
 from swak.funcflow import Pipe
-from swak.funcflow.loggers import PassThroughStdOut
+from swak.funcflow.loggers import PassThroughStdLogger
 from ..config import config
 from ..ml import tokenizer
 from ..etl import trim_memory
@@ -13,7 +13,7 @@ from .log_messages import log_total_number_of_files
 
 __all__ = ['tokenize']
 
-LOGGER = PassThroughStdOut(__name__, config.log_level)
+LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 tokenize = Pipe[[tuple[()]], tuple[()]](

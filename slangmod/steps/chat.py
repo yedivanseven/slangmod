@@ -1,14 +1,14 @@
 from swak.funcflow import Pipe, Fork, unit
 from swak.pt.io import ModelLoader
 from swak.pt.types import Module
-from swak.funcflow.loggers import PassThroughStdOut
+from swak.funcflow.loggers import PassThroughStdLogger
 from ..config import config
 from ..io import load_tokenizer, ConsoleClient, console_client
 from ..ml import Algo, create_generator
 
 __all__ = ['chat']
 
-LOGGER = PassThroughStdOut(__name__, config.log_level)
+LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 chat = Pipe[[tuple[()]], ConsoleClient](

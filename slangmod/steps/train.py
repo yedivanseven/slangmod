@@ -4,7 +4,7 @@ from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
 from swak.pt.misc import Cat, LazyCatDim0
-from swak.funcflow.loggers import PassThroughStdOut
+from swak.funcflow.loggers import PassThroughStdLogger
 from swak.funcflow import identity
 from ..config import config
 from ..etl import trim_memory, Shuffle
@@ -40,7 +40,7 @@ from .log_messages import (
 
 __all__ = ['train']
 
-LOGGER = PassThroughStdOut(__name__, config.log_level)
+LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 read_file = Pipe[[str], list[ndarray]](

@@ -10,7 +10,7 @@ from swak.pt.train import (
 )
 from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
 from swak.pt.losses import XEntropyLoss
-from swak.misc import StdOutLogger
+from swak.misc import StdLogger
 from ..config import config, Optimizers, Scaling
 from .tokenizers import special
 
@@ -19,7 +19,7 @@ __all__ = [
     'criterion'
 ]
 
-LOGGER = StdOutLogger(__name__, config.log_level)
+LOGGER = StdLogger(__name__, config.log_level)
 
 checkpoint = OnDisk(config.checkpoint_file, create=True)
 step_cb = StepPrinter()  # ToDo: Add step printer here

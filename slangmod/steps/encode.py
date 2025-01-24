@@ -1,6 +1,6 @@
 from pandas import Series, DataFrame
 from swak.funcflow import apply, Fork, Pipe, Route, Sum, Map
-from swak.funcflow.loggers import PassThroughStdOut
+from swak.funcflow.loggers import PassThroughStdLogger
 from ..etl import to_frame, trim_memory
 from ..config import config
 from ..ml import Algo
@@ -17,7 +17,7 @@ from ..io import (
 
 __all__ = ['encode']
 
-LOGGER = PassThroughStdOut(__name__, config.log_level)
+LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 load_column = Pipe[[str], Series](

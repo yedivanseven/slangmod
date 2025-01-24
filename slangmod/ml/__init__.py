@@ -16,7 +16,8 @@ from .data import (
     wrap_train_data,
     wrap_test_data
 )
-
+# ToDo: Put aliases for tensor dimensions into docstring header!
+# ToDo: Use new "Repeatable" type
 __all__ = [
     'Algo',
     'tokenizer',
