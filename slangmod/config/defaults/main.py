@@ -26,12 +26,21 @@ class Main(JsonObject):
     toml: Maybe[str](resolve) = None
     name: Maybe[str](Lower()) = 'dev'
     progress: bool = True
+    actions: list = []
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()
     model: Model = Model()
     train: Train = Train()
     chat: Chat = Chat()
+
+    @property
+    def resume(self) -> bool:
+        return 'resume' in self.actions
+
+    @property
+    def mode(self) -> str:
+        return 'a' if self.resume else 'w'
 
     @property
     def preset(self) -> str:
@@ -78,6 +87,14 @@ class Main(JsonObject):
     @property
     def config_file(self) -> str:
         return str((Path(self.folder) / self.files.config).resolve())
+
+    @property
+    def log_file(self) -> str:
+        return str((Path(self.folder) / self.files.log).resolve())
+
+    @property
+    def monitor_file(self):
+        return str((Path(self.folder) / self.files.monitor).resolve())
 
     @property
     def clean_files(self) -> str:

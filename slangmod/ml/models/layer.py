@@ -2,9 +2,8 @@ import warnings
 from typing import Self, Any
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Device, Dtype, Tensor, Module
+from swak.pt.types import Device, Dtype, Tensor, Block
 from swak.pt.misc import Identity
-from swak.pt.blocks import Block
 from ...config import config, LiteralDevice, Devices
 from .positions import src_pos_enc
 from .attention import SelfAttention, self_attention
@@ -16,20 +15,23 @@ __all__ = [
 ]
 
 
-class EncoderLayer(Module):
+class EncoderLayer(Block):
     """Encoder layer (i.e., self-attention only) to use in a transformer.
 
     Parameters
     ----------
     attention: SelfAttention
         A suitably parameterized instance of ``SelfAttention``.
-    feed_forward: Module
-        PyTorch ``Module`` that (a) has a ``reset_parameters`` method, (b) has
-        a ``new`` method to make fresh, newly initialized copies of itself,
-        and that (c) accepts and returns a tensor with dimensions
-        (..., `S`, `D`), where `S` is the sequence length and `D` is the model
-        dimension specified in the `attention`.
-    pos_enc: Module, optional
+    feed_forward: Block
+        PyTorch ``Module`` that
+
+        * has a ``reset_parameters()`` method,
+        * has a ``new()`` method to make fresh copies of itself,
+        * processes tensors with dimensions (..., `S`, `D`),
+
+        where `S` is the sequence length and `D` is the model dimension
+        specified in the `attention`.
+    pos_enc: Block, optional
         PyTorch ``Module`` that
 
         * has a ``reset_parameters()`` method,

@@ -1,7 +1,7 @@
 import warnings
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Module, Device, Dtype, Tensor, Tensors1T
+from swak.pt.types import Device, Dtype, Tensor, Tensors1T, Resettable
 from swak.pt.misc import Identity
 from .layer import EncoderLayer
 from ...config import LiteralDevice, Devices
@@ -9,7 +9,7 @@ from ...config import LiteralDevice, Devices
 __all__ = ['Encoder']
 
 
-class Encoder(Module):
+class Encoder(Resettable):
     """Flexible transformer encoder for natural language modeling.
 
     Parameters
@@ -24,11 +24,10 @@ class Encoder(Module):
         Defaults to 2, but must be at least 1.
     pad_id: int, optional
         The id of the padding token. Defaults to 0.
-    pos_enc: Module, optional
+    pos_enc: Resettable, optional
         PyTorch ``Module`` that
 
         * has a ``reset_parameters()`` method,
-        * has a ``new()`` method to make fresh copies of itself,
         * has a ``context`` attribute specifying the maximum sequence length,
         * processes tensors with dimensions (..., `S`, `D`),
 
@@ -72,7 +71,7 @@ class Encoder(Module):
             layer: EncoderLayer,
             n_layers: int = 2,
             pad_id: int = 0,
-            pos_enc: Module = Identity(),
+            pos_enc: Resettable = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
@@ -124,7 +123,7 @@ class Encoder(Module):
             raise ValueError(msg.format(n_layers))
         return n_layers
 
-    def __check(self, pos_enc: Module) -> Module:
+    def __check(self, pos_enc: Resettable) -> Resettable:
         """Check compatibility of encoder and layer positional encodings."""
         if not isinstance(pos_enc, Identity) and self.layers[0].has_pos_enc:
             msg = ("Encoder and layer(s) both apply positional encodings! "

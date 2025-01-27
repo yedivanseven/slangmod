@@ -11,4 +11,4 @@ write_toml = TomlWriter(
     prune=True
 )
 save_config = Partial[tuple[()]](write_toml, config)
-# ToDo: Remove this when the new logging pipeline is up
+# ToDo: Integrate with summary writer

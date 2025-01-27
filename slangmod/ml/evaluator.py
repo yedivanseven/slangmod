@@ -56,7 +56,7 @@ class Evaluator(ArgRepr):
         if loss.reduction != 'mean':
             tmp = ('The "reduction" of the CrossEntropyLoss'
                    ' must be "mean" and not "{}"!')
-            msg = tmp.format(loss.reduction )
+            msg = tmp.format(loss.reduction)
             raise ValueError(msg)
         return loss
 

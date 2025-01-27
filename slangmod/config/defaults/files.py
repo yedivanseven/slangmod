@@ -7,6 +7,8 @@ class Files(JsonObject):
     checkpoint: Lower() = 'checkpoint.pt'
     model: Lower() = 'model.pt'
     config: Lower() = 'config.toml'
+    log: Lower() = 'debug.log'
+    monitor: Lower() = 'convergence.txt'
     suffix: str = 'parquet'
     train: str = 'train'
     test: str = 'test'

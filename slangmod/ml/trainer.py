@@ -10,7 +10,7 @@ from swak.pt.train import (
 )
 from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
 from swak.pt.losses import XEntropyLoss
-from swak.misc import StdLogger
+from swak.misc import StdLogger, FileLogger, RAW_FMT
 from ..config import config, Optimizers, Scaling
 from .tokenizers import special
 
@@ -20,12 +20,12 @@ __all__ = [
 ]
 
 LOGGER = StdLogger(__name__, config.log_level)
+MONITOR = FileLogger(config.monitor_file, fmt=RAW_FMT, mode=config.mode)
 
 checkpoint = OnDisk(config.checkpoint_file, create=True)
-step_cb = StepPrinter()  # ToDo: Add step printer here
+step_cb = StepPrinter(MONITOR.debug)
 epoch_cb = EpochPrinter(LOGGER.info)
 train_cb = TrainPrinter(LOGGER.info)  # ToDo: Write history in custom callback
-
 
 criterion = XEntropyLoss(
     ignore_index=special.pad_id,
@@ -62,6 +62,7 @@ trainer = Trainer(
     clip_grad=config.train.clip_grad,
     checkpoint=checkpoint,
     show_progress=config.progress,
+    step_cb=step_cb,
     epoch_cb=epoch_cb,
     train_cb=train_cb
 )

@@ -17,7 +17,8 @@ model = WordPiece(
 trainer = WordPieceTrainer(
     vocab_size=config.tokens.vocab,
     min_frequency=config.tokens.min_frequency,
-    special_tokens=special.tokens
+    special_tokens=special.tokens,
+    show_progress=config.progress
 )
 pre_tokenizer = Sequence([
     WhitespaceSplit(),

@@ -20,7 +20,8 @@ trainer = BpeTrainer(
     min_frequency=config.tokens.min_frequency,
     special_tokens=special.tokens,
     end_of_word_suffix=config.tokens.end_of_word_suffix,
-    max_token_length=config.tokens.max_length
+    max_token_length=config.tokens.max_length,
+    show_progress=config.progress
 )
 pre_tokenizer = Sequence([
     WhitespaceSplit(),

@@ -4,9 +4,8 @@ from typing import Self
 import torch as pt
 import torch.nn as ptn
 import torch.nn.functional as ptnf
-from swak.pt.types import Device, Dtype, Tensor
+from swak.pt.types import Device, Dtype, Tensor, Block
 from swak.pt.misc import Identity
-from swak.pt.blocks import Block
 from ...config import config, LiteralDevice, Devices
 from .positions import qk_pos_enc
 

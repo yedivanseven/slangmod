@@ -32,14 +32,21 @@ __all__ = [
     'Generators',
     'Styles'
 ]
-# ToDo: Put available actions int DESCRIPTION
+
 # Parse the environment for config options
 parse_env = EnvParser()
 env_vars = parse_env()
 temporary = main(env_vars)
 
+ACTIONS = """actions:
+dry-run       Print the configuration slangmod would run with.
+tokenizer     Train a tokenizer on the corpus.
+encode        Encode text documents with the trained tokenizer.
+train         Train the specified model ont hne encoded data.
+chat          Start a console client to chat with a trained model.
+"""
 # Parse the command line for config options
-parse_args = ArgParser(epilog=EPILOG.format(temporary))
+parse_args = ArgParser(description=ACTIONS, epilog=EPILOG.format(temporary))
 actions, args = parse_args()
 temporary = temporary(args)
 
@@ -52,4 +59,4 @@ load_preset = TextResourceLoader(__name__, 'presets')
 preset = tomllib.loads(load_preset(temporary.preset))
 
 # Update the original config in order of precedence
-config = main(preset)(toml)(env_vars)(args)
+config = main(preset)(toml)(env_vars)(args, actions=actions)

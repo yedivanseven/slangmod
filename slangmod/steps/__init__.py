@@ -13,5 +13,3 @@ __all__ = [
     'train',
     'chat'
 ]
-
-# ToDo: Make a "resume" step somehow!

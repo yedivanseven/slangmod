@@ -1,8 +1,7 @@
 from typing import Any, Self
 import math
 import torch as pt
-from swak.pt.types import Tensor, Dtype, Device
-from swak.pt.blocks import Block
+from swak.pt.types import Tensor, Dtype, Device, Block
 from slangmod.config import LiteralDevice, Devices
 
 

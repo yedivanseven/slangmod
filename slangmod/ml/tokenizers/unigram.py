@@ -21,7 +21,8 @@ trainer = UnigramTrainer(
     shrinking_factor=config.tokens.shrink_factor,
     unk_token=special.unk.content,
     max_piece_length=config.tokens.max_length,
-    n_sub_iterations=config.tokens.n_iter
+    n_sub_iterations=config.tokens.n_iter,
+    show_progress=config.progress
 )
 pre_tokenizer = Sequence([
     WhitespaceSplit(),

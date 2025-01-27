@@ -1,8 +1,7 @@
 from typing import Any, Self
 import torch as pt
 import torch.nn as ptn
-from swak.pt.types import Tensor, Dtype, Device
-from swak.pt.blocks import Block
+from swak.pt.types import Tensor, Dtype, Device, Block
 from ....config import LiteralDevice, Devices
 
 
@@ -23,6 +22,20 @@ class Learnable(Block):
     dtype: dtype, optional
         Torch dtype of the learnable positional encodings.
         Defaults to ``torch.float``.
+
+    Note
+    ----
+    Make sure that the `context` reflects the maximum length of the sequences
+    that your model sees at **training** time. In contrast to other types of
+    positional encodings, which can reasonably be expected to generalize well
+    beyond that during inference, positions that have never been encountered
+    during training cannot be encoded at all with ``Learnable``. Consequently,
+    the user chat history can only be attended to up until that length.
+
+    See Also
+    --------
+    Sinusoidal
+    Rotary
 
     """
 

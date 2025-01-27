@@ -4,7 +4,7 @@ from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
 from swak.pt.misc import Cat, LazyCatDim0
-from swak.funcflow.loggers import PassThroughStdLogger
+from swak.funcflow.loggers import PassThroughStdLogger, PassThroughFileLogger
 from swak.funcflow import identity
 from ..config import config
 from ..etl import trim_memory, Shuffle
@@ -40,14 +40,19 @@ from .log_messages import (
 
 __all__ = ['train']
 
-LOGGER = PassThroughStdLogger(__name__, config.log_level)
+
+# ToDo: Remove once SHORT_FMT is available (and the default) for files
+FMT = '{asctime:<23s} [{levelname:<8s}] {message}'
+LOG_TERM = PassThroughStdLogger(__name__, config.log_level)
+LOG_FILE = PassThroughFileLogger(config.log_file, mode=config.mode, fmt=FMT)
 
 
 read_file = Pipe[[str], list[ndarray]](
-    LOGGER.debug(log_process_file),
+    LOG_TERM.debug(log_process_file),
+    LOG_FILE.debug(log_process_file),
     read_column,
     list,
-    LOGGER.debug(log_total_number_of_docs),
+    LOG_TERM.debug(log_total_number_of_docs),
 )
 cat_sequences = Pipe[[list[Tensor]], Tensor](
     trim_memory,
@@ -57,28 +62,36 @@ cat_sequences = Pipe[[list[Tensor]], Tensor](
 
 process_train_file = Pipe[[str], Tensor](
     read_file,
-LOGGER.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
+LOG_TERM.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
+    LOG_FILE.debug(f'Dropping sequences shorter than {config.data.jitter}.'),
     Filter[list[ndarray], list](lambda seq: len(seq) > config.data.jitter),
-    LOGGER.debug(log_remaining_number_of_sequences),
+    LOG_TERM.debug(log_remaining_number_of_sequences),
+    LOG_FILE.debug(log_remaining_number_of_sequences),
     trim_memory,
     Shuffle[list[ndarray]](config.data.shuffle),
-    LOGGER.debug(log_number_of_tokens),
+    LOG_TERM.debug(log_number_of_tokens),
+    LOG_FILE.debug(log_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
-    LOGGER.debug('Folding sequences.'),
+    LOG_TERM.debug('Folding sequences.'),
+    LOG_FILE.debug('Folding sequences.'),
     Map[[Tensor], Tensor, list](fold_train_sequences),
     cat_sequences
 )
 process_test_file = Pipe[[str], Tensor](
     read_file,
-LOGGER.debug('Dropping sequences shorter than 2.'),
+LOG_TERM.debug('Dropping sequences shorter than 2.'),
+    LOG_FILE.debug('Dropping sequences shorter than 2.'),
     Filter[list[ndarray], list](lambda seq: len(seq) > 1),
-    LOGGER.debug(log_remaining_number_of_sequences),
+    LOG_TERM.debug(log_remaining_number_of_sequences),
+    LOG_FILE.debug(log_remaining_number_of_sequences),
     trim_memory,
-    LOGGER.debug(log_number_of_tokens),
+    LOG_TERM.debug(log_number_of_tokens),
+    LOG_FILE.debug(log_number_of_tokens),
     Map[[ndarray], Tensor, list](Create(pt.long, 'cpu')),
     trim_memory,
-    LOGGER.debug('Folding sequences.'),
+    LOG_TERM.debug('Folding sequences.'),
+    LOG_FILE.debug('Folding sequences.'),
     Map[[Tensor], Tensor, list](fold_test_sequences),
     cat_sequences
 )
@@ -102,42 +115,56 @@ process_test = Pipe[[list[str]], TestData](
 )
 
 load_train = Pipe[[list[str]], TrainData](
-    LOGGER.debug('Loading train data.'),
+    LOG_TERM.debug('Loading train data.'),
+    LOG_FILE.debug('Loading train data.'),
     filter_train_files,
-    LOGGER.debug(log_total_number_of_files),
+    LOG_TERM.debug(log_total_number_of_files),
+    LOG_FILE.debug(log_total_number_of_files),
     process_train
 )
 load_test = Pipe[[list[str]], TestData](
-    LOGGER.debug('Loading test data.'),
+    LOG_TERM.debug('Loading test data.'),
+    LOG_FILE.debug('Loading test data.'),
     filter_test_files,
-    LOGGER.debug(log_total_number_of_files),
+    LOG_TERM.debug(log_total_number_of_files),
+    LOG_FILE.debug(log_total_number_of_files),
     process_test
 )
 load_validation = Pipe[[list[str]], TestData](
-    LOGGER.debug('Loading validation data.'),
+    LOG_TERM.debug('Loading validation data.'),
+    LOG_FILE.debug('Loading validation data.'),
     filter_validation_files,
-    LOGGER.debug(log_total_number_of_files),
+    LOG_TERM.debug(log_total_number_of_files),
+    LOG_FILE.debug(log_total_number_of_files),
     process_test
 )
 
 load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
-    LOGGER.debug(f'Scanning "{config.encodings}" for files.'),
+    LOG_TERM.debug(f'Scanning "{config.encodings}" for files.'),
+    LOG_FILE.debug(f'Scanning "{config.encodings}" for files.'),
     discover_encodings,
-    LOGGER.debug(log_total_number_of_files),
+    LOG_TERM.debug(log_total_number_of_files),
+    LOG_FILE.debug(log_total_number_of_files),
     Fork[[list[str]], tuple[TrainData, TestData, TestData]](
         load_train,
         load_test,
         load_validation
     ),
-    LOGGER.info(log_data_sizes)
+    LOG_TERM.info(log_data_sizes),
+    LOG_FILE.info(log_data_sizes)
 )
 
 train_model = Pipe[[Module, TrainData, TestData], Module](
-    LOGGER.info(f'Training model on {config.data.device.upper()} with a target'
-                f' learning rate of {config.train.learning_rate:7.5f}'),
+    LOG_TERM.info(f'Training model on {config.data.device.upper()} '
+                     f'with a maximum learning rate of '
+                     f'{config.train.learning_rate:7.5f}'),
+    LOG_FILE.info(f'Training model on {config.data.device.upper()} '
+                     f'with a maximum learning rate of '
+                     f'{config.train.learning_rate:7.5f}'),
     trim_memory,
-    trainer.train,
-    LOGGER.debug(f'Saving model to "{config.model_file}".'),
+    trainer.resume if config.resume else trainer.train,
+    LOG_TERM.debug(f'Saving model to "{config.model_file}".'),
+    LOG_FILE.debug(f'Saving model to "{config.model_file}".'),
     Fork[[Module], Module](
         identity,
         save_model
@@ -145,10 +172,13 @@ train_model = Pipe[[Module, TrainData, TestData], Module](
 )
 
 train = Pipe[[tuple[()]], tuple[()]](
-    LOGGER.debug(f'Saving config file to "{config.config_file}".'),
+    LOG_TERM.debug(f'Saving config file to "{config.config_file}".'),
+    LOG_FILE.debug(f'Saving config file to "{config.config_file}".'),
     save_config,
-    LOGGER.info('Starting step "train".'),
-    LOGGER.debug('Compiling model.'),
+    LOG_TERM.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
+    LOG_FILE.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
+    LOG_TERM.debug('Compiling model.'),
+    LOG_FILE.debug('Compiling model.'),
     Fork[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
         compile_model,
         load_data
@@ -158,9 +188,12 @@ train = Pipe[[tuple[()]], tuple[()]](
         train_model,
         identity,
     ),
-    LOGGER.info('Validating model.'),
+    LOG_TERM.info('Validating model.'),
+    LOG_FILE.info('Validating model.'),
     evaluate_model,
-    LOGGER.info(log_evaluation_metrics),
-    LOGGER.info('Finished step "train".'),
+    LOG_TERM.info(log_evaluation_metrics),
+    LOG_FILE.info(log_evaluation_metrics),
+    LOG_TERM.info('Finished step "train".'),
+    LOG_FILE.info('Finished step "train".'),
     unit
 )
