@@ -41,16 +41,20 @@ class TestUsage(unittest.TestCase):
             '\n[training]\n'
             'last_epoch = 2\n'
             'best_epoch = 1\n'
-            'best_loss = 0.21000\n'
+            'best_loss = 0.21\n'
             'max_epochs_reached = false\n'
-            '\n[[training.epochs]]\n'
-            'train_loss = 0.11000\n'
-            'test_loss = 0.21000\n'
-            'learning_rate = 0.01000\n'
-            '\n[[training.epochs]]\n'
-            'train_loss = 0.12000\n'
-            'test_loss = 0.22000\n'
-            'learning_rate = 0.02000\n'
+            'train_loss = [\n'
+            '    0.11,\n'
+            '    0.12,\n'
+            ']\n'
+            'test_loss = [\n'
+            '    0.21,\n'
+            '    0.22,\n'
+            ']\n'
+            'learning_rate = [\n'
+            '    0.01,\n'
+            '    0.02,\n'
+            ']\n'
         )
         printer.assert_called_once_with(expected)
 
@@ -73,18 +77,63 @@ class TestUsage(unittest.TestCase):
                 'best_epoch': 1,
                 'best_loss': 0.21,
                 'max_epochs_reached': False,
-                'epochs': [
-                    {
-                        'train_loss': 0.11,
-                        'test_loss': 0.21,
-                        'learning_rate': 0.01
-                    },
-                    {
-                        'train_loss': 0.12,
-                        'test_loss': 0.22,
-                        'learning_rate': 0.02
-                    },
-                ]
+                'train_loss': [0.11, 0.12],
+                'test_loss': [0.21, 0.22],
+                'learning_rate': [0.01, 0.02]
+            }
+        }
+        self.assertDictEqual(expected, actual)
+
+    def test_nan_inf_values_string(self):
+        printer = Mock()
+        train = TrainTomlPrinter(printer)
+        history = {
+            'train_loss': [0.11, float('-inf')],
+            'test_loss': [0.21, float('nan')],
+            'lr': [0.01, float('inf')]
+        }
+        train(3, 2, 0.21, False, history)
+        expected = (
+            '\n[training]\n'
+            'last_epoch = 2\n'
+            'best_epoch = 1\n'
+            'best_loss = 0.21\n'
+            'max_epochs_reached = false\n'
+            'train_loss = [\n'
+            '    0.11,\n'
+            '    -inf,\n'
+            ']\n'
+            'test_loss = [\n'
+            '    0.21,\n'
+            '    nan,\n'
+            ']\n'
+            'learning_rate = [\n'
+            '    0.01,\n'
+            '    inf,\n'
+            ']\n'
+        )
+        printer.assert_called_once_with(expected)
+
+    def test_nan_inf_values_toml(self):
+        printer = Mock()
+        train = TrainTomlPrinter(printer)
+        history = {
+            'train_loss': [0.11, float('-inf')],
+            'test_loss': [0.21, float('inf')],
+            'lr': [0.01, float('inf')]
+        }
+        train(3, 2, 0.21, False, history)
+        msg = printer.call_args[0][0]
+        actual = tomllib.loads(msg)
+        expected = {
+            'training': {
+                'last_epoch': 2,
+                'best_epoch': 1,
+                'best_loss': 0.21,
+                'max_epochs_reached': False,
+                'train_loss': [0.11, float('-inf')],
+                'test_loss': [0.21, float('inf')],
+                'learning_rate': [0.01, float('inf')]
             }
         }
         self.assertDictEqual(expected, actual)

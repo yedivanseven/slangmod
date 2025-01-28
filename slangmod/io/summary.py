@@ -1,5 +1,6 @@
 from typing import Any
 from collections.abc import Callable
+import tomli_w
 from swak.text import TomlWriter
 from swak.funcflow import Partial
 from swak.pt.train import TrainPrinter, History
@@ -33,12 +34,6 @@ class TrainTomlPrinter(TrainPrinter):
 
     """
 
-    # ToDo: Rethink this. Maybe better dict of lists, not list of dicts.
-    TEMPLATE = ('[[training.epochs]]\n'
-                'train_loss = {:7.5f}\n'
-                'test_loss = {:7.5f}\n'
-                'learning_rate = {:7.5f}\n')
-
     def __init__(self, printer: Callable[[str], Any] = print) -> None:
         super().__init__(printer)
 
@@ -67,18 +62,17 @@ class TrainTomlPrinter(TrainPrinter):
             rates.
 
         """
-        epochs = '\n'.join([
-            self.TEMPLATE.format(train_loss, test_loss, lr)
-            for train_loss, test_loss, lr
-            in zip(history['train_loss'], history['test_loss'], history['lr'])
-        ])
-        msg = ( '\n[training]\n'
-               f'last_epoch = {epoch - 1}\n'
-               f'best_epoch = {best_epoch - 1}\n'
-               f'best_loss = {best_loss:7.5f}\n'
-               f'max_epochs_reached = {str(max_epochs_reached).lower()}\n\n'
-               f'{epochs}')
-        self.printer(msg)
+        training = {
+            'last_epoch': epoch - 1,
+            'best_epoch': best_epoch - 1,
+            'best_loss': best_loss,
+            'max_epochs_reached': max_epochs_reached,
+            'train_loss': history['train_loss'],
+            'test_loss': history['test_loss'],
+            'learning_rate': history['lr']
+        }
+        msg = tomli_w.dumps({'training': training}, indent=4)
+        self.printer('\n' + msg)
 
 
 # Provide ready-to-use instances of config saver and TrainTomlPrinter

@@ -39,6 +39,9 @@ Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
 [tool.setuptools.packages]
 find = {exclude = ["data", "Notebooks"]}
 
+[tool.setuptools.package-data]
+slangmod = ["*.gp"]
+
 [tool.setuptools_scm]
 version_file = "version.env"
 version_file_template = "SETUPTOOLS_SCM_PRETEND_VERSION={version}"

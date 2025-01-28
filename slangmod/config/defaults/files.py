@@ -3,12 +3,13 @@ from swak.jsonobject.fields import Lower, resolve
 
 
 class Files(JsonObject):
+    summary = 'summary.toml'
+    monitor = 'convergence.txt'
+
     tokenizer: Lower() = 'tokenizer.json'
     checkpoint: Lower() = 'checkpoint.pt'
     model: Lower() = 'model.pt'
-    summary: Lower() = 'summary.toml'
     log: Lower() = 'debug.log'
-    monitor: Lower() = 'convergence.txt'
     suffix: str = 'parquet'
     train: str = 'train'
     test: str = 'test'

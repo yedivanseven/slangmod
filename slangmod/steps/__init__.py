@@ -4,6 +4,8 @@ from .train import train
 from .chat import chat
 from .clean import clean
 from .encode import encode
+from .monitor import monitor
+from .compare import compare
 
 __all__ = [
     'dry_run',
@@ -11,5 +13,7 @@ __all__ = [
     'tokenize',
     'encode',
     'train',
-    'chat'
+    'chat',
+    'monitor',
+    'compare'
 ]

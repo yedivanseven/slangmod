@@ -7,3 +7,4 @@ prune *.egg-info
 prune .github
 prune data
 exclude .gitignore .python_version version.env Pipfile Pipfile.lock
+include slangmod/gnuplot/*.gp
