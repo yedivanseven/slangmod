@@ -6,7 +6,6 @@ set ylabel "training loss"
 set y2label "learning rate"
 set ytics nomirror
 set y2tics
-set key title "Legend"
 set style line 1 lc rgbcolor "#1f77b4"
 set style line 2 lc rgbcolor "#ff7f0e"
 

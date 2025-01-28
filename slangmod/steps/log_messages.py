@@ -48,3 +48,18 @@ def log_evaluation_metrics(
             f'accuracy: {acc:4.2f} | '
             f'top-2 acc.: {top_2:4.2f} | '
             f'top-5 acc.: {top_5:4.2f}')
+
+
+def save_evaluation_metrics(
+        loss: float,
+        perplexity: float,
+        acc: float,
+        top_2: float,
+        top_5: float,
+) -> str:
+    return ( '[validation]\n'
+            f'loss = {loss:7.5f}\n'
+            f'perplexity = {perplexity:6.2f}\n'
+            f'accuracy = {acc:4.2f}\n'
+            f'top_2_acc = {top_2:4.2f}\n'
+            f'top_5_acc = {top_5:4.2f}\n')

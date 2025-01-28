@@ -1,7 +1,6 @@
 import readline  # noqa: F401
 from swak.misc import ArgRepr
 from ...config import config
-from ...ml.generators import Generator
 
 
 # ToDo: Rethink the logic with EOS here! Make sure the tokenizer gets it!
@@ -35,7 +34,8 @@ class ConsoleClient(ArgRepr):
     def space(self) -> int:
         return max(len(self.user), len(self.bot))
 
-    def __call__(self, generate: Generator) -> list[str]:
+    # ToDo: Make a type annotation with Callable here
+    def __call__(self, generate) -> list[str]:
         print(self.system)  # noqa: T201
 
         terminates = True

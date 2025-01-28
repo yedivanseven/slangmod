@@ -6,7 +6,7 @@ class Files(JsonObject):
     tokenizer: Lower() = 'tokenizer.json'
     checkpoint: Lower() = 'checkpoint.pt'
     model: Lower() = 'model.pt'
-    config: Lower() = 'config.toml'
+    summary: Lower() = 'summary.toml'
     log: Lower() = 'debug.log'
     monitor: Lower() = 'convergence.txt'
     suffix: str = 'parquet'

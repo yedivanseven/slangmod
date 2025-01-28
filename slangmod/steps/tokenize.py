@@ -17,7 +17,7 @@ LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
 
 tokenize = Pipe[[tuple[()]], tuple[()]](
-    LOGGER.debug(f'Saving config file to "{config.config_file}".'),
+    LOGGER.debug(f'Saving config to "{config.summary_file}".'),
     save_config,
     LOGGER.info('Starting step "tokenize".'),
     LOGGER.debug(f'Scanning folder "{config.corpus}" for files.'),

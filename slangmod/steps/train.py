@@ -4,7 +4,12 @@ from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
 from swak.pt.misc import Cat, LazyCatDim0
-from swak.funcflow.loggers import PassThroughStdLogger, PassThroughFileLogger
+from swak.funcflow.loggers import (
+    PassThroughStdLogger,
+    PassThroughFileLogger,
+    SHORT_FMT,
+    RAW_FMT
+)
 from swak.funcflow import identity
 from ..config import config
 from ..etl import trim_memory, Shuffle
@@ -35,17 +40,19 @@ from .log_messages import (
     log_remaining_number_of_sequences,
     log_number_of_tokens,
     log_data_sizes,
-    log_evaluation_metrics
+    log_evaluation_metrics,
+    save_evaluation_metrics
 )
 
 __all__ = ['train']
 
-
-# ToDo: Remove once SHORT_FMT is available (and the default) for files
-FMT = '{asctime:<23s} [{levelname:<8s}] {message}'
 LOG_TERM = PassThroughStdLogger(__name__, config.log_level)
-LOG_FILE = PassThroughFileLogger(config.log_file, mode=config.mode, fmt=FMT)
-
+LOG_FILE = PassThroughFileLogger(
+    config.log_file,
+    fmt=SHORT_FMT,
+    mode=config.mode
+)
+SUMMARY = PassThroughFileLogger(config.summary_file, fmt=RAW_FMT, mode='a')
 
 read_file = Pipe[[str], list[ndarray]](
     LOG_TERM.debug(log_process_file),
@@ -172,8 +179,8 @@ train_model = Pipe[[Module, TrainData, TestData], Module](
 )
 
 train = Pipe[[tuple[()]], tuple[()]](
-    LOG_TERM.debug(f'Saving config file to "{config.config_file}".'),
-    LOG_FILE.debug(f'Saving config file to "{config.config_file}".'),
+    LOG_TERM.debug(f'Saving config to "{config.summary_file}".'),
+    LOG_FILE.debug(f'Saving config to "{config.summary_file}".'),
     save_config,
     LOG_TERM.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
     LOG_FILE.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
@@ -193,6 +200,7 @@ train = Pipe[[tuple[()]], tuple[()]](
     evaluate_model,
     LOG_TERM.info(log_evaluation_metrics),
     LOG_FILE.info(log_evaluation_metrics),
+    SUMMARY.info(save_evaluation_metrics),
     LOG_TERM.info('Finished step "train".'),
     LOG_FILE.info('Finished step "train".'),
     unit

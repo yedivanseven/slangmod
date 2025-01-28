@@ -1,6 +1,6 @@
 from pandas import DataFrame
 from swak.funcflow.loggers import PassThroughStdLogger
-from swak.funcflow import Pipe, Map, Sum, Fork
+from swak.funcflow import Pipe, Map, Sum, Fork, identity
 from ..config import config
 from ..io import (
     discover_wiki40b,
@@ -28,7 +28,7 @@ __all__ = ['clean']
 
 LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
-
+# ToDo: Try with just a single processor for compactness
 wiki40b_processor = Pipe[[str], str](
     replace_article,
     replace_section,
@@ -98,10 +98,14 @@ clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
     Sum(()),
 )
 
+delete_corpus_directory = Pipe[[tuple[()]], tuple[()]](
+    LOGGER.debug(f'Preparing a fresh and empty folder "{config.corpus}".'),
+    clean_corpus_directory
+)
+
 clean = Pipe[[tuple[()]], tuple[()]](
-    LOGGER.info('Starting step "clean".'),
-LOGGER.debug(f'Preparing a fresh and empty folder "{config.corpus}".'),
-    clean_corpus_directory,
+    LOGGER.info(f'{"Resum" if config.resume else "Start"}ing step "clean".'),
+    identity if config.resume else delete_corpus_directory,
     Fork[[tuple[()]], tuple[()]](
         clean_wiki40b,
         # clean_gutenberg

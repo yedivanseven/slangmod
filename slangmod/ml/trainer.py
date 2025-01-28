@@ -10,8 +10,9 @@ from swak.pt.train import (
 )
 from swak.pt.train import LinearInverse, LinearCosine, LinearExponential
 from swak.pt.losses import XEntropyLoss
-from swak.misc import StdLogger, FileLogger, RAW_FMT
+from swak.misc import StdLogger, FileLogger, RAW_FMT, SHORT_FMT
 from ..config import config, Optimizers, Scaling
+from ..io import save_train_toml
 from .tokenizers import special
 
 __all__ = [
@@ -19,13 +20,19 @@ __all__ = [
     'criterion'
 ]
 
-LOGGER = StdLogger(__name__, config.log_level)
+LOG_TERM = StdLogger(__name__, config.log_level)
+LOG_FILE = FileLogger(config.log_file, fmt=SHORT_FMT, mode=config.mode)
 MONITOR = FileLogger(config.monitor_file, fmt=RAW_FMT, mode=config.mode)
 
 checkpoint = OnDisk(config.checkpoint_file, create=True)
-step_cb = StepPrinter(MONITOR.debug)
-epoch_cb = EpochPrinter(LOGGER.info)
-train_cb = TrainPrinter(LOGGER.info)  # ToDo: Write history in custom callback
+
+step_cbs = StepPrinter(MONITOR.debug),
+epoch_cbs = EpochPrinter(LOG_TERM.info), EpochPrinter(LOG_FILE.info)
+train_cbs = (
+    TrainPrinter(LOG_TERM.info),
+    TrainPrinter(LOG_FILE.info),
+    save_train_toml
+)
 
 criterion = XEntropyLoss(
     ignore_index=special.pad_id,
@@ -62,7 +69,7 @@ trainer = Trainer(
     clip_grad=config.train.clip_grad,
     checkpoint=checkpoint,
     show_progress=config.progress,
-    step_cb=step_cb,
-    epoch_cb=epoch_cb,
-    train_cb=train_cb
+    step_cbs=step_cbs,
+    epoch_cbs=epoch_cbs,
+    train_cbs=train_cbs
 )

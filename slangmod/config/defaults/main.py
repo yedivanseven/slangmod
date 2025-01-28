@@ -1,4 +1,5 @@
 import importlib.metadata as meta
+import datetime as dt
 from hashlib import shake_128
 from pathlib import Path
 from swak.jsonobject import JsonObject
@@ -19,6 +20,7 @@ VERSION = meta.version(PACKAGE)
 class Main(JsonObject):
     package = PACKAGE
     version = VERSION
+    start = dt.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
 
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     workdir: resolve = '/home/georg/Projects/slangmod/data'
@@ -74,7 +76,7 @@ class Main(JsonObject):
 
     @property
     def tokenizer_file(self) -> str:
-        return str((Path(self.folder) / self.files.tokenizer).resolve())
+        return str((Path(self.workdir) / self.files.tokenizer).resolve())
 
     @property
     def checkpoint_file(self) -> str:
@@ -85,8 +87,8 @@ class Main(JsonObject):
         return str((Path(self.folder) / self.files.model).resolve())
 
     @property
-    def config_file(self) -> str:
-        return str((Path(self.folder) / self.files.config).resolve())
+    def summary_file(self) -> str:
+        return self.add_time(self.files.summary)
 
     @property
     def log_file(self) -> str:
@@ -94,7 +96,7 @@ class Main(JsonObject):
 
     @property
     def monitor_file(self):
-        return str((Path(self.folder) / self.files.monitor).resolve())
+        return self.add_time(self.files.monitor)
 
     @property
     def clean_files(self) -> str:
@@ -103,3 +105,13 @@ class Main(JsonObject):
     @property
     def encoded_files(self) -> str:
         return self.encodings + '/{}'
+
+    def add_time(self, file: str) -> str:
+        """Add datetime suffix to files if we're not resuming."""
+        *parts, extension = file.split('.')
+        stem = '.'.join(parts)
+        files = sorted(Path(self.folder).glob(f'{stem}*.{extension}'))
+        if files and self.resume:
+            return str(files[-1].resolve())
+        new = stem + f'_{self.start}.' + extension
+        return str((Path(self.folder) / new).resolve())

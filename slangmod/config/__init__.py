@@ -32,7 +32,7 @@ __all__ = [
     'Generators',
     'Styles'
 ]
-
+# ToDo: Rename presets 1x1_32.toml etc ...
 # Parse the environment for config options
 parse_env = EnvParser()
 env_vars = parse_env()
@@ -60,3 +60,6 @@ preset = tomllib.loads(load_preset(temporary.preset))
 
 # Update the original config in order of precedence
 config = main(preset)(toml)(env_vars)(args, actions=actions)
+
+# Remove the "resume" action if given, since it only modifies others
+actions = [action for action in actions if action != 'resume']

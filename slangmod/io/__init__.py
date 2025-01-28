@@ -1,5 +1,5 @@
 from .clients import ConsoleClient, console_client
-from .config import save_config
+from .summary import save_config, save_train_toml
 from .model import save_model
 from .corpus import (
     NotFound,
@@ -37,6 +37,7 @@ __all__ = [
     'ConsoleClient',
     'console_client',
     'save_config',
+    'save_train_toml',
     'save_model',
     'NotFound',
     'CorpusDiscovery',
