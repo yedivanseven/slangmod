@@ -1,5 +1,5 @@
 models
-======
+------
 
 .. autoclass:: slangmod.ml.models.Sinusoidal
    :members:

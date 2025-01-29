@@ -70,6 +70,7 @@ trainer = Trainer(
     checkpoint=checkpoint,
     show_progress=config.progress,
     step_cbs=step_cbs,
+    cb_freq=config.train.cb_freq,
     epoch_cbs=epoch_cbs,
     train_cbs=train_cbs
 )

@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from swak.misc import ArgRepr
 from ...config import config, Styles
 
@@ -13,33 +12,53 @@ __all__ = [
 
 
 class Style(ArgRepr):
+    """Format user prompt into a template to encourage model answer styles.
 
+    Parameters
+    ----------
+    template: str, optional
+        A python string containing a single pair of curly brackets where the
+        user prompt will go. Defaults to "{} ".
+    strip: str, optional
+        Prior to being inserted into the `template`, the user prompt will be
+        stripped of all word-delimitation characters and, additionally, of all
+        the characters in the given string, both left and right.
+        Defaults to ``None``, which results in only word-delimitation
+        characters being stripped.
+
+    """
     def __init__(
             self,
             template: str = '{} ',
-            char: str | Iterable[str] = (),
-            *chars: str
+            strip: str | None = None
     ) -> None:
         self.template = template
-        self.chars = ((char,) if isinstance(char, str) else char) + chars
-        super().__init__(template, *chars)
-
-    def strip(self, prompt: str) -> str:
-        naked = prompt.strip()
-        # ToDo: Rethink if the ordering of characters is irrelevant
-        for char in self.chars:
-            naked = naked.strip(char)
-        return naked.strip()
+        self.strip = strip
+        super().__init__(template, strip)
 
     def __call__(self, prompt: str) -> str:
-        return self.template.format(self.strip(prompt))
+        """Format user prompt by stripping characters and using a template.
+
+        Parameters
+        ----------
+        prompt: str
+            The user prompt.
+
+        Returns
+        -------
+        str
+            The formatted user prompt.
+
+        """
+        return self.template.format(prompt.strip().strip(self.strip))
 
 
+# Provide a few meaningful example instances of Style ...
 space = Style('{} ')
-paragraph = Style('{}' + f'{config.tokens.eos_string}')
-quote = Style('"{}," ', ",", '"')
-dialogue = Style('"{}"' + f'{config.tokens.eos_string}', '"')
-
+paragraph = Style('{} ' + f'{config.tokens.eos_symbol}')
+quote = Style('"{}," ', '",')
+dialogue = Style('"{}" ' + f'{config.tokens.eos_symbol}', '"')
+# ... to select from via the project config.
 style = {
     Styles.SPACE: space,
     Styles.PARAGRAPH: paragraph,

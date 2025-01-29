@@ -1,9 +1,9 @@
-from .console import ConsoleClient, console_client
+from .pretrained import PreTrainedClient, pre_trained_client
 from .styles import Style, style, space, paragraph, quote, dialogue
 
 __all__ = [
-    'ConsoleClient',
-    'console_client',
+    'PreTrainedClient',
+    'pre_trained_client',
     'Style',
     'style',
     'space',

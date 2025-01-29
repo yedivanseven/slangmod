@@ -1,5 +1,5 @@
 data
-======
+----
 
 .. autoclass:: slangmod.ml.TestSequenceFolder
    :members:

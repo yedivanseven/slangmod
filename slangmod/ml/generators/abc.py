@@ -8,7 +8,7 @@ from ..tokenizers import Algo
 type Logits = tuple[Tensor, int]
 
 
-# ToDo: Predict only up to the highest token index in the ACTUAL tokenizer vocab size!
+# ToDo: Predict only up to the highest token in ACTUAL tokenizer vocab size!
 class Generator(ABC):
 
     def __init__(
@@ -44,7 +44,7 @@ class Generator(ABC):
 
     @property
     def vocab(self) -> int:
-        return self.tokenizer.vocab
+        return self.tokenizer.get_vocab_size()
 
     @property
     def eos_id(self) -> int:

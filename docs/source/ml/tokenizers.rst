@@ -1,5 +1,5 @@
 tokenizers
-==========
+----------
 
 .. autoclass:: slangmod.ml.tokenizers.Special
    :members:

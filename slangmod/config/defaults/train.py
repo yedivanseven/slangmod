@@ -18,3 +18,4 @@ class Train(JsonObject):
     gamma: float = 0.95
     cooldown: int = 30_000
     patience: Maybe[int](int) = 2
+    cb_freq: int = 1
