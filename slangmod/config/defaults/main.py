@@ -20,7 +20,7 @@ VERSION = meta.version(PACKAGE)
 class Main(JsonObject):
     package = PACKAGE
     version = VERSION
-    start = dt.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss")
+    start = dt.datetime.now().strftime("%Y-%m-%d.%Hh%Mm%Ss")
 
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
     workdir: resolve = '/home/georg/Projects/slangmod/data'
@@ -88,7 +88,7 @@ class Main(JsonObject):
 
     @property
     def summary_file(self) -> str:
-        return self.add_time(self.files.summary)
+        return self.add_time(self.files.summary, 'toml')
 
     @property
     def log_file(self) -> str:
@@ -96,7 +96,7 @@ class Main(JsonObject):
 
     @property
     def monitor_file(self):
-        return self.add_time(self.files.monitor)
+        return self.add_time(self.files.monitor, 'txt')
 
     @property
     def clean_files(self) -> str:
@@ -106,12 +106,11 @@ class Main(JsonObject):
     def encoded_files(self) -> str:
         return self.encodings + '/{}'
 
-    def add_time(self, file: str) -> str:
-        """Add datetime suffix to files if we're not resuming."""
-        *parts, extension = file.split('.')
-        stem = '.'.join(parts)
-        files = sorted(Path(self.folder).glob(f'{stem}*.{extension}'))
+    def add_time(self, subdir: str, suffix: str) -> str:
+        """Generate new datetime file names if we're not resuming."""
+        folder = Path(self.folder)
+        files = sorted((folder / subdir).glob(f'*.{suffix}'))
         if files and self.resume:
             return str(files[-1].resolve())
-        new = stem + f'_{self.start}.' + extension
-        return str((Path(self.folder) / new).resolve())
+        new = f'{self.start}.{suffix}'
+        return str((folder / subdir / new).resolve())

@@ -3,10 +3,14 @@ from ..config import config
 
 __all__ = ['monitor']
 
-# ToDo: Interpolate config.folder into script
+
 def monitor() -> tuple[()]:
-    print(resources                                        # noqa: T201
-          .files(config.package)
-          .joinpath('gnuplot', 'monitor.gp')
-          .read_text())
+    template = (
+        resources
+        .files(config.package)
+        .joinpath('gnuplot', 'monitor.gp')
+        .read_text()
+    )
+    script = template.format(folder=config.folder, subdir=config.files.monitor)
+    print(script) # noqa: T201
     return ()

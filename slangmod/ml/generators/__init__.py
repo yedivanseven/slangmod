@@ -1,6 +1,6 @@
 from swak.funcflow import Curry
 from ...config import config, Generators
-from .abc import Generator
+from .abc import Generator, NextToken
 from .greedy import Greedy
 from .random import Random
 from .top_k import TopK
@@ -27,6 +27,7 @@ create_generator = Curry(
 
 __all__ = [
     'Generator',
+    'NextToken',
     'Greedy',
     'Random',
     'TopK',

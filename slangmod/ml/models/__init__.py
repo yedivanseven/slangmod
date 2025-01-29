@@ -50,7 +50,7 @@ model = Reference(
     dtype=config.data.dtype
 )
 
-# ToDo: Maybe compile right away to not keep two copies?
+# ToDo: Compile right away to not keep two copies? Try again with in-place!
 compile_model = Compile(
     inplace=True,
     model=model,

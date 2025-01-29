@@ -7,6 +7,7 @@ from .abc import Generator
 
 
 # ToDo: Can we move eos sequences to CPU?
+# ToDo: Predict only up to the highest token in ACTUAL tokenizer vocab size!
 class BeamSearch(Generator):
 
     def __init__(

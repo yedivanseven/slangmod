@@ -55,11 +55,11 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_eos_string(self):
         self.assertEqual('\n\n', self.client.eos_string)
 
-    def test_has_history(self):
-        self.assertTrue(hasattr(self.client, 'history'))
+    def test_has_conversation(self):
+        self.assertTrue(hasattr(self.client, 'conversation'))
 
-    def test_history(self):
-        self.assertListEqual([], self.client.history)
+    def test_conversation(self):
+        self.assertListEqual([], self.client.conversation)
 
     def test_has_flat(self):
         self.assertTrue(hasattr(self.client, 'flat'))
@@ -119,9 +119,12 @@ class TestCustomAttributes(unittest.TestCase):
         client = PreTrainedClient(eos_string='eos')
         self.assertEqual('eos', client.eos_string)
 
-    def test_history(self):
+    def test_conversation(self):
         client = PreTrainedClient(system='Hello World!')
-        self.assertListEqual([(client.bot, 'Hello World!')], client.history)
+        self.assertListEqual(
+            [(client.bot, 'Hello World!')],
+            client.conversation
+        )
 
     def test_flat(self):
         client = PreTrainedClient(system='Hello World!')
@@ -168,12 +171,12 @@ class TestUsage(unittest.TestCase):
         _ = self.client(generate(True))
 
     @patch('builtins.input', return_value='Stop!')
-    def test_history_not_extended_on_immediate_stop(self, _):
+    def test_conversation_not_extended_on_immediate_stop(self, _):
         _ = self.client(generate(True))
         self.assertEqual(self.system, self.client.flat)
         self.assertListEqual(
             [(self.client.bot, self.system)],
-            self.client.history
+            self.client.conversation
         )
 
     @patch('builtins.input', side_effect=['', '', 'Stop!'])
@@ -183,18 +186,18 @@ class TestUsage(unittest.TestCase):
         self.assertEqual(self.system, self.client.flat)
         self.assertListEqual(
             [(self.client.bot, self.system)],
-            self.client.history
+            self.client.conversation
         )
 
     @patch('builtins.input', side_effect=['Hello!', 'Stop!'])
-    def test_history_appended_with_terminates(self, _):
+    def test_conversation_appended_with_terminates(self, _):
         _ = self.client(generate(True))
         expected = [
             (self.client.bot, self.system),
             (self.client.user, 'Hello! '),
             (self.client.bot, ANSWER + self.client.eos_string)
         ]
-        self.assertEqual(expected, self.client.history)
+        self.assertEqual(expected, self.client.conversation)
         expected = f'{self.system}Hello! {ANSWER}{self.client.eos_string}'
         self.assertEqual(expected, self.client.flat)
 
@@ -220,14 +223,14 @@ class TestUsage(unittest.TestCase):
             end='')
 
     @patch('builtins.input', side_effect=['Hello!', 'Stop!'])
-    def test_history_appended_with_not_terminates(self, _):
+    def test_conversation_appended_with_not_terminates(self, _):
         _ = self.client(generate(False))
         expected = [
             (self.client.bot, self.system),
             (self.client.user, 'Hello! '),
             (self.client.bot, ANSWER)
         ]
-        self.assertEqual(expected, self.client.history)
+        self.assertEqual(expected, self.client.conversation)
         expected = f'{self.system}Hello! {ANSWER}'
         self.assertEqual(expected, self.client.flat)
 
@@ -244,11 +247,12 @@ class TestUsage(unittest.TestCase):
     @patch('builtins.input', side_effect=['Hello!', 'Stop!'])
     def test_return_value(self, _):
         out = self.client(generate(True))
-        expected = [
+        hist = [
             (self.client.bot, self.system),
             (self.client.user, 'Hello! '),
             (self.client.bot, ANSWER + self.client.eos_string)
         ]
+        expected = [{'role': role, 'text': text} for role, text in hist]
         self.assertListEqual(expected, out)
 
 

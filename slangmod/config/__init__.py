@@ -38,14 +38,17 @@ parse_env = EnvParser()
 env_vars = parse_env()
 temporary = main(env_vars)
 
+# Parse the command line for config options
 ACTIONS = """actions:
 dry-run       Print the configuration slangmod would run with.
-tokenizer     Train a tokenizer on the corpus.
+clean         Clean wiki40b-en and gutenberg data.
+tokenize      Train a tokenizer on the cleaned corpus.
 encode        Encode text documents with the trained tokenizer.
 train         Train the specified model on the encoded data.
+monitor       Print a gnuplot script to graphically track training progress.
+compare       Print a gnuplot script to compare convergence of training runs.
 chat          Start a console client to chat with a trained model.
 """
-# Parse the command line for config options
 parse_args = ArgParser(description=ACTIONS, epilog=EPILOG.format(temporary))
 actions, args = parse_args()
 temporary = temporary(args)

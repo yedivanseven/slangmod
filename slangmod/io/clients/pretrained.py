@@ -1,4 +1,5 @@
 import readline  # noqa: F401
+from typing import TypedDict
 from collections.abc import Callable
 from swak.misc import ArgRepr
 from .styles import Style, style
@@ -10,9 +11,12 @@ __all__ = [
 ]
 
 type Generator = Callable[[str], tuple[str, bool]]
+class RoleText(TypedDict):
+    role: str
+    text: str
+type Conversation = list[RoleText]
 
 
-# ToDo: Make history writer!
 class PreTrainedClient(ArgRepr):
     """Chat with a pretrained model.
 
@@ -61,18 +65,18 @@ class PreTrainedClient(ArgRepr):
         self.bot = bot.strip().upper()
         self.stop = stop.strip()
         self.eos_string = eos_string
-        self.history = [(self.bot, self.system)] if self.system else []
+        self.conversation = [(self.bot, self.system)] if self.system else []
 
     @property
     def flat(self):
         """The conversation flattened into a single string fed to the model."""
-        return ''.join([text for _, text in self.history])
+        return ''.join([text for _, text in self.conversation])
 
     @property
     def _pad(self) -> int:
         return max(len(self.user), len(self.bot))
 
-    def __call__(self, generate: Generator) -> list[tuple[str, str]]:
+    def __call__(self, generate: Generator) -> Conversation:
         """Chat with a pretrained model in the given format.
 
         Parameters
@@ -86,7 +90,9 @@ class PreTrainedClient(ArgRepr):
         Returns
         -------
         list
-            The chat history as tuples of `bot` or `user` and text.
+            The chat history as a list of dicts with their "role" keys having
+            values `user` or `bot` and their "text" values containing the
+            respective text.
 
         """
         if self.system:
@@ -102,17 +108,17 @@ class PreTrainedClient(ArgRepr):
             elif prompt.strip() == self.stop:
                 break
 
-            self.history.append((self.user, self.style(prompt)))
+            self.conversation.append((self.user, self.style(prompt)))
             generated, terminates = generate(self.flat)
 
             answer = generated + (self.eos_string if terminates else '')
-            self.history.append((self.bot, answer))
+            self.conversation.append((self.bot, answer))
 
             suffix = '' if terminates else ' ...\n'
             reply = answer + suffix
 
             print(f'\n[{self.bot:>{self._pad}}]>', reply, end='')  # noqa: T201
-        return self.history
+        return [{'role': role, 'text': txt} for role, txt in self.conversation]
 
 
 # Provide a ready-to-use instance of the PreTrainedClient

@@ -49,7 +49,7 @@ class CorpusCleaner(ArgRepr):
         DataFrame
             A pandas dataframe with the cleaned series as a sole column.
         str
-            The SHA256 hash of the cleaned series for downstream deduplication.
+            The SHA256 hash of the cleaned series.
 
         """
         wrapped = tqdm(corpus, 'Documents', disable=not self.show_progress)

@@ -4,10 +4,13 @@ from ..config import config
 __all__ = ['compare']
 
 
-# ToDo: Interpolate config.folder into script and make persistent
 def compare() -> tuple[()]:
-    print(resources                                        # noqa: T201
-          .files(config.package)
-          .joinpath('gnuplot', 'compare.gp')
-          .read_text())
+    template = (
+        resources
+        .files(config.package)
+        .joinpath('gnuplot', 'compare.gp')
+        .read_text()
+    )
+    script = template.format(folder=config.folder, subdir=config.files.monitor)
+    print(script)  # noqa: T201
     return ()

@@ -2,10 +2,9 @@ from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower, resolve
 
 
-# ToDo: Make subdirectories for summary and convergence
 class Files(JsonObject):
-    summary = 'summary.toml'
-    monitor = 'convergence.txt'
+    summary = 'summary'
+    monitor = 'convergence'
     log = 'debug.log'
 
     tokenizer: Lower() = 'tokenizer.json'

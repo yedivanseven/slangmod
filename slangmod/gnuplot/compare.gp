@@ -1,5 +1,5 @@
-FILES = system("ls -1 convergence_*.txt")
-LABELS = system("ls -1 convergence_*.txt | sed -e 's/convergence_//' -e 's/.txt//'")
+FILES = system("ls -1 {folder}/{subdir}/*.txt")
+LABELS = system("ls -1 {folder}/{subdir}/*.txt | xargs -n 1 basename | sed -e 's/.txt//'")
 
 set title "Convergence"
 set xlabel "# batches"

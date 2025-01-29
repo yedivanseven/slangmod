@@ -8,6 +8,7 @@ ml
    ml/tokenizers
    ml/data
    ml/models
+   ml/generators
 
 
 .. autoclass:: slangmod.ml.Evaluator
