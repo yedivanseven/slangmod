@@ -1,15 +1,15 @@
+"""Various algorithms to produce model responses from user input."""
+
 from swak.funcflow import Curry
 from ...config import config, Generators
 from .abc import Generator, NextToken
 from .greedy import Greedy
-from .random import Random
 from .top_k import TopK
 from .top_p import TopP
 from .beamsearch import BeamSearch
 
 generator_type = {
     Generators.GREEDY: Greedy,
-    Generators.RANDOM: Random,
     Generators.TOP_K: TopK,
     Generators.TOP_P: TopP,
     Generators.BEAM: BeamSearch
@@ -22,14 +22,13 @@ create_generator = Curry(
     k=config.chat.k,
     p=config.chat.p,
     width=config.chat.width,
-    boost=config.chat.boost
+    penalty=config.chat.penalty
 )
 
 __all__ = [
     'Generator',
     'NextToken',
     'Greedy',
-    'Random',
     'TopK',
     'TopP',
     'BeamSearch',

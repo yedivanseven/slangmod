@@ -82,7 +82,6 @@ class Scaling(StrEnum):
 class Generators(StrEnum):
     """How to generate model responses from next-token prediction."""
     GREEDY = 'greedy'
-    RANDOM = 'random'
     TOP_K = 'top_k'
     TOP_P = 'top_p'
     BEAM = 'beam'

@@ -1,9 +1,37 @@
 generators
 ==========
 
+.. automodule:: slangmod.ml.generators
+
+
+.. autoclass:: slangmod.ml.generators.Greedy
+   :members:
+   :show-inheritance:
+   :special-members: __call__
+
+
+.. autoclass:: slangmod.ml.generators.TopK
+   :members:
+   :show-inheritance:
+   :special-members: __call__
+
+
+.. autoclass:: slangmod.ml.generators.TopP
+   :members:
+   :show-inheritance:
+   :special-members: __call__
+
+
+.. autoclass:: slangmod.ml.generators.BeamSearch
+   :members:
+   :show-inheritance:
+   :special-members: __call__
+
+
 
 Base classes
 ------------
+
 
 .. autoclass:: slangmod.ml.generators.Generator
    :members:

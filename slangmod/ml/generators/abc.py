@@ -5,6 +5,11 @@ import torch as pt
 from swak.pt.types import Module, Tensor, Tensors2T
 from ..tokenizers import Algo
 
+__all__ = [
+    'Generator',
+    'NextToken'
+]
+
 type Logits = tuple[Tensor, int]
 
 
@@ -27,7 +32,7 @@ class Generator(ABC):
     Note
     ----
     Child classes should also accept any number of additional, potentially
-    unused, keyword arguments so that they can be used as drop-ip replacements
+    unused keyword arguments so that they can be used as drop-ip replacements
     for each other.
 
     """
@@ -104,14 +109,14 @@ class Generator(ABC):
         encoded = self.tokenizer.encode(prompt)
         encoded.truncate(self.context, direction='left')
 
-        more = encoded.ids[-1] == self.eos_id
+        more = encoded.ids[-1] == self.eos_id  # Predict a non-EOS token first?
 
         src = pt.tensor(
             encoded.ids,
             device=self.model.device,
             dtype=pt.long
         ).unsqueeze(0)
-
+        # Create a floating-point mask to not attend to unknown tokens.
         mask = pt.zeros_like(
             src,
             dtype=self.model.dtype,
@@ -168,7 +173,7 @@ class NextToken(Generator):
     Note
     ----
     Child classes should also accept any number of additional, potentially
-    unused, keyword arguments so that they can be used as drop-ip replacements
+    unused keyword arguments so that they can be used as drop-ip replacements
     for each other.
 
     """
@@ -210,7 +215,7 @@ class NextToken(Generator):
         """
         with pt.inference_mode():
             out, *_ = self.model(src, None, mask, False)
-        offset = self.eos_id + more
+        offset = self.eos_id + more  # Exclude EOS token if not permitted.
         return out[0, offset:self.vocab, -1].float(), offset
 
     def step(self, token: Tensor, src: Tensor, mask: Tensor) -> Tensors2T:
@@ -265,22 +270,24 @@ class NextToken(Generator):
 
         """
         answer = []
-
+        # Predict the first token of the model answer.
         logits, offset = self.logits(src, mask, more)
         next_token = self.next_token_from_logits(logits) + offset
         answer.append(next_token.item())
         src, mask = self.step(next_token, src, mask)
 
+        # If we restricted the first token to not be EOS, the next one can be.
+        # If we did not, and it is, we need at least one more non-EOS token.
         more = False if more else next_token.item() == self.eos_id
 
         for _ in range(1, self.max_tokens):
             logits, offset = self.logits(src, mask, more)
             next_token = self.next_token_from_logits(logits) + offset
             answer.append(next_token.item())
-            if next_token.item() == self.eos_id:
+            if next_token.item() == self.eos_id:  # Cannot be if more = True.
                 break
             src, mask = self.step(next_token, src, mask)
-            more = False
+            more = False  # From now on, EOS is acceptable in any case.
 
         return answer
 
@@ -297,7 +304,7 @@ class NextToken(Generator):
         Returns
         -------
         Tensor
-            Integer tensor of shape (1,1) with the ID of the single next
+            Integer tensor of shape (1, 1) with the ID of the single next
             token chosen on the basis of the `logits`.
 
         """

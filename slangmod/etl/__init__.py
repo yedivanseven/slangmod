@@ -1,3 +1,5 @@
+"""Tools to clean, preprocess, and re-format your text corpus."""
+
 from .encoding import EncodingEnforcer, enforce_encoding
 from .cleaner import CorpusCleaner
 from .frame import ToFrame, to_frame

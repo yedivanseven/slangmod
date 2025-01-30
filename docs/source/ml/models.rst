@@ -1,6 +1,9 @@
 models
 ------
 
+.. automodule:: slangmod.ml.models
+
+
 .. autoclass:: slangmod.ml.models.Sinusoidal
    :members:
    :show-inheritance:

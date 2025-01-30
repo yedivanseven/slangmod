@@ -1,6 +1,9 @@
 tokenizers
 ----------
 
+.. automodule:: slangmod.ml.tokenizers
+
+
 .. autoclass:: slangmod.ml.tokenizers.Special
    :members:
    :show-inheritance:

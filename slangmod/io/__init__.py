@@ -1,3 +1,9 @@
+"""Tools for IO-related tasks like saving to and loading from disk.
+
+User input and model output is handled by :obj:`~slangmod.io.clients`.
+
+"""
+
 from .clients import pre_trained_client
 from .summary import save_config, save_train_toml
 from .model import save_model

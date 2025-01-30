@@ -1,6 +1,8 @@
 ml
 ==
 
+.. automodule:: slangmod.ml
+
 .. toctree::
    :maxdepth: 1
    :caption: Subpackages

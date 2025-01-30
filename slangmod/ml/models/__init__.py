@@ -1,3 +1,5 @@
+"""The blocks to build a variety of causal, transformer-based models."""
+
 from swak.pt.misc import Compile
 from .attention import SelfAttention
 from .layer import EncoderLayer, encoder_layer
@@ -18,7 +20,8 @@ __all__ = [
     'compile_model'
 ]
 
-# ToDo: Move this to the init of "ml"
+# ToDo: Partial/Curry no not instantiate anything right away.
+# ToDo: Move into a module "model" in "ml"
 model = Reference(
     mod_dim=config.model.dim,
     vocab=config.tokens.vocab,
@@ -50,7 +53,7 @@ model = Reference(
     dtype=config.data.dtype
 )
 
-# ToDo: Compile right away to not keep two copies? Try again with in-place!
+# ToDo: Make sure in-place works when re-loading model!
 compile_model = Compile(
     inplace=True,
     model=model,

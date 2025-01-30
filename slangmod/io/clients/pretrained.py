@@ -18,7 +18,7 @@ type Conversation = list[RoleText]
 
 
 class PreTrainedClient(ArgRepr):
-    """Chat with a pretrained model.
+    """Chat with a pre-trained model.
 
     Parameters
     ----------
