@@ -1,6 +1,6 @@
 import pickle
 import unittest
-from slangmod.io.clients import Style, space, quote, paragraph, dialogue
+from slangmod.io.clients.styles import Style, space, quote, paragraph, dialogue
 from slangmod.config import config
 
 

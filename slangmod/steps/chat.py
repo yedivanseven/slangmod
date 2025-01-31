@@ -21,5 +21,6 @@ chat = Pipe[[tuple[()]], tuple[()]](
     create_generator,
     LOGGER.info(f'Starting chat client. Enter "{config.chat.stop}" to exit.'),
     pre_trained_client,
+    # ToDo: Once (compressed) JSON writer is available in swak, save here.
     unit
 )

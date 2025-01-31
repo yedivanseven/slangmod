@@ -20,8 +20,9 @@ from ..ml import (
     TestData,
     wrap_train_data,
     wrap_test_data,
-    compile_model,
     trainer,
+    create_model,
+    compile_model,
     evaluate_model
 )
 from ..io import (
@@ -161,6 +162,15 @@ load_data = Pipe[[tuple[()]], tuple[TrainData, TestData, TestData]](
     LOG_FILE.info(log_data_sizes)
 )
 
+load_model = Pipe[[tuple[()]], Module](
+    LOG_TERM.debug('Instantiating model.'),
+    LOG_FILE.debug('Instantiating model.'),
+    create_model,
+    LOG_TERM.debug('Compiling model.'),
+    LOG_FILE.debug('Compiling model.'),
+    compile_model
+)
+
 train_model = Pipe[[Module, TrainData, TestData], Module](
     LOG_TERM.info(f'Training model on {config.data.device.upper()} '
                      f'with a maximum learning rate of '
@@ -184,10 +194,8 @@ train = Pipe[[tuple[()]], tuple[()]](
     save_config,
     LOG_TERM.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
     LOG_FILE.info(f'{"Resum" if config.resume else "Start"}ing step "train".'),
-    LOG_TERM.debug('Compiling model.'),
-    LOG_FILE.debug('Compiling model.'),
     Fork[[tuple[()]], tuple[Module, TrainData, TestData, TestData]](
-        compile_model,
+        load_model,
         load_data
     ),
     Route[[Module, TrainData, TestData, TestData], tuple[Module, TestData]](

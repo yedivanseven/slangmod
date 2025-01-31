@@ -7,7 +7,12 @@ Welcome to slangmod's documentation!
    :maxdepth: 1
    :caption: Usage
 
+   start
    clean
+   tokenize
+   encode
+   train
+   chat
 
 
 .. toctree::

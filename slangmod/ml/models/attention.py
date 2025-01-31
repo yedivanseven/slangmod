@@ -6,13 +6,9 @@ import torch.nn as ptn
 import torch.nn.functional as ptnf
 from swak.pt.types import Device, Dtype, Tensor, Block
 from swak.pt.misc import Identity
-from ...config import config, LiteralDevice, Devices
-from .positions import qk_pos_enc
+from ...config import LiteralDevice, Devices
 
-__all__ = [
-    'SelfAttention',
-    'self_attention'
-]
+__all__ = ['SelfAttention']
 
 
 class SelfAttention(Block):
@@ -218,14 +214,3 @@ class SelfAttention(Block):
             self.device,
             self.dtype
         )
-
-
-self_attention = Identity() if config.model.reference else SelfAttention(
-    mod_dim=config.model.dim,
-    n_heads=config.model.n_heads,
-    bias=config.model.bias,
-    dropout=config.model.dropout,
-    pos_enc=qk_pos_enc,
-    device=config.data.device,
-    dtype=config.data.dtype
-)

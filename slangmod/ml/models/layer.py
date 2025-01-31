@@ -4,15 +4,10 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor, Block
 from swak.pt.misc import Identity
-from ...config import config, LiteralDevice, Devices
-from .positions import src_pos_enc
-from .attention import SelfAttention, self_attention
-from .feedforward import feedforward
+from ...config import LiteralDevice, Devices
+from .attention import SelfAttention
 
-__all__ = [
-    'EncoderLayer',
-    'encoder_layer'
-]
+__all__ = ['EncoderLayer']
 
 
 class EncoderLayer(Block):
@@ -224,15 +219,3 @@ class EncoderLayer(Block):
             self.device,
             self.dtype
         )
-
-
-encoder_layer = Identity() if config.model.reference else EncoderLayer(
-    attention=self_attention,
-    feed_forward=feedforward,
-    pos_enc=src_pos_enc,
-    bias=config.model.bias,
-    dropout=config.model.dropout,
-    norm_first=config.model.norm_first,
-    device=config.data.device,
-    dtype=config.data.dtype
-)

@@ -1,13 +1,10 @@
 """The blocks to build a variety of causal, transformer-based models."""
 
-from swak.pt.misc import Compile
 from .attention import SelfAttention
-from .layer import EncoderLayer, encoder_layer
+from .layer import EncoderLayer
 from .encoder import Encoder
-from .positions import Learnable, Sinusoidal, Rotary, emb_pos_enc
+from .positions import Learnable, Sinusoidal, Rotary
 from .reference import Reference
-from ..tokenizers import special
-from ...config import config
 
 __all__ = [
     'Reference',
@@ -16,46 +13,5 @@ __all__ = [
     'Encoder',
     'Learnable',
     'Sinusoidal',
-    'Rotary',
-    'compile_model'
+    'Rotary'
 ]
-
-# ToDo: Partial/Curry no not instantiate anything right away.
-# ToDo: Move into a module "model" in "ml"
-model = Reference(
-    mod_dim=config.model.dim,
-    vocab=config.tokens.vocab,
-    n_heads=config.model.n_heads,
-    n_layers=config.model.n_layers,
-    pos_enc=Sinusoidal(
-        mod_dim=config.model.dim,
-        context=config.model.context,
-        device=config.data.device,
-        dtype=config.data.dtype
-    ),
-    feedforward_factor=config.model.feedforward.factor,
-    scale_grad_by_freq=config.model.scale_grad_by_freq,
-    dropout=config.model.dropout,
-    bias=config.model.bias,
-    norm_first=config.model.norm_first,
-    device=config.data.device,
-    dtype=config.data.dtype
-) if config.model.reference else Encoder(
-    vocab=config.tokens.vocab,
-    layer=encoder_layer,
-    n_layers=config.model.n_layers,
-    pad_id=special.pad_id,
-    pos_enc=emb_pos_enc,
-    bias=config.model.bias,
-    dropout=config.model.dropout,
-    scale_grad_by_freq=config.model.scale_grad_by_freq,
-    device=config.data.device,
-    dtype=config.data.dtype
-)
-
-# ToDo: Make sure in-place works when re-loading model!
-compile_model = Compile(
-    inplace=True,
-    model=model,
-    disable=config.model.disable_compile
-)

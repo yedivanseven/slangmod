@@ -1,10 +1,10 @@
 """Machine-learning elements for building and training a language model."""
 
 from .tokenizers import Algo, tokenizer
-from .models import compile_model
 from .trainer import trainer
 from .evaluator import Evaluator, evaluate_model
 from .generators import Generator, create_generator
+from .model import create_model, compile_model
 from .folder import (
     TestSequenceFolder,
     TrainSequenceFolder,
@@ -30,6 +30,7 @@ __all__ = [
     'TestData',
     'wrap_train_data',
     'wrap_test_data',
+    'create_model',
     'compile_model',
     'trainer',
     'Evaluator',
