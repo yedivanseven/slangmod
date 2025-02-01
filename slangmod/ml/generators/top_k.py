@@ -74,8 +74,8 @@ class TopK(NextToken):
         Returns
         -------
         Tensor
-            Integer tensor of shape (1, 1) with the ID of the single next
-            token chosen on the basis of the `logits`.
+            Int64 scalar with the ID of the next token randomly chosen from
+            top-k candidates in `logits`.
 
         """
         top_k = logits.topk(min(self.k, logits.size(-1)), dim=-1)

@@ -13,7 +13,6 @@ __all__ = [
 type Logits = tuple[Tensor, int]
 
 
-# ToDo: Check and document tensor shapes!
 class Generator(ABC):
     """Abstract base class for text generators to inherit from.
 
@@ -53,16 +52,18 @@ class Generator(ABC):
         src = pt.randint(
             0,
             self.vocab,
-            [self.width, self.context],
+            [width, self.context],
             device=model.device
         )
         mask = pt.zeros(
-            self.width,
+            1,
             self.context,
             dtype=model.dtype,
             device=model.device
         )
-        _ = self.model(src, None, mask, False)
+        self.model.eval()
+        with pt.inference_mode():
+            _ = self.model(src, None, mask, False)
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -224,8 +225,8 @@ class NextToken(Generator):
         Parameters
         ----------
         token: Tensor
-            Int64 tensor of shape (1, 1) indicating the ID of the token to
-            concatenate to the end of `src`.
+            The ID of the token to append to `src` as an int64 tensor
+            broadcastable to shape (1, 1).
         src: Tensor
             The input sequence of shape (1, `S`) with `S` being the number of
             tokens.
@@ -304,8 +305,8 @@ class NextToken(Generator):
         Returns
         -------
         Tensor
-            Integer tensor of shape (1, 1) with the ID of the single next
-            token chosen on the basis of the `logits`.
+            Int64 scalar with the ID of the single next token chosen on the
+            basis of the `logits`.
 
         """
         ...

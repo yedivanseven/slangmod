@@ -67,13 +67,17 @@ class TopP(NextToken):
         Returns
         -------
         Tensor
-            Integer tensor of shape (1, 1) with the ID of the single next
-            token chosen on the basis of the `logits`.
+            Int64 scalar with the ID of the next token randomly chosen from
+            the top candidates that together have a probability of `p`.
 
         """
         scaled = logits / self.temperature
         probas = ptnf.softmax(scaled, dim=-1).sort(dim=-1, descending=True)
+        # Boolean mask starting with True until cumsum reaches p
         top_p = probas.values.cumsum(dim=-1) <= self.p
-        top_p[0] = True  # We need at least one element to draw!
+        # We need at least one element to draw
+        top_p[0] = True
+        # Sample only from the top-p candidates
         sample = ptd.Categorical(probas.values[top_p]).sample()
+        # Return their actual index among the logits
         return probas.indices[sample]

@@ -29,5 +29,18 @@ class Greedy(NextToken):
         super().__init__(tokenizer, model, max_tokens)
 
     def next_token_from_logits(self, logits: Tensor) -> Tensor:
-        """Take the argmax over the probabilities of permissible tokens."""
+        """Take the argmax over the probabilities of permissible tokens.
+
+        Parameters
+        ----------
+        logits: Tensor
+            1-D PyTorch tensor with un-normalized probabilities over all
+            permissible tokens in the vocabulary.
+
+        Returns
+        -------
+        Tensor
+            Int64 scalar with the argmax of `logits`.
+
+        """
         return logits.argmax(dim=-1)

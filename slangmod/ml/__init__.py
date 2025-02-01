@@ -3,7 +3,7 @@
 from .tokenizers import Algo, tokenizer
 from .trainer import trainer
 from .evaluator import Evaluator, evaluate_model
-from .generators import Generator, create_generator
+from .generators import create_generator
 from .model import create_model, compile_model
 from .folder import (
     TestSequenceFolder,
@@ -35,7 +35,6 @@ __all__ = [
     'trainer',
     'Evaluator',
     'evaluate_model',
-    'Generator',
     'create_generator',
     'ValidationErrors'
 ]

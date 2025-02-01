@@ -144,6 +144,8 @@ def extract_file_name(path: str) -> str:
     return Path(path).name
 
 
+# ToDo: Write more like these where they are missing!
+# Provide ready-to-use instances of the CorpusLoader
 clean_corpus_directory = DirectoryCleaner(config.corpus)
 clean_encodings_directory = DirectoryCleaner(config.encodings)
 write_clean_file = ParquetWriter(config.clean_files, create=True)

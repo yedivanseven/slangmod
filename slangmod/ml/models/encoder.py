@@ -209,12 +209,15 @@ class Encoder(Resettable):
         elif src_mask is None:
             mask = attn_mask
         else:
+            # Insert a next-to-last dimension to repeat the src_mask in
+            reshaped = src_mask.unsqueeze(-2)
             # Construct the arguments to PyTorch tensors' expand method
-            sizes = [-1] * max(2, src_mask.dim())
+            sizes = [-1] * reshaped.dim()
+            # src_mask will be repeated sequence-length times in new dimension
             sizes[-2] = src_mask.size(-1)
-            # Repeat the src_mask along the next to last dimension to a square
-            src_mask = src_mask.expand(*sizes)
-            # Add src mask to attn_mask if present
+            # Repeat to form a square mask. Shape is now original +1 dim
+            src_mask = reshaped.expand(*sizes)
+            # Add repeated and reshaped src_mask to attn_mask if present
             mask = src_mask if attn_mask is None else attn_mask + src_mask
 
         out = self.drop(self.pos_enc(self.embed(src)))

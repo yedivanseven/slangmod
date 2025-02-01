@@ -75,7 +75,7 @@ class BeamSearch(Generator):
         top_k = ptnf.log_softmax(logits, dim=-1).topk(self.width, dim=-1)
 
         # Reshape to (width, 1) and convert back to token index in the vocab,
-        # thus initializing the buffer of _all_ candidate sequences.
+        # thus initializing the buffer for _all_ candidate sequences.
         all_seqs = top_k.indices.view(-1, 1) + self.eos_id + more
         all_prob = top_k.values
         all_size = pt.ones_like(all_prob).long()
@@ -102,19 +102,16 @@ class BeamSearch(Generator):
             eos_size = all_size[eos]
             eos_vals = all_vals[eos]
 
-            # How man candidates remain?
+            # How many candidates remain?
             n_remain = all_seqs[~eos].size(0)
-
             # Repeat original input accordingly and append unfinished sequences
             inp = pt.cat([src.expand(n_remain, -1), all_seqs[~eos]], dim=-1)
-            # Extend the length of the mask by one ...
+            # Extend the mask by one 0 (we do not predict unknown tokens).
             mask = pt.cat([mask, self.zero], dim=-1)[:, -self.context:]
-            # ... and repeat as many times as there are remaining sequences.
-            unk = mask.expand(n_remain, -1)
 
             # Get next-token probabilities for all remaining sequences.
             with pt.inference_mode():
-                out, *_ = self.model(inp[:, -self.context:], None, unk, False)
+                out, *_ = self.model(inp[:, -self.context:], None, mask, False)
             logits = out[:, self.eos_id + more:self.vocab, -1].float()
 
             # Get top "width" most likely tokens for all remaining sequences...
@@ -124,29 +121,29 @@ class BeamSearch(Generator):
             # ... and get their log_probabilities in 1-D shape.
             log_prob = top_k.values.ravel()
 
-            # Repeat each remaining sequence "width" times ...
+            # Repeat each remaining sequence "width" times, ...
             grow_seqs = all_seqs[~eos].repeat_interleave(self.width, dim=0)
-            # ... and append the "width" most likely tokens ...
+            # ... append the "width" most likely tokens, ...
             grow_seqs = pt.cat([grow_seqs, next_tokens], dim=-1)
-            # ... add their log-probabilities ...
+            # ... add their log-probabilities, ...
             grow_prob = all_prob[~eos].repeat_interleave(self.width) + log_prob
-            # ... increase their length by one ...
+            # ... increase their length by one, ...
             grow_size = all_size[~eos].repeat_interleave(self.width) + 1
             # ... and re-evaluate their score.
             grow_vals = grow_prob / grow_size**self.penalty
 
-            # Re-unite the new candidates with the already ended sequences ...
+            # Re-unite the new candidates with the already ended sequences, ...
             all_seqs = pt.cat([eos_seqs, grow_seqs], dim=0)
             all_prob = pt.cat([eos_prob, grow_prob], dim=0)
             all_size = pt.cat([eos_size, grow_size], dim=0)
             all_vals = pt.cat([eos_vals, grow_vals], dim=0)
-            # ... get the "width" highest-scoring ones ...
-            _, top_k_indices = all_vals.topk(self.width, dim=-1)
+            # ... get the "width" highest-scoring ones, ...
+            top_k = all_vals.topk(self.width, dim=-1)
             # ... and keep only those in the candidate list for the next round.
-            all_seqs = all_seqs[top_k_indices]
-            all_prob = all_prob[top_k_indices]
-            all_size = all_size[top_k_indices]
-            all_vals = all_vals[top_k_indices]
+            all_seqs = all_seqs[top_k.indices]
+            all_prob = all_prob[top_k.indices]
+            all_size = all_size[top_k.indices]
+            all_vals = all_vals[top_k.indices]
 
             more = False  # From now on, EOS is acceptable in any case.
 

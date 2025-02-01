@@ -3,6 +3,7 @@ from unittest.mock import patch
 import torch as pt
 from swak.pt.misc import Identity
 from swak.pt.blocks import ActivatedBlock
+
 from slangmod.ml.models import (
     SelfAttention,
     EncoderLayer,
@@ -299,7 +300,7 @@ class TestMasking(unittest.TestCase):
         self.inp = pt.randint(
             0,
             self.vocab,
-            (1, self.context, self.mod_dim),
+            (1, self.context),
             device='cpu',
             dtype=pt.long
         )
@@ -377,7 +378,7 @@ class TestMasking(unittest.TestCase):
             self.assertIs(mask, self.attn_mask)
             self.assertFalse(is_causal)
 
-    def test_is_not_causal_no_attn_mask_src_mask(self):
+    def test_is_not_causal_no_attn_mask_src_mask_unbatched(self):
         with patch.object(self.encode.layers[0], 'forward') as layer:
             layer.return_value = self.out
             _ = self.encode(self.inp, None, self.src_mask, False)
@@ -387,7 +388,30 @@ class TestMasking(unittest.TestCase):
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
             pt.testing.assert_close(mask, expected)
 
-    def test_is_not_causal_attn_mask_src_mask(self):
+    def test_is_not_causal_no_attn_mask_src_mask_batch_1(self):
+        src_mask = self.src_mask.unsqueeze(0)
+        with patch.object(self.encode.layers[0], 'forward') as layer:
+            layer.return_value = self.out
+            _ = self.encode(self.inp, None, src_mask, False)
+            layer.assert_called_once()
+            mask, is_causal = layer.call_args[0][1:]
+            self.assertFalse(is_causal)
+            expected = src_mask.unsqueeze(0).expand(-1, self.context, -1)
+            pt.testing.assert_close(mask, expected)
+
+    def test_is_not_causal_no_attn_mask_src_mask_batched(self):
+        src_mask = self.src_mask.unsqueeze(0).expand(3, -1)
+        inp = self.inp.expand(3, -1)
+        with patch.object(self.encode.layers[0], 'forward') as layer:
+            layer.return_value = self.out
+            _ = self.encode(inp, None, src_mask, False)
+            layer.assert_called_once()
+            mask, is_causal = layer.call_args[0][1:]
+            self.assertFalse(is_causal)
+            expected = src_mask.unsqueeze(-2).expand(-1, self.context, -1)
+            pt.testing.assert_close(mask, expected)
+
+    def test_is_not_causal_attn_mask_src_mask_unbatched(self):
         with patch.object(self.encode.layers[0], 'forward') as layer:
             layer.return_value = self.out
             _ = self.encode(self.inp, self.attn_mask, self.src_mask, False)
@@ -397,19 +421,27 @@ class TestMasking(unittest.TestCase):
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
             pt.testing.assert_close(mask, expected + self.attn_mask)
 
-    def test_2d_attn_mask_2d_src_mask(self):
+    def test_is_not_causal_attn_mask_src_mask_batch_1(self):
+        src_mask = self.src_mask.unsqueeze(0)
         with patch.object(self.encode.layers[0], 'forward') as layer:
             layer.return_value = self.out
-            _ = self.encode(
-                self.inp,
-                self.attn_mask,
-                self.src_mask.unsqueeze(0),
-                False
-            )
+            _ = self.encode(self.inp, self.attn_mask, src_mask, False)
             layer.assert_called_once()
             mask, is_causal = layer.call_args[0][1:]
             self.assertFalse(is_causal)
-            expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
+            expected = src_mask.unsqueeze(0).expand(-1, self.context, -1)
+            pt.testing.assert_close(mask, expected + self.attn_mask)
+
+    def test_is_not_causal_attn_mask_src_mask_batched(self):
+        src_mask = self.src_mask.unsqueeze(0).expand(3, -1)
+        inp = self.inp.expand(3, -1)
+        with patch.object(self.encode.layers[0], 'forward') as layer:
+            layer.return_value = self.out
+            _ = self.encode(inp, self.attn_mask, src_mask, False)
+            layer.assert_called_once()
+            mask, is_causal = layer.call_args[0][1:]
+            self.assertFalse(is_causal)
+            expected = src_mask.unsqueeze(-2).expand(-1, self.context, -1)
             pt.testing.assert_close(mask, expected + self.attn_mask)
 
     def test_2d_attn_mask_3d_src_mask(self):
@@ -425,7 +457,7 @@ class TestMasking(unittest.TestCase):
             mask, is_causal = layer.call_args[0][1:]
             self.assertFalse(is_causal)
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
-            expected = expected.unsqueeze(0) + self.attn_mask
+            expected = expected.unsqueeze(0).unsqueeze(0) + self.attn_mask
             pt.testing.assert_close(mask, expected)
 
     def test_2d_attn_mask_4d_src_mask(self):
@@ -441,8 +473,8 @@ class TestMasking(unittest.TestCase):
             mask, is_causal = layer.call_args[0][1:]
             self.assertFalse(is_causal)
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
-            expected = expected.unsqueeze(0).unsqueeze(0) + self.attn_mask
-            pt.testing.assert_close(mask, expected)
+            expected = expected.unsqueeze(0).unsqueeze(0).unsqueeze(0)
+            pt.testing.assert_close(mask, expected + self.attn_mask)
 
     def test_3d_attn_mask_1d_src_mask(self):
         with patch.object(self.encode.layers[0], 'forward') as layer:
@@ -489,7 +521,7 @@ class TestMasking(unittest.TestCase):
             mask, is_causal = layer.call_args[0][1:]
             self.assertFalse(is_causal)
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
-            expected = self.attn_mask.unsqueeze(0) + expected.unsqueeze(0)
+            expected = self.attn_mask + expected.unsqueeze(0).unsqueeze(0)
             pt.testing.assert_close(mask, expected)
 
     def test_3d_attn_mask_4d_src_mask(self):
@@ -507,7 +539,7 @@ class TestMasking(unittest.TestCase):
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
             expected = (
                 self.attn_mask.unsqueeze(0) +
-                expected.unsqueeze(0).unsqueeze(0)
+                expected.unsqueeze(0).unsqueeze(0).unsqueeze(0)
             )
             pt.testing.assert_close(mask, expected)
 
@@ -578,7 +610,7 @@ class TestMasking(unittest.TestCase):
             expected = self.src_mask.unsqueeze(0).expand(self.context, -1)
             expected = (
                 self.attn_mask.unsqueeze(0).unsqueeze(0) +
-                expected.unsqueeze(0).unsqueeze(0)
+                expected.unsqueeze(0).unsqueeze(0).unsqueeze(0)
             )
             pt.testing.assert_close(mask, expected)
 

@@ -401,31 +401,218 @@ class TestUsage(unittest.TestCase):
             out.call_args[0][0].shape
         )
 
-    def test_2d(self):
+    def test_2d_inp_1d_mask(self):
         inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
-        actual = self.attention(inp)
+        mask = pt.zeros(self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
         self.assertTupleEqual(inp.shape, actual.shape)
 
-    def test_3d(self):
+    def test_2d_inp_2d_mask(self):
+        inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
+        mask = pt.zeros(self.seq_len, self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_2d_inp_3d_mask_first_dim_1(self):
+        inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
+        mask = pt.zeros(1, self.seq_len, self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_2d_inp_3d_mask_first_dim_n_heads(self):
+        inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
+        mask = pt.zeros(self.n_heads, self.seq_len, self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_2d_inp_3d_mask_first_dim_wrong_raises(self):
+        inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
+        mask = pt.zeros(
+            self.batch_size,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        with self.assertRaises(RuntimeError):
+            _ = self.attention(inp, mask, False)
+
+    def test_2d_inp_4d_mask_raises(self):
+        inp = pt.rand(self.seq_len, self.mod_dim, device='cpu')
+        mask = pt.zeros(1, 1, self.seq_len, self.seq_len, device='cpu')
+        with self.assertRaises(RuntimeError):
+            _ = self.attention(inp, mask, False)
+
+    def test_3d_inp_1d_mask(self):
         inp = pt.rand(
             self.batch_size,
             self.seq_len,
             self.mod_dim,
             device='cpu'
         )
-        actual = self.attention(inp)
+        mask = pt.zeros(self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
         self.assertTupleEqual(inp.shape, actual.shape)
 
-    def test_4d(self):
+
+    def test_3d_inp_2d_mask(self):
         inp = pt.rand(
-            7,
             self.batch_size,
             self.seq_len,
             self.mod_dim,
             device='cpu'
         )
-        actual = self.attention(inp)
+        mask = pt.zeros(self.seq_len, self.seq_len, device='cpu')
+        actual = self.attention(inp, mask, False)
         self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_3d_mask_batch_first_dim_1(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            1,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_3d_mask_first_dim_batch_size_raises(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.batch_size,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        with self.assertRaises(RuntimeError):
+            _ = self.attention(inp, mask, False)
+
+    def test_3d_inp_3d_mask_first_dim_n_heads(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.n_heads,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_3d_mask_n_heads(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.n_heads,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_4d_mask_first_dims_1(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            1,
+            1,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_4d_mask_first_dim_1_second_dim_n_head(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            1,
+            self.n_heads,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_4d_mask_first_dim_batch_size_second_dim_1(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.batch_size,
+            1,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_4d_mask_first_dim_batch_size_second_dim_n_heads(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.batch_size,
+            1,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        actual = self.attention(inp, mask, False)
+        self.assertTupleEqual(inp.shape, actual.shape)
+
+    def test_3d_inp_4d_mask_first_dims_wrong_raises(self):
+        inp = pt.rand(
+            self.batch_size,
+            self.seq_len,
+            self.mod_dim,
+            device='cpu'
+        )
+        mask = pt.zeros(
+            self.n_heads,
+            self.batch_size,
+            self.seq_len,
+            self.seq_len,
+            device='cpu'
+        )
+        with self.assertRaises(RuntimeError):
+            _ = self.attention(inp, mask, False)
 
 
 if __name__ == '__main__':
