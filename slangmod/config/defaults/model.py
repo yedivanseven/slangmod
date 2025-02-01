@@ -4,7 +4,7 @@ from ..enums import Positions, FeedForwards, Activations, Gates
 
 
 class FeedForward(JsonObject):
-    flavour: Lower() = FeedForwards.VANILLA
+    flavor: Lower() = FeedForwards.VANILLA
     activation: Lower() = Activations.GELU
     gate: Lower() = Gates.GELU
     factor: int = 4

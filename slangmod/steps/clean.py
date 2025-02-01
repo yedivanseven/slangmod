@@ -28,7 +28,7 @@ __all__ = ['clean']
 
 LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
-# ToDo: Try with just a single processor for compactness
+# Flow for wiki40b-en
 wiki40b_processor = Pipe[[str], str](
     replace_article,
     replace_section,
@@ -62,9 +62,10 @@ clean_wiki40b = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(log_total_number_of_files),
     process_wiki40b,
     LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
-    Sum(()),
+    Sum(())  # Collapse empty tuples into one
 )
 
+# Flow for gutenberg
 gutenberg_processor = Pipe[[str], str](
     replace_minutes,
     replace_seconds,
@@ -95,7 +96,7 @@ clean_gutenberg = Pipe[[tuple[()]], tuple[()]](
     LOGGER.debug(log_total_number_of_files),
     process_gutenberg,
     LOGGER.debug(f'Saved cleaned *.parquet files to "{config.corpus}".'),
-    Sum(()),
+    Sum(()),  # Collapse empty tuples into one
 )
 
 delete_corpus_directory = Pipe[[tuple[()]], tuple[()]](
@@ -103,6 +104,7 @@ delete_corpus_directory = Pipe[[tuple[()]], tuple[()]](
     clean_corpus_directory
 )
 
+# Overall flow
 clean = Pipe[[tuple[()]], tuple[()]](
     LOGGER.info(f'{"Resum" if config.resume else "Start"}ing step "clean".'),
     identity if config.resume else delete_corpus_directory,

@@ -47,6 +47,7 @@ encode        Encode text documents with the trained tokenizer.
 train         Train the specified model on the encoded data.
 monitor       Print a gnuplot script to graphically track training progress.
 compare       Print a gnuplot script to compare convergence of training runs.
+summarize     Print a JSON of all training-run summaries in one experiment.
 chat          Start a console client to chat with a trained model.
 """
 parse_args = ArgParser(description=ACTIONS, epilog=EPILOG.format(temporary))

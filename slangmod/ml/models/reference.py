@@ -6,6 +6,7 @@ from ...config import LiteralDevice, Devices
 __all__ = ['Reference']
 
 
+# ToDo: Remove once confirmed
 class Reference(Module):
 
     def __init__(

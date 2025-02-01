@@ -8,7 +8,7 @@ class Delayed[T, **P](ArgRepr):
     """Recursively delay instantiating heavy classes until actually needed.
 
     To avoid blocking CPU/GPU memory with instances of huge PyTorch models
-    unless they are actually needed, both the model class and the required
+    until they are actually needed, both the model class and the required
     (keyword) arguments are cached until instances of this wrapper are called
     with *no* (keyword) arguments. At that point, classes are called and,
     thus, instantiated with the cached (keyword) arguments and, if any of
@@ -42,8 +42,8 @@ class Delayed[T, **P](ArgRepr):
         self.args = args
         self.kwargs = kwargs
 
-    def __call__(self) -> T:
-        """Call `call` with the recursively resolved keyword (arguments)."""
+    def __call__(self, *_, **__) -> T:
+        """Call `call` with cached keyword (arguments) recursively resolved."""
         return self.call(
             *[
                 arg() if isinstance(arg, self.__class__) else arg

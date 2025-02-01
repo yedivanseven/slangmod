@@ -8,6 +8,16 @@ from .top_k import TopK
 from .top_p import TopP
 from .beamsearch import BeamSearch
 
+__all__ = [
+    'Generator',
+    'NextToken',
+    'Greedy',
+    'TopK',
+    'TopP',
+    'BeamSearch',
+    'create_generator'
+]
+
 generator_type = {
     Generators.GREEDY: Greedy,
     Generators.TOP_K: TopK,
@@ -24,13 +34,3 @@ create_generator = Curry(
     width=config.chat.width,
     penalty=config.chat.penalty
 )
-
-__all__ = [
-    'Generator',
-    'NextToken',
-    'Greedy',
-    'TopK',
-    'TopP',
-    'BeamSearch',
-    'create_generator'
-]

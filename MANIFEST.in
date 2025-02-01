@@ -6,5 +6,6 @@ prune .ruff_cache
 prune *.egg-info
 prune .github
 prune data
+prune tutorials
 exclude .gitignore .python_version version.env Pipfile Pipfile.lock
 include slangmod/gnuplot/*.gp

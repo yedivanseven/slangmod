@@ -6,6 +6,7 @@ from .clean import clean
 from .encode import encode
 from .monitor import monitor
 from .compare import compare
+from .summarize import summarize
 
 __all__ = [
     'dry_run',
@@ -15,5 +16,6 @@ __all__ = [
     'train',
     'chat',
     'monitor',
-    'compare'
+    'compare',
+    'summarize'
 ]

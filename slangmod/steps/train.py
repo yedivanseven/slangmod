@@ -173,11 +173,11 @@ load_model = Pipe[[tuple[()]], Module](
 
 train_model = Pipe[[Module, TrainData, TestData], Module](
     LOG_TERM.info(f'Training model on {config.data.device.upper()} '
-                     f'with a maximum learning rate of '
-                     f'{config.train.learning_rate:7.5f}'),
+                  f'with a maximum learning rate of '
+                  f'{config.train.learning_rate:7.5f}'),
     LOG_FILE.info(f'Training model on {config.data.device.upper()} '
-                     f'with a maximum learning rate of '
-                     f'{config.train.learning_rate:7.5f}'),
+                  f'with a maximum learning rate of '
+                  f'{config.train.learning_rate:7.5f}'),
     trim_memory,
     trainer.resume if config.resume else trainer.train,
     LOG_TERM.debug(f'Saving model to "{config.model_file}".'),

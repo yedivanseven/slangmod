@@ -11,7 +11,7 @@ jitter = 32
 vocab = 16384
 
 [train]
-batch_size = 192
-learning_rate = 0.03
-warmup = 8_000
-cooldown = 15_000
+batch_size = 160
+learning_rate = 0.01
+warmup = 10_000
+cooldown = 20_000

@@ -1,5 +1,5 @@
 """Helpers and wrappers to safely use HuggingFace `tokenizers <https://
-huggingface.co/docs/tokenizers/index>`_"""
+huggingface.co/docs/tokenizers/index>`_."""
 
 from .special import Special, special
 from .algo import Algo

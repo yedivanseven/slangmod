@@ -55,6 +55,6 @@ encode = Pipe[[tuple[()]], tuple[()]](
     discover_corpus,
     LOGGER.debug(log_total_number_of_files),
     Map[[str], tuple[()], list](encode_file),
-    Sum(()),
+    Sum(()),  # Collapse empty tuples into one
     LOGGER.info('Finished step "encode".'),
 )

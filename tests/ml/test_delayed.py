@@ -49,7 +49,7 @@ class TestUsage(unittest.TestCase):
         self.args = 1, 2
         self.kwargs = {'three': 3, 'four': 4}
 
-    def test_non_recursive(self):
+    def test_non_recursive_no_args(self):
         expected = 'mock return'
         call = Mock(return_value=expected)
 
@@ -62,7 +62,20 @@ class TestUsage(unittest.TestCase):
         call.assert_called_once_with(*args, **kwargs)
         self.assertEqual(expected, actual)
 
-    def test_recursive(self):
+    def test_non_recursive_args(self):
+        expected = 'mock return'
+        call = Mock(return_value=expected)
+
+        args = 1, 2
+        kwargs = {'three': 3, 'four': 4}
+
+        delayed = Delayed(call, *args, **kwargs)
+        call.assert_not_called()
+        actual = delayed('these', are='disregarded')
+        call.assert_called_once_with(*args, **kwargs)
+        self.assertEqual(expected, actual)
+
+    def test_recursive_nor_args(self):
         root = Mock(return_value='root')
         child = Mock(return_value='child')
         grandchild = Mock(return_value='grandchild')
@@ -75,6 +88,25 @@ class TestUsage(unittest.TestCase):
         root.assert_not_called()
 
         actual = delayed_root()
+        self.assertEqual('root', actual)
+
+        grandchild.assert_called_once_with(1, answer=42)
+        child.assert_called_once_with('grandchild', hello='world')
+        root.assert_called_once_with(2, child='child')
+
+    def test_recursive_args(self):
+        root = Mock(return_value='root')
+        child = Mock(return_value='child')
+        grandchild = Mock(return_value='grandchild')
+
+        delayed_grandchild = Delayed(grandchild, 1, answer=42)
+        grandchild.assert_not_called()
+        delayed_child = Delayed(child, delayed_grandchild, hello='world')
+        grandchild.assert_not_called()
+        delayed_root = Delayed(root, 2, child=delayed_child)
+        root.assert_not_called()
+
+        actual = delayed_root('these', are='disregarded')
         self.assertEqual('root', actual)
 
         grandchild.assert_called_once_with(1, answer=42)

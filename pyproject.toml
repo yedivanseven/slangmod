@@ -37,7 +37,7 @@ Issues = "https://github.com/yedivanseven/slangmod/issues"
 Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages]
-find = {exclude = ["data", "Notebooks"]}
+find = {exclude = ["data", "Notebooks", "tutorials"]}
 
 [tool.setuptools.package-data]
 slangmod = ["*.gp"]
