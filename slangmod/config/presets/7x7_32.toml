@@ -14,4 +14,4 @@ vocab = 16384
 batch_size = 160
 learning_rate = 0.015
 warmup = 10_000
-cooldown = 25_000  # Was 20k cooldown
+cooldown = 20_000

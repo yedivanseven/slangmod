@@ -176,5 +176,5 @@ create_model = Delayed(
     dtype=config.data.dtype
 )
 
-# ToDo: Make sure in-place works when re-loading model!
+# Provide a ready-to-use compile for model training
 compile_model = Compile(inplace=True, disable=config.model.disable_compile)

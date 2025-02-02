@@ -32,5 +32,5 @@ create_generator = Curry(
     k=config.chat.k,
     p=config.chat.p,
     width=config.chat.width,
-    penalty=config.chat.penalty
+    boost=config.chat.boost
 )

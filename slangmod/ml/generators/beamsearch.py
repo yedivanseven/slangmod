@@ -20,10 +20,11 @@ class BeamSearch(Generator):
         token is not predicted by the model first. Defaults to 256.
     width: int, optional
         The width of the beam search. Defaults to 4.
-    penalty: float, optional
-        The *higher* this number, the more *short* answers are preferred.
-        Conversely, *lower* numbers promote *longer* answers.
-        Defaults to 0.8
+    boost: float, optional
+        Boost the length of the generated answers. The *higher* this number,
+        the *longer* the answers. Conversely, *lower* numbers promote *shorter*
+        answers. Defaults to 1.0, which ranks answers purely on their
+        (log-)probabilities.
 
     """
 
@@ -33,14 +34,14 @@ class BeamSearch(Generator):
             model: Module,
             max_tokens: int = 256,
             width: int = 4,
-            penalty: float = 0.8,
+            boost: float = 1.0,
             **_: Any
     ) -> None:
         super().__init__(tokenizer, model, max_tokens, width)
-        self.penalty = penalty
+        self.boost = boost
 
     def __repr__(self) -> str:
-        extras = f', width={self.width}, penalty={self.penalty})'
+        extras = f', width={self.width}, boost={self.boost})'
         return super().__repr__()[:-1] + extras
 
     def predict(self, src: Tensor, mask: Tensor, more: bool) -> list[int]:
@@ -83,7 +84,7 @@ class BeamSearch(Generator):
 
         # If we restricted the first token to not be EOS, the next one can be.
         # If we did not, and it is, we need at least one more non-EOS token.
-        more = False if more else (all_seqs == self.eos_id).any()
+        more = False if more else (all_seqs == self.eos_id).any().item()
 
         # Initialize a 1-D boolean mask indicating sequences already ended.
         eos = pt.zeros(all_seqs.size(0), dtype=pt.bool)
@@ -130,7 +131,7 @@ class BeamSearch(Generator):
             # ... increase their length by one, ...
             grow_size = all_size[~eos].repeat_interleave(self.width) + 1
             # ... and re-evaluate their score.
-            grow_vals = grow_prob / grow_size**self.penalty
+            grow_vals = grow_prob / grow_size**self.boost
 
             # Re-unite the new candidates with the already ended sequences, ...
             all_seqs = pt.cat([eos_seqs, grow_seqs], dim=0)
@@ -149,9 +150,10 @@ class BeamSearch(Generator):
 
         winner = all_vals.argmax()
         answer = all_seqs[winner].tolist()
-        # Because shorter sequences potentially have many EOS at the end:
+        # Sequence may have an EOS in the beginning (depending on the initial
+        # "more", and shorter sequences potentially have many EOS at the end:
         if self.eos_id in answer[1:]:
-            eos_pos = answer[1:].index(self.eos_id) + 2
+            eos_pos = answer[1:].index(self.eos_id) + 2  # This keeps one EOS.
         else:
             eos_pos = len(answer)
-        return answer[:eos_pos]
+        return answer[:eos_pos]  # Answer with at most one EOS at the end.

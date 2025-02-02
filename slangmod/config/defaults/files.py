@@ -3,6 +3,9 @@ from swak.jsonobject.fields import Lower, resolve
 
 
 class Files(JsonObject):
+    train = 'train'
+    test = 'test'
+    validation = 'validation'
     summary = 'summary'
     monitor = 'convergence'
     log = 'debug.log'
@@ -11,10 +14,7 @@ class Files(JsonObject):
     checkpoint: Lower() = 'checkpoint.pt'
     model: Lower() = 'model.pt'
     suffix: str = 'parquet'
-    train: str = 'train'
-    test: str = 'test'
     column: str = 'text'
-    validation: str = 'validation'
     wiki40b: resolve = '/home/georg/Projects/slangmod/data/wiki40b'
     gutenberg: resolve = '/home/georg/Projects/slangmod/data/gutenberg'
 

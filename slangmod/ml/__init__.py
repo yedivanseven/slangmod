@@ -1,4 +1,4 @@
-"""Machine-learning elements for building and training a language model."""
+"""Building blocks for building, training, and talking to a language model."""
 
 from .tokenizers import Algo, tokenizer
 from .trainer import trainer

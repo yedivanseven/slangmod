@@ -102,5 +102,6 @@ class TokenizerLoader[T: (Algo, Tokenizer)](ArgRepr):
         return self.algo.from_file(file)
 
 
+# Provide read-to-use instances of both the Save and the Loader
 save_tokenizer = TokenizerSaver(config.tokenizer_file, True)
 load_tokenizer = TokenizerLoader(tokenizer, config.tokenizer_file)

@@ -70,6 +70,7 @@ class Main(JsonObject):
     def corpus(self) -> str:
         return str((Path(self.workdir) / 'corpus').resolve())
 
+    # ToDo: Append hash of data, tokens, and version settings to encodings dir and tokenizer file
     @property
     def encodings(self) -> str:
         return str((Path(self.workdir) / 'encodings').resolve())

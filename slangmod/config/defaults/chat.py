@@ -40,7 +40,7 @@ class Chat(JsonObject):
     k: float = 0.1
     p: float = 0.8
     width: int = 16
-    penalty: float = 0.8
+    boost: float = 0.8
     user: str = 'USR'
     bot: str = 'BOT'
     stop: str = 'Stop!'

@@ -41,7 +41,8 @@ class CorpusDiscovery(ArgRepr):
     not_found: str, optional
         What to do if either the directory does not exist or no matching files
         are found in the given directory. One of "ignore", "warn", or "raise".
-        Use the ``NotFound`` enum to avoid typos. Defaults to "raise".
+        Use the `NotFound <https://yedivanseven.github.io/swak/text.html#swak.
+        text.misc.NotFound>`_ enum to avoid typos. Defaults to "raise".
         If set otherwise, an empty tuple of file names might be returned.
 
     """

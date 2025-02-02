@@ -144,15 +144,15 @@ def extract_file_name(path: str) -> str:
     return Path(path).name
 
 
-# ToDo: Write more like these where they are missing!
-# Provide ready-to-use instances of the CorpusLoader
+# Provide ready-to-use instances of the DirectoryCleaner ...
 clean_corpus_directory = DirectoryCleaner(config.corpus)
 clean_encodings_directory = DirectoryCleaner(config.encodings)
+# ... the ParquetWriter, and ...
 write_clean_file = ParquetWriter(config.clean_files, create=True)
-
-extract_file_type = FileTypeExtractor(*config.files.types)
 write_encoded_file = ParquetWriter(config.encoded_files, create=True)
-
+# ... the FileTypeExtractor.
+extract_file_type = FileTypeExtractor(*config.files.types)
+# Because we can only ever read DataFrames, but actually would like a Series:
 read_column = Pipe[[str], Series](
     ParquetReader(),
     ColumnSelector(config.files.column)

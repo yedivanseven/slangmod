@@ -15,13 +15,6 @@ __all__ = [
 
 SUMMARY = FileLogger(config.summary_file, fmt=RAW_FMT, mode='a')
 
-write_toml = TomlWriter(
-    path=config.summary_file,
-    overwrite=True,
-    create=True,
-    prune=True
-)
-
 
 class TrainTomlPrinter(TrainPrinter):
     """Assemble a TOML-formatted string with a summary of the training run.
@@ -76,5 +69,11 @@ class TrainTomlPrinter(TrainPrinter):
 
 
 # Provide ready-to-use instances of config saver and TrainTomlPrinter
+write_toml = TomlWriter(
+    path=config.summary_file,
+    overwrite=True,
+    create=True,
+    prune=True
+)
 save_config = Partial[tuple[()]](write_toml, config)
 save_train_toml = TrainTomlPrinter(SUMMARY.info)

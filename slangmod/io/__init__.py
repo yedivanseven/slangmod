@@ -1,6 +1,12 @@
 """Tools for IO-related tasks like saving to and loading from disk.
 
-User input and model output is handled by :obj:`~slangmod.io.clients`.
+User input and model output is handled by :obj:`~slangmod.io.clients` module.
+
+Note
+----
+For more tools, see also the `pandas <https://yedivanseven.github.io/swak/pd.
+html>`_ and `text <https://yedivanseven.github.io/swak/text.html>`_ sections
+of the `swak <https://github.com/yedivanseven/swak>`_ documentation.
 
 """
 

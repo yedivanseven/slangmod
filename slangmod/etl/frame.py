@@ -8,11 +8,13 @@ from ..config import config
 class ToFrame(ArgRepr):
     """Turn any iterable into a single-column pandas dataframe.
 
+    Parameters
+    ----------
     name: Hashable
         The name of the single column in the dataframe.
     **kwargs
-        Additional keyword arguments are forwarded to the pandas
-        ``Series`` `constructor <https://pandas.pydata.org/pandas-docs/stable/
+        Additional keyword arguments are forwarded to the pandas ``Series``
+        `constructor <https://pandas.pydata.org/pandas-docs/stable/
         reference/api/pandas.Series.html>`_.
 
     """
@@ -41,4 +43,4 @@ class ToFrame(ArgRepr):
 
 
 # Provide a ready-to use instance of ToFrame
-to_frame = ToFrame(config.files.column)
+to_frame = ToFrame(name=config.files.column)
