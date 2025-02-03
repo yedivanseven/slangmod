@@ -28,7 +28,7 @@ class Main(JsonObject):
     toml: Maybe[str](resolve) = None
     name: Maybe[str](Lower()) = '1x1_32'
     progress: bool = True
-    actions: list = []
+    _actions: list = []
     files: Files = Files()
     tokens: Tokens = Tokens()
     data: Data = Data()
@@ -38,7 +38,7 @@ class Main(JsonObject):
 
     @property
     def resume(self) -> bool:
-        return 'resume' in self.actions
+        return 'resume' in self._actions
 
     @property
     def mode(self) -> str:

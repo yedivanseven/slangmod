@@ -63,7 +63,7 @@ load_preset = TextResourceLoader(__name__, 'presets')
 preset = tomllib.loads(load_preset(temporary.preset))
 
 # Update the original config in order of precedence
-config = main(preset)(toml)(env_vars)(args, actions=actions)
+config = main(preset)(toml)(env_vars)(args, _actions=actions)
 
 # Remove the "resume" action if given, since it only modifies other actions
 actions = [action for action in actions if action.strip().lower() != 'resume']
