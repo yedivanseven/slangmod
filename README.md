@@ -12,7 +12,7 @@ answer is yes, then there is only one way to find out, isn't there?
 Make one yourself. From scratch.
 
 Of course, you cannot hope to compete with commercial products that take months
-and millions to train, but with a little bit of patience, you can actually get
+and millions to train, but with a little patience, you can actually get
 impressive results on consumer hardware. Not any old laptop, mind you, but a
 state-of-the art gaming PC with a dedicated graphics card supported by
 [PyTorch](https://pytorch.org/) will do.
@@ -26,8 +26,8 @@ Specifically, this pacakge provides everything you need to
 - train your model with a choice of optimizers and learning-rate schedulers,
   employing early-stopping if you like;
 - monitor convergence and experiment on hyperparameters;
-- explore highly configurable text-generation algorithms like top-k, top-p or beam-search;
-- chat with your model.
+- explore text-generation algorithms like top-k, top-p or beamsearch;
+- and, finally, chat with your model.
 
 To that end, `slangmod` provides a command-line interface (CLI) with
 fine-grained configuration options on one hand, but also the raw building
@@ -42,7 +42,7 @@ can be quickly code up.
 * The easiest way of installing `slangmod` is from the python package index
 [PyPI](https://pypi.org/project/slangmod/), where it is hosted. Simply type
   ```shell
-  pip install swak
+  pip install slangmod
   ```
   or treat it like any other python package in your dependency management.
 * While it is, in principle, possible to run `slangmod` on the CPU, this is
