@@ -8,6 +8,8 @@ class Files(JsonObject):
     validation = 'validation'
     summary = 'summary'
     monitor = 'convergence'
+    corpus = 'corpus'
+    encodings = 'encodings'
     log = 'debug.log'
 
     tokenizer: Lower() = 'tokenizer.json'

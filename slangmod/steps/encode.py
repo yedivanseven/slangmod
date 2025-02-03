@@ -11,8 +11,7 @@ from ..io import (
     discover_corpus,
     read_column,
     extract_file_name,
-    write_encoded_file,
-    save_config
+    write_encoded_file
 )
 
 __all__ = ['encode']
@@ -46,8 +45,6 @@ encode_file = Pipe[[str], tuple[()]](
 )
 
 encode = Pipe[[tuple[()]], tuple[()]](
-    LOGGER.debug(f'Saving config to "{config.summary_file}".'),
-    save_config,
     LOGGER.info('Starting step "encode".'),
     LOGGER.debug(f'Preparing a fresh and empty folder "{config.encodings}".'),
     clean_encodings_directory,

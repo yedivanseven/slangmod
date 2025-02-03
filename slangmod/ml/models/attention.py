@@ -11,6 +11,8 @@ from ...config import LiteralDevice, Devices
 __all__ = ['SelfAttention']
 
 
+# ToDo: Enable Grouped-Query Attention
+# ToDo: Enable Key-Value Cache
 class SelfAttention(Block):
     """Multi-headed self attention with optional (rotary) positional encodings.
 

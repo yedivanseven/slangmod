@@ -41,7 +41,7 @@ wiki40b_processor = Pipe[[str], str](
 )
 process_wiki40b_docs = CorpusCleaner(
     wiki40b_processor,
-    config.data.jitter,
+    config.tokens.min_len,
     config.progress
 )
 process_wiki40b_file = Pipe[[str], tuple[()]](
@@ -75,7 +75,7 @@ gutenberg_processor = Pipe[[str], str](
 )
 process_gutenberg_docs = CorpusCleaner(
     gutenberg_processor,
-    config.data.jitter,
+    config.tokens.min_len,
     config.progress
 )
 process_gutenberg_file = Pipe[[str], tuple[()]](

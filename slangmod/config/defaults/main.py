@@ -68,16 +68,21 @@ class Main(JsonObject):
 
     @property
     def corpus(self) -> str:
-        return str((Path(self.workdir) / 'corpus').resolve())
+        return str((Path(self.workdir) / self.files.corpus).resolve())
 
-    # ToDo: Append hash of data, tokens, and version settings to encodings dir and tokenizer file
     @property
     def encodings(self) -> str:
-        return str((Path(self.workdir) / 'encodings').resolve())
+        settings = ''.join([str(self.version), str(self.tokens)])
+        suffix = shake_128(settings.encode()).hexdigest(4)
+        path = Path(self.workdir) / (self.files.encodings + f'_{suffix}')
+        return str(path.resolve())
 
     @property
     def tokenizer_file(self) -> str:
-        return str((Path(self.workdir) / self.files.tokenizer).resolve())
+        settings = ''.join([str(self.version), str(self.tokens)])
+        suffix = shake_128(settings.encode()).hexdigest(4)
+        file = Path(self.files.tokenizer).stem + f'_{suffix}.json'
+        return str((Path(self.workdir) / file).resolve())
 
     @property
     def checkpoint_file(self) -> str:

@@ -9,6 +9,7 @@ class Tokens(JsonObject):
     encoding: Lower() = 'cp1252'
     algo: Lower() = Tokenizers.UNIGRAM
     vocab: int = 16384
+    min_len: int = 32
     dropout: float = 0.0
     min_frequency: int = 0
     max_length: int = 16
