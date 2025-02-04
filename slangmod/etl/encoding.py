@@ -53,4 +53,4 @@ class EncodingEnforcer(ArgRepr):
 
 
 # Provide a ready-to use instance of the EncodingEnforcer
-enforce_encoding = EncodingEnforcer(encoding=config.tokens.encoding)
+enforce_encoding = EncodingEnforcer(encoding=config.files.encoding)

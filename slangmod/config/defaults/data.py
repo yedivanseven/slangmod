@@ -15,4 +15,5 @@ class Data(JsonObject):
 
     @property
     def dtype(self) -> Dtype:
+        """Heuristic dtype to exploit device capabilities."""
         return pt.bfloat16 if self.device == Devices.CUDA else pt.float32

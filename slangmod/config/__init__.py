@@ -5,6 +5,7 @@ from .defaults import main, Main
 from .enums import (
     Devices,
     LiteralDevice,
+    Cleaners,
     Tokenizers,
     Positions,
     Activations,
@@ -22,6 +23,7 @@ __all__ = [
     'actions',
     'Devices',
     'LiteralDevice',
+    'Cleaners',
     'Tokenizers',
     'Positions',
     'Activations',

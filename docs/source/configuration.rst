@@ -1,11 +1,11 @@
 configuration
 =============
-:py:mod:`slangmod` can be configured *via* its command line interface (CLI) and/or
+:mod:`slangmod` can be configured *via* its command-line interface (CLI) and/or
 *via* a config file in `TOML <https://toml.io/en/>`_ format. All configuration
 options can be set by either or both of these mechanisms. In case of
 discrepancy, the CLI takes precedence over the config file.
 
-In order to see all the options that you can possible set, simply type
+In order to list all the options that you can possible set, simply type
 
 .. code-block:: bash
 
@@ -25,10 +25,10 @@ remain static and can be added.
 
 Specifically, you could set
 
-- ``work_dir`` the path to a working directory, where :py:mod:`slangmod` will
+- ``work_dir`` the path to a working directory, where :mod:`slangmod` will
   save all it needs. While, in principle, this path can be *relative*
-  (defaulting, in fact, to directory where you invoke :py:mod:`slangmod`), I
-  recommend setting an absolute path here.
+  (defaulting, in fact, to the directory where you invoke :mod:`slangmod`),
+  I recommend setting an absolute path here.
 - ``log_level`` the level at which progress is logged to the console. The
   default is 10 (meaning DEBUG, *i.e.*, everything is logged) and I recommend
   leaving it at that. If, however, you want to have fewer messages on the
@@ -48,15 +48,15 @@ With these setting, your initial config file could look something like this:
    progress = true
 
 To convince yourself that this works, use the ``dry-run`` action on the command
-line by invoking :py:mod:`slangmod` with
+line by invoking :mod:`slangmod` with
 
 .. code-block:: bash
 
    slangmod dry-run --toml path/to/your-config-file.toml
 
-This does nothing other than printing the configuration that :py:mod:`slangmod`
+This does nothing other than printing the configuration that :mod:`slangmod`
 would run with. Look for the options you set in the file. They should now have
-the desired values. To convince yourself that the CLI takes preference over
+the desired values. To convince yourself that the CLI takes precedence over
 the config file, run
 
 .. code-block:: bash
@@ -65,10 +65,10 @@ the config file, run
 
 and check that the log-level has indeed changed.
 
-And that's it. All other commands/actions and configuration options (and how
-to set them) are explained in detail in the CLI reference.
+And that's it for now. All other commands/actions and configuration options
+(and how to set them) are explained in detail in the CLI reference.
 
 .. note::
    In the examples above, we used "long-format" command-line options. With the
    exception of ``-h`` for ``--help``, this is, in fact, the only format accepted
-   by :py:mod:`slangmod`.
+   by :mod:`slangmod`.

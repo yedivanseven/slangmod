@@ -14,10 +14,16 @@ Make one yourself. From scratch.
 Of course, you cannot hope to compete with commercial products that take months
 and millions to train, but with a little patience, you can actually get
 impressive results on consumer hardware. Not any old laptop, mind you, but a
-state-of-the art gaming PC with a dedicated graphics card supported by
-[PyTorch](https://pytorch.org/) will do.
+state-of-the art gaming PC with a single graphics card supported by
+[PyTorch](https://pytorch.org/) will do. So, we are going to train a *small*
+language model. These hardware limitations are reflected in software
+design choices. Specifically, `slangmod` does *not* employ any type of
+parallelization that would keep multiple GPUs busy at the same time, and *all*
+training data are loaded into CPU RAM at once, to be drip-fed to the model
+on the GPU from there (1 billion tokens take up about 7.5 GB worth of 64-bit
+integer numbers).
 
-Specifically, this pacakge provides everything you need to
+Having said that, `slangmod` provides everything you need to
 - preprocess and clean your text corpus;
 - chose and train one of the HuggingFace
   [tokenizers](https://huggingface.co/docs/tokenizers/index);
@@ -29,12 +35,12 @@ Specifically, this pacakge provides everything you need to
 - explore text-generation algorithms like top-k, top-p or beamsearch;
 - and, finally, chat with your model.
 
-To that end, `slangmod` provides a command-line interface (CLI) with
-fine-grained configuration options on one hand, but also the raw building
+To do all these things, `slangmod` provides a command-line interface (CLI)
+with fine-grained configuration options on one hand, and the raw building
 blocks it is made of on the other hand. Leveraging the foundational
 functionalities provided by the fiercely functional
 [swak](https://github.com/yedivanseven/swak) package, any other workflow
-can be quickly code up. 
+can thus be quickly coded up.
 
 
 ## Installation

@@ -54,7 +54,6 @@ class Main(JsonObject):
     def folder(self) -> str:
         if self.name is None:
             settings = ''.join([
-                str(self.version),
                 str(self.tokens),
                 str(self.data),
                 str(self.model),
@@ -71,18 +70,18 @@ class Main(JsonObject):
         return str((Path(self.workdir) / self.files.corpus).resolve())
 
     @property
-    def encodings(self) -> str:
-        settings = ''.join([str(self.version), str(self.tokens)])
-        suffix = shake_128(settings.encode()).hexdigest(4)
-        path = Path(self.workdir) / (self.files.encodings + f'_{suffix}')
-        return str(path.resolve())
+    def suffix(self) -> str:
+        return shake_128(str(self.tokens).encode()).hexdigest(4)
 
     @property
     def tokenizer_file(self) -> str:
-        settings = ''.join([str(self.version), str(self.tokens)])
-        suffix = shake_128(settings.encode()).hexdigest(4)
-        file = Path(self.files.tokenizer).stem + f'_{suffix}.json'
+        file = Path(self.files.tokenizer).stem + f'_{self.suffix}.json'
         return str((Path(self.workdir) / file).resolve())
+
+    @property
+    def encodings(self) -> str:
+        path = Path(self.workdir) / (self.files.encodings + f'_{self.suffix}')
+        return str(path.resolve())
 
     @property
     def checkpoint_file(self) -> str:
@@ -106,7 +105,7 @@ class Main(JsonObject):
 
     @property
     def clean_files(self) -> str:
-        return self.corpus + '/{}-{}.' + self.files.suffix
+        return self.corpus + '/{}-{}.' + self.files.suffix.strip(' .')
 
     @property
     def encoded_files(self) -> str:

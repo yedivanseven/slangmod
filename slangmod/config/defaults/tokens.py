@@ -6,10 +6,8 @@ from ..enums import Tokenizers
 class Tokens(JsonObject):
     end_of_word_suffix = '</w>'
 
-    encoding: Lower() = 'cp1252'
     algo: Lower() = Tokenizers.UNIGRAM
     vocab: int = 16384
-    min_len: int = 32
     dropout: float = 0.0
     min_frequency: int = 0
     max_length: int = 16
@@ -22,4 +20,5 @@ class Tokens(JsonObject):
 
     @property
     def eos_repl(self) -> str:
+        """What should the `eos_string` be replaced with?"""
         return ' ' + self.eos_symbol.strip() + ' '

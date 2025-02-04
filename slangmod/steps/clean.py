@@ -28,6 +28,7 @@ __all__ = ['clean']
 
 LOGGER = PassThroughStdLogger(__name__, config.log_level)
 
+# ToDo: Unify to one processor
 # Flow for wiki40b-en
 wiki40b_processor = Pipe[[str], str](
     replace_article,
@@ -41,7 +42,7 @@ wiki40b_processor = Pipe[[str], str](
 )
 process_wiki40b_docs = CorpusCleaner(
     wiki40b_processor,
-    config.tokens.min_len,
+    config.files.min_doc_len,
     config.progress
 )
 process_wiki40b_file = Pipe[[str], tuple[()]](
@@ -75,7 +76,7 @@ gutenberg_processor = Pipe[[str], str](
 )
 process_gutenberg_docs = CorpusCleaner(
     gutenberg_processor,
-    config.tokens.min_len,
+    config.files.min_doc_len,
     config.progress
 )
 process_gutenberg_file = Pipe[[str], tuple[()]](

@@ -2,8 +2,9 @@ from enum import StrEnum
 from typing import Literal
 
 __all__ = [
-    'Devices',
     'LiteralDevice',
+    'Devices',
+    'Cleaners',
     'Tokenizers',
     'Positions',
     'Activations',
@@ -22,6 +23,13 @@ class Devices(StrEnum):
     """Device to run model training on."""
     CPU = 'cpu'
     CUDA = 'cuda'
+
+
+class Cleaners(StrEnum):
+    """Data cleaning steps to perform."""
+    QUOTES = 'quotes'
+    ENCODING = 'encoding'
+    WIKI40B = 'wiki40b'
 
 
 class Tokenizers(StrEnum):
