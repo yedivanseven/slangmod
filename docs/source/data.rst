@@ -69,15 +69,15 @@ ideally when it has said what it wanted to say. One way to realize this is to
 stop producing more text when a special "end-of-sequence" (EOS) token
 is predicted. However, the model can only do so if there are EOS tokens in
 the training data. Too few too far apart and your model will never shut up.
-Too many and your model answers might be more concise than you'd like them.
+Too many and your model answers might be more concise than you'd like.
 Therefore, one important decision to make is what exactly should be considered
 a "**sequence**" by your model.
 
-The upper bound for how long a sequence can be is the length of the documents,
-*i.e.*, the row contents in the "text" column of your data files. :mod:`slangmod`
-will put an EOS token at the end of each. So, if your documents are rather
-short (say, a few sentences), you don't have do to anything. If however, you
-use much longer documents, like E-books, then you will have to either
-deliberately put markers into your documents that designate an EOS, or identify
-already existing patterns in your document that :mod:`slangmod` can interpret
-as EOS.
+The upper bound for the length of a sequences are the length of the documents,
+*i.e.*, the contents of rows in the "text" column of your data files.
+:mod:`slangmod` will put an EOS token at the end of each. So, if your documents
+are rather short (say, a few sentences), you don't have do to anything.
+If however, you use much longer documents, like E-books, then you will have to
+either deliberately put markers into your documents that designate an EOS,
+or identify already existing patterns in your document that :mod:`slangmod`
+can interpret as EOS.

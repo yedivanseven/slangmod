@@ -17,6 +17,7 @@ class Tokens(JsonObject):
     unk_symbol = '[UNK]'
     eos_symbol: str = '[EOS]'
     eos_string: str = '\n\n'
+    eos_regex: str = '\n{2,}'
 
     @property
     def eos_repl(self) -> str:

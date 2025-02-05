@@ -23,10 +23,10 @@ class Main(JsonObject):
     start = dt.datetime.now().strftime("%Y-%m-%d.%Hh%Mm%Ss")
 
     log_level: int = 10  # 10=debug, 20=info, 30=warning, 40=error, 50=critical
-    workdir: resolve = '/home/georg/Projects/slangmod/data'
-    size: Maybe[str](Lower()) = '1x1_32'
+    workdir: resolve = '.'
+    size: Maybe[str](Lower()) = None
     toml: Maybe[str](resolve) = None
-    name: Maybe[str](Lower()) = '1x1_32'
+    name: Maybe[str](Lower()) = None
     progress: bool = True
     _actions: list = []
     files: Files = Files()

@@ -15,29 +15,20 @@ from .regex import (
     replace_newline,
     replace_minutes,
     replace_seconds,
-    PARAGRAPH_REGEX,
     replace_single_quote,
     replace_double_quote
 )
 
 __all__ = [
     'EncodingEnforcer',
-    'enforce_encoding',
     'CorpusCleaner',
+    'clean_docs',
     'ToFrame',
     'to_frame',
     'MemoryTrimmer',
     'trim_memory',
     'Shuffle',
-    'RegexReplacer',
-    'replace_article',
-    'replace_section',
-    'replace_newline',
-    'replace_minutes',
-    'replace_seconds',
-    'PARAGRAPH_REGEX',
-    'replace_single_quote',
-    'replace_double_quote'
+    'RegexReplacer'
 ]
 
 # Assemble the document-cleaning pipeline according to the config.
@@ -57,4 +48,9 @@ cleaners = {
     Cleaners.WIKI40B: wiki40b,
     Cleaners.ENCODING: enforce_encoding
 }
-processor = Pipe[[str], str](*ValuesGetter(config.files.cleaners)(cleaners))
+process = Pipe[[str], str](*ValuesGetter(config.files.cleaners)(cleaners))
+clean_docs = CorpusCleaner(
+    process=process,
+    min_len=config.files.min_doc_len,
+    show_progress=config.progress
+)

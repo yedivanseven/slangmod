@@ -14,9 +14,8 @@ __all__ = [
     'CorpusFilter',
     'CorpusLoader',
     'load_corpus',
+    'discover_raw',
     'discover_corpus',
-    'discover_wiki40b',
-    'discover_gutenberg',
     'discover_encodings',
     'filter_train_files',
     'filter_test_files',
@@ -175,14 +174,8 @@ class CorpusFilter(ArgRepr):
 
 
 # Provide ready-to-use instances of the CorpusDiscovery
-discover_wiki40b = CorpusDiscovery(
-    config.files.wiki40b,
-    *config.files.types,
-    suffix=config.files.suffix,
-    not_found=NotFound.RAISE
-)
-discover_gutenberg = CorpusDiscovery(
-    config.files.gutenberg,
+discover_raw = CorpusDiscovery(
+    config.files.raw,
     *config.files.types,
     suffix=config.files.suffix,
     not_found=NotFound.RAISE
@@ -199,8 +192,10 @@ discover_encodings = CorpusDiscovery(
     suffix=config.files.suffix,
     not_found=NotFound.RAISE
 )
+
 # Provide a ready-to-use instance of the CorpusLoader
 load_corpus = CorpusLoader(read_column)
+
 # Provide ready-to-use instances of the CorpusFilter ...
 train_files_filter = CorpusFilter(config.files.train)
 test_files_filter = CorpusFilter(config.files.test)

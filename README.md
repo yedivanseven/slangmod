@@ -5,17 +5,13 @@
 _**Small language model.**_
 
 Ever wondered how large language models (LLMs) like ChatGPT, Claude,
-LLama, Deepseek, _etc._, actually work, like, _really_ work? If not, then you
-will find plenty of libraries and tools that abstract away all the nitty-gritty
-details and provide a convenient, high-level playground. If, however, the
-answer is yes, then there is only one way to find out, isn't there?
-Make one yourself. From scratch.
+LLama, Deepseek, _etc._, actually work, like, _really_ work? I did. And I
+figured there is only one way to find out: Make one yourself. From scratch.
 
-Of course, you cannot hope to compete with commercial products that take months
-and millions to train, but with a little patience, you can actually get
-impressive results on consumer hardware. Not any old laptop, mind you, but a
+Of course, I wasn't expecting to beat the big players at their own game,
+but I wanted to know what you can do on consumer hardware (meaning a
 state-of-the art gaming PC with a single graphics card supported by
-[PyTorch](https://pytorch.org/) will do. So, we are going to train a *small*
+[PyTorch](https://pytorch.org/)). So, naturally, it was going to be a *small*
 language model. These hardware limitations are reflected in software
 design choices. Specifically, `slangmod` does *not* employ any type of
 parallelization that would keep multiple GPUs busy at the same time, and *all*

@@ -11,9 +11,8 @@ __all__ = [
     'replace_newline',
     'replace_minutes',
     'replace_seconds',
-    'PARAGRAPH_REGEX',
     'replace_single_quote',
-    'replace_double_quote',
+    'replace_double_quote'
 ]
 
 # Some useful regular expressions
@@ -22,7 +21,6 @@ SECTION_REGEX = r'\s*_START_SECTION_[\s\S]*?_START_PARAGRAPH_\s*'
 NEWLINE_REGEX = r'\s*_NEWLINE_\s*'
 MINUTE_REGEX = r'′'
 SECONDS_REGEX = r'″'
-PARAGRAPH_REGEX = r'\n{2,}'
 
 
 class RegexReplacer(ArgRepr):

@@ -36,7 +36,7 @@ __all__ = [
 ]
 
 # Parse the environment for config options
-parse_env = EnvParser()
+parse_env = EnvParser(prefix='SLM_')
 env_vars = parse_env()
 temporary = main(env_vars)
 
