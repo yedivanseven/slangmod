@@ -25,27 +25,27 @@ jobs:
         run: pipenv install --dev build
       - name: Run build
         run: pipenv run python -m build
-#      - name: Upload the package artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: python-package-distributions
-#          path: dist/
+      - name: Upload the package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
 
-#  publish:
-#    name: Publish Package to PyPi
-#    needs:
-#      - build
-#    runs-on: ubuntu-latest
-#    environment:
-#      name: pypi
-#      url: https://pypi.org/p/slangmod
-#    permissions:
-#      id-token: write
-#    steps:
-#      - name: Download distributions
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: python-package-distributions
-#          path: dist/
-#      - name: Publish package distributions to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
+  publish:
+    name: Publish Package to PyPi
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/slangmod
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
