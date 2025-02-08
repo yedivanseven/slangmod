@@ -32,7 +32,7 @@ jobs:
       - name: Install pipenv
         run: pip install --upgrade pipenv --user
       - name: Sync PyTorch CPU
-        run: pipenv sync -categories=cpu
+        run: pipenv sync --categories=cpu
       - name: Install sphinx
         run: pipenv install --dev sphinx sphinx-rtd-theme
       - name: Install package
