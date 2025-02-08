@@ -88,4 +88,3 @@ Next, look for and replace other occurrences of
 - `package`
 - `your@email.com`
 
-Finally, take a good look at the files in the `.github/` folder and taylor them to your needs.
