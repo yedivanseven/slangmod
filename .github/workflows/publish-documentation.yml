@@ -31,22 +31,22 @@ jobs:
         name: Set up python
       - name: Install pipenv
         run: pip install --upgrade pipenv --user
-#      - name: Sync your dependencies
-#        run: pipenv sync -categories="extra"
+      - name: Sync PyTorch CPU
+        run: pipenv sync -categories=cpu
       - name: Install sphinx
         run: pipenv install --dev sphinx sphinx-rtd-theme
-#      - name: Install slangmod
-#        run: pipenv run pip install .[like]
+      - name: Install package
+        run: pipenv run pip install .
       - name: Build the docs
         run: |
           cd docs
           pipenv run make html
-#      - name: Setup GitHub Pages
-#        uses: actions/configure-pages@v5
-#      - name: Upload artifact
-#        uses: actions/upload-pages-artifact@v3
-#        with:
-#          path: docs/build/html
-#      - name: Deploy to GitHub Pages
-#        id: deployment
-#        uses: actions/deploy-pages@v4
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build/html
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
