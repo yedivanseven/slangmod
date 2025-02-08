@@ -40,7 +40,7 @@ Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
 find = {exclude = ["data", "Notebooks", "tutorials"]}
 
 [tool.setuptools.package-data]
-slangmod = ["*.gp"]
+slangmod = ["*.gp", "*.toml"]
 
 [tool.setuptools_scm]
 version_file = "version.env"

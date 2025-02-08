@@ -9,3 +9,4 @@ prune data
 prune tutorials
 exclude .gitignore .python_version version.env Pipfile Pipfile.lock
 include slangmod/gnuplot/*.gp
+include slangmod/config/presets/*.toml
