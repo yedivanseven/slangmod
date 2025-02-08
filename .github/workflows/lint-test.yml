@@ -37,9 +37,9 @@ jobs:
         name: Set up python
       - name: Install pipenv
         run: pip install --upgrade pipenv --user
-#      - name: Sync your dependencies
-#        run: pipenv sync --categories="extra"
-#      - name: Install slangmod
-#        run: pipenv run pip install .[like]
+      - name: Sync your dependencies
+        run: pipenv sync --categories=cpu
+      - name: Install slangmod
+        run: pipenv run pip install .
       - name: Run unittest
         run: pipenv run python -m unittest
