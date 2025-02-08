@@ -1,0 +1,17 @@
+[model]
+dim = 64
+n_heads = 1
+n_layers = 1
+
+[data]
+seq_len = 512
+jitter = 32
+
+[tokens]
+vocab = 16384
+
+[train]
+batch_size = 192
+learning_rate = 0.07
+warmup = 1_000
+cooldown = 15_000

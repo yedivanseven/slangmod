@@ -1,0 +1,17 @@
+[model]
+dim = 1024
+n_heads = 16
+n_layers = 12
+
+[data]
+seq_len = 1024
+stride = 768
+jitter = 64
+
+[tokens]
+vocab = 32768
+
+[train]
+batch_size = 16
+learning_rate = 0.0005
+warmup = 7000

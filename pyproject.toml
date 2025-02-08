@@ -1,0 +1,83 @@
+[build-system]
+requires = [
+    "setuptools>=75",
+    "setuptools_scm>=8.1",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slangmod"
+dynamic = ["version"]
+requires-python = ">=3.12"
+dependencies = [
+  "swak >= 0.3.8",
+  "tokenizers >= 0.20"
+]
+authors = [{name = "yedivanseven", email = "yedivanseven@outlook.de"}]
+description = "Small language model."
+readme = "README.md"
+keywords = [
+    "Natural Language Processing",
+    "Generative AI",
+    "Transformer"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.scripts]
+slangmod = "slangmod.main:run"
+
+[project.urls]
+Documentation = "https://yedivanseven.github.io/slangmod/"
+Repository = "https://github.com/yedivanseven/slangmod.git"
+Issues = "https://github.com/yedivanseven/slangmod/issues"
+Changelog = "https://github.com/yedivanseven/slangmod/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages]
+find = {exclude = ["data", "Notebooks", "tutorials"]}
+
+[tool.setuptools.package-data]
+slangmod = ["*.gp"]
+
+[tool.setuptools_scm]
+version_file = "version.env"
+version_file_template = "SETUPTOOLS_SCM_PRETEND_VERSION={version}"
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+ignore = ["PLR", "A005"]
+select = [
+    "A",
+    "F",
+    "E",
+    "W",
+    "N",
+    "T",
+    "UP",
+    "YTT",
+    "ASYNC",
+    "C4",
+    "T100",
+    "EXE",
+    "ISC",
+    "ICN",
+    "PIE",
+    "PYI",
+    "RSE",
+    "SLOT",
+    "SIM",
+    "INT",
+    "PTH",
+    "PL",
+    "NPY",
+    "PERF",
+    "FURB"
+]
