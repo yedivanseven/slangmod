@@ -72,20 +72,3 @@ can thus be quickly coded up.
 ## Documentation
 The documentation for both the CLI and the API of `slangmod` is hosted
 on [GitHub Pages](https://yedivanseven.github.io/slangmod/).
-
-
-## Usage
-Use this repository as a template when using the [swak](https://github.com/yedivanseven/swak) package.
-
-First, search for the following tags and replace them as needed:
-- `<YEAR>` the year for the copyright notice
-- `<AUTHOR>` your name
-- `<USER>` your GitHub user name
-- `<PACKAGE>` the name of your package, which should match the name of the repository
-Then, rename the python package `package` also to <PACKAGE>.
-
-Next, look for and replace other occurrences of
-- `package`
-- `your@email.com`
-
-Finally, take a good look at the files in the `.github/` folder and taylor them to your needs.
