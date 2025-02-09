@@ -18,8 +18,6 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -34,8 +32,8 @@ jobs:
           context: .
           file: ./Dockerfile
           build-args: |
-            SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.version.outputs.VERSION }}
-          push: true
+            SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.version.outputs.VERSION }}
           tags: |
             ${{ github.repository }}:latest
             ${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+          push: true
