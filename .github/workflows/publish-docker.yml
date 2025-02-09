@@ -30,7 +30,7 @@ jobs:
           VERSION: ${{ github.ref_name }}
         run: |
           echo ${{ github.repository }}:latest
-          echo ${VERSION#v}
+          echo ${VERSION#m}
 #      - name: Build and push Docker image
 #        id: push
 #        uses: docker/build-push-action@v6
