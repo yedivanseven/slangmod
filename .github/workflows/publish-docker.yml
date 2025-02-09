@@ -27,15 +27,18 @@ jobs:
           password: ${{ secrets.PASSWORD }}
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@v6
+#        uses: docker/build-push-action@v6
         env:
           VERSION: ${{ github.ref_name }}
-        with:
-          context: .
-          file: ./Dockerfile
-          build-args: |
-            SETUPTOOLS_SCM_PRETEND_VERSION: ${VERSION#v}
-          push: true
-          tags: |
-            ${{ github.repository }}:latest
-            ${{ github.repository }}:${VERSION#v}
+        run: |
+          echo ${{ github.repository_owner }}/${VERSION#v}
+          echo ${{ github.repository }}/${VERSION#v}
+#        with:
+#          context: .
+#          file: ./Dockerfile
+#          build-args: |
+#            SETUPTOOLS_SCM_PRETEND_VERSION: ${VERSION#v}
+#          push: true
+#          tags: |
+#            ${{ github.repository }}:latest
+#            ${{ github.repository }}:${VERSION#v}
