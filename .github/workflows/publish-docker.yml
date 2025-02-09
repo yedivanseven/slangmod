@@ -6,9 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  VERSION: ${GITHUB_REF_NAME#v}
-
 
 jobs:
   build_and_push:
@@ -28,17 +25,17 @@ jobs:
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-      - name: Print version string
-        run: echo "${{ env.VERSION }}"
+      - name: Extract version string
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
       - name: Build and push Docker image
-        id: push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           build-args: |
-            SETUPTOOLS_SCM_PRETEND_VERSION: ${{ env.VERSION }}
+            SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.version.outputs.VERSION }}
           push: true
           tags: |
             ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ env.VERSION }}
+            ${{ github.repository }}:${{ steps.version.outputs.VERSION }}
