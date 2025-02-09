@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
       - name: Test image names and tags
-      - run: |
+        run: |
           echo ${{ github.repository }}:latest
           echo ${{ github.ref }}
           echo ${{ github.ref_name}}
