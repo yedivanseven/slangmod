@@ -2,7 +2,7 @@
 ![PyPI](https://github.com/yedivanseven/slangmod/actions/workflows/publish-package.yml/badge.svg)
 
 # slangmod
-_**Small language model.**_
+_**small language model**_
 
 Ever wondered how large language models (LLMs) like ChatGPT, Claude,
 LLama, Deepseek, _etc._, actually work, like, _really_ work? I did. And I
@@ -34,12 +34,12 @@ Having said that, `slangmod` provides everything you need to
 To do all these things, `slangmod` provides a command-line interface (CLI)
 with fine-grained configuration options on one hand, and the raw building
 blocks it is made of on the other hand. Leveraging the foundational
-functionalities provided by the
-[swak](https://github.com/yedivanseven/swak) package, any other workflow
+functionalities provided by the [swak](https://github.com/yedivanseven/swak) package, any other workflow
 can thus be quickly coded up.
 
 
 ## Installation
+### Python package
 * Create a new virtual environment running at least `python 3.12`.
 * The easiest way of installing `slangmod` is from the python package index
 [PyPI](https://pypi.org/project/slangmod/), where it is hosted. Simply type
@@ -56,17 +56,52 @@ can thus be quickly coded up.
   explicit dependency of `slangmod`. You will have to install it yourself,
   _e.g._, following [these instructions](https://pytorch.org/get-started/locally/).
   If you are using `pipenv` for dependency management, you can also have a
-  look at the [Pipfile](https://github.com/yedivanseven/slangmod/blob/main/Pipfile)
-  in the root of the `slangmod` [repository](https://github.com/yedivanseven/slangmod)
+  look at the [Pipfile](https://github.com/yedivanseven/slangmod/blob/main/Pipfile) in the root of the `slangmod` [repository](https://github.com/yedivanseven/slangmod)
   and taylor it to your needs. Personally, I go
   ```shell
   pipenv sync --categories=cpu
   ```
-  for a CPU-only installation of PyTorch and
+  for a CPU-only installation of PyTorch (for debugging only) and
   ```shell
   pipenv sync --categories=cuda
   ```
   if I want GPU support.
+* Finally, with the virtual environment you just created active, open a console
+  and type
+  ```shell
+  slagnmod -h
+  ```
+  to check that everything works.
+
+
+### Docker image
+A docker image with GPU-enabled [PyTorch](https://pytorch.org/) and all other
+dependencies inside is available on the [Docker Hub](https://hub.docker.com/r/yedivanseven/slangmod).
+```shell
+docker pull yedivanseven/slangmod
+```
+To use it, you must have a host machine that
+* has an NVIDIA GPU,
+* has the drivers for it installed, and
+* exposes it via the [container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/).
+
+Change into a *working directory*, i.e., one where ``slangmod`` will read its
+config file *slangmod.toml* from and where it will save outputs to, and mount
+this directory to the path ``/workdir`` inside the container when you run it.
+```shell
+docker run --rm -v ./:/workdir yedivanseven/slangmod
+```
+This will invoke ``slangmod -h``.
+
+In the event that you still want to clean your raw text with the help of
+``slangmod``, you will also have to mount the folder with those dirty files
+when your start a docker container.
+```shell
+docker run --rm -v ./:/workdir -v /path/to/raw/docs:/raw yedivanseven/slangmod clean ...
+```
+
+For all other command-line options and to find out about this config TOML file,
+refer to the ...
 
 
 ## Documentation

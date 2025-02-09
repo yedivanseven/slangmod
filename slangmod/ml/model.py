@@ -136,6 +136,7 @@ encoder_layer = Identity() if config.model.reference else Delayed(
     pos_enc=src_pos_enc,
     bias=config.model.bias,
     dropout=config.model.dropout,
+    norm_cls=config.model.norm_cls,
     norm_first=config.model.norm_first,
     device=config.data.device,
     dtype=config.data.dtype

@@ -4,7 +4,7 @@ import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor, Block
 from swak.pt.misc import Identity
-from ...config import LiteralDevice, Devices
+from ...config import LiteralDevice, Devices, LiteralNorm, Norms
 from .attention import SelfAttention
 
 __all__ = ['EncoderLayer']
@@ -45,6 +45,9 @@ class EncoderLayer(Block):
     dropout: float, optional
         Fraction of dropout to apply after self-attention and feed-forward.
         Defaults to 0.1
+    norm_cls: str, optional
+        Which type of norm to use between (sub-)layers. Defaults to "layer",
+        but can also be "rms".
     norm_first: bool, optional
         Whether to normalize inputs to attention and feed-forward or the sum
         of respective inputs and outputs. Defaults to ``True``.
@@ -64,6 +67,11 @@ class EncoderLayer(Block):
 
     """
 
+    _norms = {
+        Norms.LAYER: ptn.LayerNorm,
+        Norms.RMS: ptn.RMSNorm
+    }
+
     def __init__(
             self,
             attention: SelfAttention,
@@ -71,6 +79,7 @@ class EncoderLayer(Block):
             pos_enc: Block = Identity(),
             bias: bool = True,
             dropout: float = 0.1,
+            norm_cls: Norms | LiteralNorm = 'layer',
             norm_first: bool = True,
             eps: float = 1e-5,
             device: Device | Devices | LiteralDevice = 'cpu',
@@ -83,26 +92,27 @@ class EncoderLayer(Block):
         self.pos_enc = self.__check(pos_enc).to(device=device, dtype=dtype)
         self.bias = bias
         self.dropout = dropout
+        self.norm_cls = norm_cls.strip().lower()
         self.norm_first = norm_first
         self.eps = eps
-        self.norm1 = ptn.LayerNorm(
-            attention.mod_dim,
-            eps=eps,
-            elementwise_affine=True,
-            bias=bias,
-            device=device,
-            dtype=dtype
-        )
-        self.norm2 = ptn.LayerNorm(
-            attention.mod_dim,
-            eps=eps,
-            elementwise_affine=True,
-            bias=bias,
-            device=device,
-            dtype=dtype
-        )
         self.drop1 = ptn.Dropout(dropout)
         self.drop2 = ptn.Dropout(dropout)
+        self.norm1 = self._norms[self.norm_cls](
+            attention.mod_dim,
+            eps=eps,
+            elementwise_affine=True,
+            device=device,
+            dtype=dtype,
+            **self.bias_kwarg
+        )
+        self.norm2 = self._norms[self.norm_cls](
+            attention.mod_dim,
+            eps=eps,
+            elementwise_affine=True,
+            device=device,
+            dtype=dtype,
+            **self.bias_kwarg
+        )
 
     def __check(self, pos_enc: Block) -> Block:
         """Warn if both attention and layer apply positional encodings."""
@@ -111,6 +121,11 @@ class EncoderLayer(Block):
                    "Hope you know what you're doing ...")
             warnings.warn(msg)
         return pos_enc
+
+    @property
+    def bias_kwarg(self) -> dict[str, bool]:
+        """Extra keyword 'bias' for LayerNorm components, if requested."""
+        return {'bias': self.bias} if self.norm_cls == Norms.LAYER else {}
 
     @property
     def mod_dim(self) -> int:
@@ -214,6 +229,7 @@ class EncoderLayer(Block):
             self.pos_enc.new(),
             self.bias,
             self.dropout,
+            self.norm_cls,
             self.norm_first,
             self.eps,
             self.device,

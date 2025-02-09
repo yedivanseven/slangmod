@@ -8,6 +8,8 @@ __all__ = [
     'Cleaners',
     'Tokenizers',
     'Positions',
+    'Norms',
+    'LiteralNorm',
     'Activations',
     'Gates',
     'FeedForwards',
@@ -18,6 +20,7 @@ __all__ = [
 ]
 
 type LiteralDevice = Literal['cpu', 'cuda']
+type LiteralNorm = Literal['layer', 'rms']
 
 
 class Devices(StrEnum):
@@ -54,6 +57,11 @@ class Positions(StrEnum):
     LEARNABLE = 'learnable'
     SINUSOIDAL = 'sinusoidal'
     ROTARY = 'rotary'
+
+class Norms(StrEnum):
+    """The type of norm used between (sub-)layers."""
+    LAYER = 'layer'
+    RMS = 'rms'
 
 
 class Activations(StrEnum):

@@ -204,7 +204,11 @@ class TestAttributes(unittest.TestCase):
         self.attention = SelfAttention(self.mod_dim, self.n_heads)
         self.pos_enc = Sinusoidal(self.mod_dim, self.context)
         self.feedforward = ActivatedBlock(self.mod_dim)
-        self.layer = EncoderLayer(self.attention, self.feedforward)
+        self.layer = EncoderLayer(
+            self.attention,
+            self.feedforward,
+            norm_cls='rms'
+        )
         self.encode = Encoder(
             self.vocab,
             self.layer,
@@ -257,6 +261,9 @@ class TestAttributes(unittest.TestCase):
         )
         self.assertIs(self.encode.embed.weight.dtype, self.dtype)
 
+    def test_norm_cls(self):
+        self.assertIsInstance(self.encode.norm, pt.nn.RMSNorm)
+
     def test_norm(self):
         self.assertIs(self.dtype, self.encode.norm.weight.dtype)
 
@@ -280,6 +287,7 @@ class TestAttributes(unittest.TestCase):
         el = EncoderLayer(self.attention, self.feedforward, norm_first=False)
         encode = Encoder(self.vocab, el, pos_enc=self.pos_enc)
         self.assertIsInstance(encode.norm, Identity)
+
 
 class TestMasking(unittest.TestCase):
 

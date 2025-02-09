@@ -30,9 +30,8 @@ Having said that, :mod:`slangmod` provides everything you need to
 To do all these things, :mod:`slangmod` provides a command-line interface (CLI)
 with fine-grained configuration options on one hand, and the raw building
 blocks it is made of on the other hand. Leveraging the foundational
-functionalities provided by the fiercely functional
-`swak <https://github.com/yedivanseven/swak>`_ package, any other workflow
-can thus be quickly coded up.
+functionalities provided by the `swak <https://github.com/yedivanseven/swak>`_
+package, any other workflow can thus be quickly coded up.
 
 
 

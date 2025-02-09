@@ -49,6 +49,10 @@ model.dropout = 0.1
 model.bias = True
    Whether to add bias to the linear projections all across the model.
 
+model.norm_cls = "layer"
+   Which type of norm to use between transformer (sub-)layers. The other choice
+   besides the default of "layer" is "rms".
+
 model.norm_first = True
    Whether to normalize the *input* before each Transformer layer or the sum
    of *output* and residual stream after each layer.

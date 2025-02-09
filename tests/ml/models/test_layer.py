@@ -47,6 +47,12 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_dropout(self):
         self.assertEqual(0.1, self.layer.dropout)
 
+    def test_has_norm_cls(self):
+        self.assertTrue(hasattr(self.layer, 'norm_cls'))
+
+    def test_norm_cls(self):
+        self.assertEqual('layer', self.layer.norm_cls)
+
     def test_has_norm_first(self):
         self.assertTrue(hasattr(self.layer, 'norm_first'))
 
@@ -122,6 +128,12 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_drop2(self):
         self.assertIsInstance(self.layer.drop2, pt.nn.Dropout)
         self.assertEqual(self.layer.dropout, self.layer.drop2.p)
+
+    def test_has_bias_kwarg(self):
+        self.assertTrue(hasattr(self.layer, 'bias_kwarg'))
+
+    def test_bias_kwarg(self):
+        self.assertDictEqual({'bias': True}, self.layer.bias_kwarg)
 
     def test_has_mod_dim(self):
         self.assertTrue(hasattr(self.layer, 'mod_dim'))
@@ -211,6 +223,7 @@ class TestAttributes(unittest.TestCase):
             self.pos_enc,
             False,
             0.2,
+            'rms',
             False,
             1e-4,
             dtype=self.dtype
@@ -224,6 +237,38 @@ class TestAttributes(unittest.TestCase):
 
     def test_dropout(self):
         self.assertEqual(0.2, self.layer.dropout)
+
+    def test_norm_cls(self):
+        self.assertEqual('rms', self.layer.norm_cls)
+
+    def test_norm_cls_sanitized(self):
+        enc = EncoderLayer(self.attention, self.feedforward, norm_cls=' RmS  ')
+        self.assertEqual('rms', enc.norm_cls)
+
+    def test_norm1(self):
+        self.assertIsInstance(self.layer.norm1, pt.nn.RMSNorm)
+        self.assertTupleEqual(
+            (self.attention.mod_dim,),
+            self.layer.norm1.normalized_shape
+        )
+        self.assertEqual(self.layer.eps, self.layer.norm1.eps)
+        self.assertTrue(self.layer.norm1.elementwise_affine)
+        self.assertEqual(self.layer.device, self.layer.norm1.weight.device)
+        self.assertEqual(self.layer.dtype, self.layer.norm1.weight.dtype)
+
+    def test_norm2(self):
+        self.assertIsInstance(self.layer.norm2, pt.nn.RMSNorm)
+        self.assertTupleEqual(
+            (self.attention.mod_dim,),
+            self.layer.norm2.normalized_shape
+        )
+        self.assertEqual(self.layer.eps, self.layer.norm2.eps)
+        self.assertTrue(self.layer.norm2.elementwise_affine)
+        self.assertEqual(self.layer.device, self.layer.norm2.weight.device)
+        self.assertEqual(self.layer.dtype, self.layer.norm2.weight.dtype)
+
+    def test_bias_kwarg(self):
+        self.assertDictEqual({}, self.layer.bias_kwarg)
 
     def test_norm_first(self):
         self.assertFalse(self.layer.norm_first)

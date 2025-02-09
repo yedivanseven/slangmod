@@ -1,6 +1,8 @@
 installation
 ============
 
+package
+-------
 - Create and activate a new virtual environment running at least ``python 3.12``.
 - The easiest way of installing :mod:`slangmod` is from the python package index
   `PyPI <https://pypi.org/project/slangmod/>`_, where it is hosted. Simply type
@@ -27,7 +29,7 @@ installation
 
      pipenv sync --categories=cpu
 
-  for a CPU-only installation of PyTorch and
+  for a CPU-only installation of PyTorch (for debugging only) and
 
   .. code-block:: bash
 
@@ -42,3 +44,41 @@ installation
      slangmod -h
 
   to check that everything works.
+
+
+docker
+------
+A docker image with GPU-enabled `PyTorch <https://pytorch.org/>`_ and all other
+dependencies inside is available on the
+`Docker Hub <https://hub.docker.com/r/yedivanseven/slangmod>`_.
+
+.. code-block:: bash
+
+   docker pull yedivanseven/slangmod
+
+To use it, you must have a host machine that
+
+- has an NVIDIA GPU,
+- has the drivers for it installed, and
+- exposes it via the `container toolkit <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/>`_.
+
+Change into a *working directory*, i.e., one where ``slangmod`` will read its
+config file *slangmod.toml* from and where it will save outputs to, and mount
+this directory to the path ``/workdir`` inside the container when you run it.
+
+.. code-block:: bash
+
+   docker run --rm -v ./:/workdir yedivanseven/slangmod
+
+This will invoke ``slangmod -h``.
+
+In the event that you still want to clean your raw text with the help of
+``slangmod``, you will also have to mount the folder with those dirty files
+when your start a docker container.
+
+.. code-block:: bash
+
+   docker run --rm -v ./:/workdir -v /path/to/raw/docs:/raw yedivanseven/slangmod clean ...
+
+For all other command-line options and to find out about this config TOML file,
+read on ...

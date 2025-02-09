@@ -1,6 +1,6 @@
 from swak.jsonobject import JsonObject
 from swak.jsonobject.fields import Lower
-from ..enums import Positions, FeedForwards, Activations, Gates
+from ..enums import Positions, FeedForwards, Activations, Gates, Norms
 
 
 class FeedForward(JsonObject):
@@ -21,6 +21,7 @@ class Model(JsonObject):
     feedforward: FeedForward = FeedForward()
     dropout: float = 0.1
     bias: bool = True
+    norm_cls: str = Norms.LAYER
     norm_first: bool = True
     compile: bool = True
 

@@ -26,13 +26,13 @@ COPY --from=build /usr/local/venv /usr/local/venv
 ENV PATH="/usr/local/venv/bin:$PATH"
 
 # Documents we still nedd to clean must be mounted to /raw
-ENV raw=/raw
+ENV files="{'raw': '/raw'}"
 
 # Create a user to run as
 USER 1937:2846
 
-# The working directory with also the slangmod.toml in it must be mounted to /data
-WORKDIR /data
+# A working directory with the slangmod.toml in it must be mounted to /workdir
+WORKDIR /workdir
 
 # The entrypoint is the package itself
 ENTRYPOINT ["/usr/local/venv/bin/slangmod"]

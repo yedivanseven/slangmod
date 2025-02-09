@@ -99,13 +99,13 @@ class Encoder(Resettable):
             dtype=dtype
         )
         self.drop = ptn.Dropout(dropout)
-        self.norm = ptn.LayerNorm(
+        self.norm = layer.norm1.__class__(
             self.mod_dim,
             eps=layer.norm1.eps,
             elementwise_affine=layer.norm1.elementwise_affine,
-            bias=layer.bias,
             device=device,
-            dtype=dtype
+            dtype=dtype,
+            **layer.bias_kwarg
         ) if layer.norm_first else Identity()
         self.finalize = ptn.Linear(
             in_features=self.mod_dim,
@@ -199,8 +199,8 @@ class Encoder(Resettable):
             position with dimensions (..., `vocab`, `S`), where `S` is again
             the sequence length.
 
-        Note
-        ----
+        Important
+        ---------
         Boolean attention masks are not accepted!
 
         """
@@ -231,4 +231,5 @@ class Encoder(Resettable):
             layer.reset_parameters()
         self.embed.reset_parameters()
         self.pos_enc.reset_parameters()
+        self.norm.reset_parameters()
         self.finalize.reset_parameters()
