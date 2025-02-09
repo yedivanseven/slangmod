@@ -26,9 +26,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
       - name: Test image names and tags
+        env:
+          VERSION: ${{ github.ref_name }}
         run: |
           echo ${{ github.repository }}:latest
-          echo ${{ github.ref_name }#v}
+          echo ${VERSION#v}
 #      - name: Build and push Docker image
 #        id: push
 #        uses: docker/build-push-action@v6
