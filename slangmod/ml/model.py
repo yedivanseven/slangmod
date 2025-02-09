@@ -178,4 +178,4 @@ create_model = Delayed(
 )
 
 # Provide a ready-to-use compile for model training
-compile_model = Compile(inplace=True, disable=config.model.disable_compile)
+compile_model = Compile(inplace=True, disable=config.model.disable)

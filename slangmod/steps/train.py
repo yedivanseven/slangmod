@@ -61,6 +61,7 @@ read_file = Pipe[[str], list[ndarray]](
     read_column,
     list,
     LOG_TERM.debug(log_total_number_of_docs),
+    LOG_FILE.debug(log_total_number_of_docs),
 )
 cat_sequences = Pipe[[list[Tensor]], Tensor](
     trim_memory,

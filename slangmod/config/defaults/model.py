@@ -26,7 +26,7 @@ class Model(JsonObject):
     compile: bool = True
 
     @property
-    def disable_compile(self) -> bool:
+    def disable(self) -> bool:
         """Negation of `compile` for consistency in notation."""
         return not self.compile
 
