@@ -28,8 +28,7 @@ jobs:
       - name: Test image names and tags
         run: |
           echo ${{ github.repository }}:latest
-          echo ${{ github.ref }}
-          echo ${{ github.ref_name}}
+          echo ${{ github.ref_name#v }}
 #      - name: Build and push Docker image
 #        id: push
 #        uses: docker/build-push-action@v6
