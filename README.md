@@ -85,16 +85,16 @@ To use it, you must have a host machine that
 * has the drivers for it installed, and
 * exposes it via the [container toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/).
 
-Change into a *working directory*, i.e., one where ``slangmod`` will read its
+Change into a *working directory*, i.e., one where `slangmod` will read its
 config file *slangmod.toml* from and where it will save outputs to, and mount
-this directory to the path ``/workdir`` inside the container when you run it.
+this directory to the path `/workdir` inside the container when you run it.
 ```shell
 docker run --rm -v ./:/workdir yedivanseven/slangmod
 ```
-This will invoke ``slangmod -h``.
+This will invoke `slangmod -h`.
 
 In the event that you still want to clean your raw text with the help of
-``slangmod``, you will also have to mount the folder with those dirty files
+`slangmod`, you will also have to mount the folder with those dirty files
 when your start a docker container.
 ```shell
 docker run --rm -v ./:/workdir -v /path/to/raw/docs:/raw yedivanseven/slangmod clean ...
