@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  VERSION: ${GITHUB_REF_NAME#v}
+
 
 jobs:
   build_and_push:
@@ -17,8 +20,6 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-    env:
-      VERSION: ${GITHUB_REF_NAME#v}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,6 +28,8 @@ jobs:
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+      - name: Print version string
+        run: echo "${{ env.VERSION }}"
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
