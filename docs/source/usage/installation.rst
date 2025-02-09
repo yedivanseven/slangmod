@@ -68,9 +68,10 @@ this directory to the path ``/workdir`` inside the container when you run it.
 
 .. code-block:: bash
 
-   docker run --rm -v ./:/workdir yedivanseven/slangmod
+   docker run --rm --gpus all -v ./:/workdir yedivanseven/slangmod
 
-This will invoke ``slangmod -h``.
+This will invoke ``slangmod -h``. If all went well, the "device" entry under
+the section "data" should read "cuda".
 
 In the event that you still want to clean your raw text with the help of
 ``slangmod``, you will also have to mount the folder with those dirty files
@@ -78,7 +79,7 @@ when your start a docker container.
 
 .. code-block:: bash
 
-   docker run --rm -v ./:/workdir -v /path/to/raw/docs:/raw yedivanseven/slangmod clean ...
+   docker run --rm --gpus all -v ./:/workdir -v /path/to/raw/docs:/raw yedivanseven/slangmod clean ...
 
 For all other command-line options and to find out about this config TOML file,
 read on ...
