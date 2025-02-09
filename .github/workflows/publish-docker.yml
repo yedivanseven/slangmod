@@ -25,12 +25,6 @@ jobs:
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-      - name: Test image names and tags
-        env:
-          VERSION: ${{ github.ref_name }}
-        run: |
-          echo ${{ github.repository }}:latest
-          echo ${VERSION#m}
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
@@ -39,9 +33,9 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          build-args:
-            - SETUPTOOLS_SCM_PRETEND_VERSION: ${VERSION#v}
+          build-args: |
+            SETUPTOOLS_SCM_PRETEND_VERSION: ${VERSION#v}
           push: true
-          tags:
-            - ${{ github.repository }}:latest
-            - ${{ github.repository }}:${VERSION#v}
+          tags: |
+            ${{ github.repository }}:latest
+            ${{ github.repository }}:${VERSION#v}
