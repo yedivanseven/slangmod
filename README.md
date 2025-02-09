@@ -1,5 +1,6 @@
 ![GitHub Pages](https://github.com/yedivanseven/slangmod/actions/workflows/publish-documentation.yml/badge.svg)
 ![PyPI](https://github.com/yedivanseven/slangmod/actions/workflows/publish-package.yml/badge.svg)
+![Publish Docker Image](https://github.com/yedivanseven/slangmod/actions/workflows/publish-docker.yml/badge.svg)
 
 # slangmod
 _**small language model**_
