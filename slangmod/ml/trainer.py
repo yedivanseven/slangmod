@@ -29,7 +29,7 @@ MONITOR = FileLogger(config.monitor_file, fmt=RAW_FMT, mode=config.mode)
 checkpoint = OnDisk(config.checkpoint_file, create=True)
 
 # Configure callbacks every step, every epoch, and at the end of training.
-step_cbs = StepPrinter(MONITOR.debug, sep=', '),
+step_cbs = StepPrinter(MONITOR.debug),
 epoch_cbs = EpochPrinter(LOG_TERM.info), EpochPrinter(LOG_FILE.info)
 train_cbs = (
     TrainPrinter(LOG_TERM.info),

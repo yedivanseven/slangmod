@@ -1,9 +1,14 @@
-from swak.funcflow import Pipe, Fork, unit
+from swak.funcflow import Pipe, Fork
 from swak.pt.types import Module
 from swak.funcflow.loggers import PassThroughStdLogger
 from ..config import config
-from ..io import load_tokenizer, load_model, pre_trained_client
 from ..ml import Algo, create_generator, create_model
+from ..io import (
+    load_tokenizer,
+    load_model,
+    pre_trained_client,
+    write_chat_history
+)
 
 __all__ = ['chat']
 
@@ -20,6 +25,5 @@ chat = Pipe[[tuple[()]], tuple[()]](
     create_generator,
     LOGGER.info(f'Starting chat client. Enter "{config.chat.stop}" to exit.'),
     pre_trained_client,
-    # ToDo: Once (compressed) JSON writer is available in swak, save here.
-    unit
+    write_chat_history
 )

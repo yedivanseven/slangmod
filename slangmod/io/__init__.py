@@ -13,6 +13,7 @@ of the `swak <https://github.com/yedivanseven/swak>`_ documentation.
 from .clients import pre_trained_client
 from .summary import save_config, save_train_toml
 from .model import save_model, load_model
+from .chat import write_chat_history
 from .corpus import (
     NotFound,
     CorpusDiscovery,
@@ -50,6 +51,7 @@ __all__ = [
     'save_train_toml',
     'save_model',
     'load_model',
+    'write_chat_history',
     'NotFound',
     'CorpusDiscovery',
     'discover_raw',

@@ -117,6 +117,7 @@ class TestData(TestDataBase):
         )
 
 
+# ToDo: Load data from file instead of memory?
 class TrainData(TrainDataBase):
     """Wraps training data to provide batches and samples.
 

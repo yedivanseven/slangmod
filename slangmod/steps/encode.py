@@ -30,6 +30,9 @@ load = Route[[str], tuple[Algo, Series]](
     load_column
 )
 
+# ToDo:. Fold sequences right away.
+# ToDo: Add hash of data settings to folder name.
+# ToDo: Add metadata file (with counts and data settings) into folder
 encode_file = Pipe[[str], tuple[()]](
     Fork[[str], tuple[()]](
         Pipe[[str], DataFrame](

@@ -127,6 +127,11 @@ class Main(JsonObject):
         return self.add_time(self.files.monitor, 'csv')
 
     @property
+    def chat_file(self):
+        """Name of the file to save the chat history in."""
+        return self.add_time(self.files.chat, 'json.gz')
+
+    @property
     def clean_files(self) -> str:
         """Naming schema for the cleand data files in the corpus directory."""
         return self.corpus + '/{}-{}.' + self.files.suffix.strip(' .')

@@ -7,6 +7,7 @@ from swak.misc import ArgRepr
 __all__ = ['CorpusCleaner']
 
 
+# ToDo: Clean files in parallel
 class CorpusCleaner(ArgRepr):
     """Clean a single pandas series where each entry represents one document.
 

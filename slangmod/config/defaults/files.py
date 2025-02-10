@@ -10,6 +10,7 @@ class Files(JsonObject):
     monitor = 'convergence'
     corpus = 'corpus'
     log = 'logs'
+    chat = 'chats'
 
     raw: resolve = '.'
     suffix: str = 'parquet'
