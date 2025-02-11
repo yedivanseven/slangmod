@@ -6,7 +6,7 @@ from ..enums import Scaling, Optimizers
 class Train(JsonObject):
     batch_size: int = 64
     step_freq: int = 1
-    clip_grad: float = 0.8
+    clip_grad: float = 0.6
     label_smoothing: float = 0.1
     optimizer: Lower() = Optimizers.ADMAW
     max_epochs: int = 16

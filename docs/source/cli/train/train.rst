@@ -16,7 +16,7 @@ step_freq = 1
    For example, you could set it to 2 for a ``batch_size`` of 16, to 4 for a
    ``batch_size`` of 8, and so on.
 
-clip_grad = 0.8
+clip_grad = 0.6
    When the overall norm of all parameter gradients in the model exceeds this
    value, they are scaled back accordingly. This helps stabilize convergence,
    especially in the beginning of a training run.
