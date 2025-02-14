@@ -14,8 +14,7 @@ from .models import (
     Rotary,
     SelfAttention,
     EncoderLayer,
-    Encoder,
-    Reference
+    Encoder
 )
 
 __all__ = [
@@ -63,11 +62,11 @@ qk_pos_enc = Delayed({
 )
 
 # Set up a self-attention according to specifications
-self_attention = Identity() if config.model.reference else Delayed(
+self_attention = Delayed(
     SelfAttention,
     mod_dim=config.model.dim,
     n_heads=config.model.n_heads,
-    bias=config.model.bias,
+    bias=config.model.attn_bias,
     dropout=config.model.dropout,
     pos_enc=qk_pos_enc,
     device=config.data.device,
@@ -94,14 +93,14 @@ gate = {
 }[config.model.feedforward.gate]
 
 # Select the feedforward network specified in the config
-feedforward = Identity() if config.model.reference else {
+feedforward = {
     FeedForwards.VANILLA: Delayed(
         ActivatedHiddenBlock,
         mod_dim=config.model.dim,
         activate=activation,
         drop=ptn.Dropout(config.model.dropout),
         hidden_factor=config.model.feedforward.factor,
-        bias=config.model.bias,
+        bias=config.model.feedforward.bias,
         device=config.data.device,
         dtype=config.data.dtype
     ),
@@ -111,7 +110,7 @@ feedforward = Identity() if config.model.reference else {
         gate=gate,
         drop=ptn.Dropout(config.model.dropout),
         hidden_factor=config.model.feedforward.factor,
-        bias=config.model.bias,
+        bias=config.model.feedforward.bias,
         device=config.data.device,
         dtype=config.data.dtype
     ),
@@ -122,19 +121,19 @@ feedforward = Identity() if config.model.reference else {
         gate=gate,
         drop=ptn.Dropout(config.model.dropout),
         hidden_factor=config.model.feedforward.factor,
-        bias=config.model.bias,
+        bias=config.model.feedforward.bias,
         device=config.data.device,
         dtype=config.data.dtype
     )
 }[config.model.feedforward.flavor]
 
 # Configure an encoder layer with the components selected above
-encoder_layer = Identity() if config.model.reference else Delayed(
+encoder_layer = Delayed(
     EncoderLayer,
     attention=self_attention,
     feed_forward=feedforward,
     pos_enc=src_pos_enc,
-    bias=config.model.bias,
+    bias=config.model.norm_bias,
     dropout=config.model.dropout,
     norm_cls=config.model.norm_cls,
     norm_first=config.model.norm_first,
@@ -144,33 +143,12 @@ encoder_layer = Identity() if config.model.reference else Delayed(
 
 # Assemble the final model
 create_model = Delayed(
-    Reference,
-    mod_dim=config.model.dim,
-    vocab=config.tokens.vocab,
-    n_heads=config.model.n_heads,
-    n_layers=config.model.n_layers,
-    pos_enc=Delayed(
-        Sinusoidal,
-        mod_dim=config.model.dim,
-        context=config.model.context,
-        device=config.data.device,
-        dtype=config.data.dtype
-    ),
-    feedforward_factor=config.model.feedforward.factor,
-    scale_grad_by_freq=config.model.scale_grad_by_freq,
-    dropout=config.model.dropout,
-    bias=config.model.bias,
-    norm_first=config.model.norm_first,
-    device=config.data.device,
-    dtype=config.data.dtype
-) if config.model.reference else Delayed(
     Encoder,
     vocab=config.tokens.vocab,
     layer=encoder_layer,
     n_layers=config.model.n_layers,
     pad_id=special.pad_id,
     pos_enc=emb_pos_enc,
-    bias=config.model.bias,
     dropout=config.model.dropout,
     scale_grad_by_freq=config.model.scale_grad_by_freq,
     device=config.data.device,

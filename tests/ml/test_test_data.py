@@ -83,15 +83,13 @@ class TestDefaultUsage(unittest.TestCase):
         batches = self.test.sample(4)
         for batch in batches:
             inp, tgt = batch
-            src, *_, is_causal = inp
+            src, = inp
 
     def test_first_batch_values(self):
         batches = self.test.sample(4)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:4, :-1])
         pt.testing.assert_close(tgt, self.seqs[:4, 1:])
 
@@ -100,9 +98,7 @@ class TestDefaultUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:, :-1])
         pt.testing.assert_close(tgt, self.seqs[4:, 1:])
 
@@ -133,7 +129,7 @@ class TestMaxN(unittest.TestCase):
         batches = self.test.sample(4, 100)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(4, src.size(0))
         self.assertEqual(4, tgt.size(0))
 
@@ -142,7 +138,7 @@ class TestMaxN(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(3, src.size(0))
         self.assertEqual(3, tgt.size(0))
 
@@ -157,7 +153,7 @@ class TestMaxN(unittest.TestCase):
         batches = self.test.sample(4, 5)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(4, src.size(0))
         self.assertEqual(4, tgt.size(0))
 
@@ -166,7 +162,7 @@ class TestMaxN(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(1, src.size(0))
         self.assertEqual(1, tgt.size(0))
 
@@ -181,7 +177,7 @@ class TestMaxN(unittest.TestCase):
         batches = self.test.sample(4, 3)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(3, src.size(0))
         self.assertEqual(3, tgt.size(0))
 

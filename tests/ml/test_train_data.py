@@ -155,15 +155,13 @@ class TestDefaultSample(unittest.TestCase):
         batches = self.train.sample(4)
         for batch in batches:
             inp, tgt = batch
-            src, *_, is_causal = inp
+            src, = inp
 
     def test_first_batch_values(self):
         batches = self.train.sample(4)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:4, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:4, 1:self.seq_len + 1])
 
@@ -172,9 +170,7 @@ class TestDefaultSample(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[4:, 1:self.seq_len + 1])
 
@@ -210,7 +206,7 @@ class TestMaxNSampling(unittest.TestCase):
         batches = self.train.sample(4, 100)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(4, src.size(0))
         self.assertEqual(4, tgt.size(0))
 
@@ -219,7 +215,7 @@ class TestMaxNSampling(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(3, src.size(0))
         self.assertEqual(3, tgt.size(0))
 
@@ -234,7 +230,7 @@ class TestMaxNSampling(unittest.TestCase):
         batches = self.train.sample(4, 5)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(4, src.size(0))
         self.assertEqual(4, tgt.size(0))
 
@@ -243,7 +239,7 @@ class TestMaxNSampling(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(3, src.size(0))
         self.assertEqual(3, tgt.size(0))
 
@@ -258,7 +254,7 @@ class TestMaxNSampling(unittest.TestCase):
         batches = self.train.sample(4, 3)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
+        src, = inp
         self.assertEqual(4, src.size(0))
         self.assertEqual(4, tgt.size(0))
 
@@ -304,15 +300,13 @@ class TestDeterministicUsage(unittest.TestCase):
         _, batches = self.train(4)
         for batch in batches:
             inp, tgt = batch
-            src, *_, is_causal = inp
+            src, = inp
 
     def test_first_batch_values(self):
         _, batches = self.train(4)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:4, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:4, 1:self.seq_len + 1])
 
@@ -321,9 +315,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertIsInstance(is_causal, bool)
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[4:, 1:self.seq_len + 1])
 
@@ -335,8 +327,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _, batches = self.train(2, 2)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:2, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:2, 1:self.seq_len + 1])
 
@@ -345,8 +336,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[2:4, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[2:4, 1:self.seq_len + 1])
 
@@ -358,8 +348,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _, batches = self.train(2, 3)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:2, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:2, 1:self.seq_len + 1])
 
@@ -368,8 +357,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[2:4, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[2:4, 1:self.seq_len + 1])
 
@@ -379,8 +367,7 @@ class TestDeterministicUsage(unittest.TestCase):
         _ = next(batches)
         third = next(batches)
         inp, tgt = third
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:6, :self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[4:6, 1:self.seq_len + 1])
 
@@ -432,8 +419,7 @@ class TestRandomizeUsage(unittest.TestCase):
         _, batches = self.train(self.batch_size)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:, 1:1 + self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[4:, 2:2 + self.seq_len])
 
@@ -444,8 +430,7 @@ class TestRandomizeUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:4, 1:1 + self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:4, 2:2 + self.seq_len])
 
@@ -455,8 +440,7 @@ class TestRandomizeUsage(unittest.TestCase):
         _, batches = self.train(self.batch_size)
         first = next(batches)
         inp, tgt = first
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[4:, 2:2 + self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[4:, 3:3 + self.seq_len])
 
@@ -467,8 +451,7 @@ class TestRandomizeUsage(unittest.TestCase):
         _ = next(batches)
         second = next(batches)
         inp, tgt = second
-        src, *_, is_causal = inp
-        self.assertTrue(is_causal)
+        src, = inp
         pt.testing.assert_close(src, self.seqs[:4, 2:2 + self.seq_len])
         pt.testing.assert_close(tgt, self.seqs[:4, 3:3 + self.seq_len])
 

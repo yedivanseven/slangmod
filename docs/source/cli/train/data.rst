@@ -5,6 +5,8 @@ regarding how to feed the data to the model. These settings go into the
 ``[data]`` section of your config TOML file. Alternatively, you can set options
 on the command line with ``--data.<KEY> <VALUE>``.
 
+.. _seq_len:
+
 data.seq_len = 512
    :mod:`slangmod` trains with batches of sequences that are all of the exact
    same length. To that end, they are padded to multiples of this value.

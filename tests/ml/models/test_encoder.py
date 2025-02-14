@@ -56,13 +56,6 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_pos_enc(self):
         self.assertIsInstance(self.encode.pos_enc, Identity)
 
-    def test_has_bias(self):
-        self.assertTrue(hasattr(self.encode, 'bias'))
-
-    def test_bias(self):
-        self.assertIsInstance(self.encode.bias, bool)
-        self.assertTrue(self.encode.bias)
-
     def test_has_dropout(self):
         self.assertTrue(hasattr(self.encode, 'dropout'))
 
@@ -148,10 +141,8 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertEqual(self.vocab, self.encode.finalize.out_features)
         self.assertEqual('cpu', self.encode.finalize.weight.device.type)
         self.assertIs(self.encode.finalize.weight.dtype, pt.float)
-        self.assertTupleEqual(
-            (self.vocab,),
-            self.encode.finalize.bias.shape
-        )
+        self.assertIs(self.encode.finalize.weight, self.encode.embed.weight)
+        self.assertIsNone(self.encode.finalize.bias)
 
     def test_has_mod_dim(self):
         self.assertTrue(hasattr(self.encode, 'mod_dim'))
@@ -159,6 +150,12 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_mod_dim(self):
         self.assertIsInstance(self.encode.mod_dim, int)
         self.assertEqual(self.mod_dim, self.encode.mod_dim)
+
+    def test_has_scale(self):
+        self.assertTrue(hasattr(self.encode, 'scale'))
+
+    def test_scale(self):
+        self.assertEqual(self.mod_dim ** 0.5, self.encode.scale)
 
     def test_has_context(self):
         self.assertTrue(hasattr(self.encode, 'context'))
@@ -187,6 +184,11 @@ class TestDefaultAttributes(unittest.TestCase):
             p.assert_called_once_with()
             f.assert_called_once_with()
 
+    def test_finalize_and_embed_still_share_weights_after_reset(self):
+        self.assertIs(self.encode.finalize.weight, self.encode.embed.weight)
+        self.encode.reset_parameters()
+        self.assertIs(self.encode.finalize.weight, self.encode.embed.weight)
+
 
 class TestAttributes(unittest.TestCase):
 
@@ -197,7 +199,6 @@ class TestAttributes(unittest.TestCase):
         self.vocab = 128
         self.n_layers = 3
         self.pad_id = 1
-        self.bias = False
         self.dropout = 0.2
         self.scale_grad_by_freq = False
         self.dtype = pt.double
@@ -215,7 +216,6 @@ class TestAttributes(unittest.TestCase):
             self.n_layers,
             self.pad_id,
             self.pos_enc,
-            self.bias,
             self.dropout,
             self.scale_grad_by_freq,
             dtype=self.dtype
@@ -229,9 +229,6 @@ class TestAttributes(unittest.TestCase):
 
     def test_pos_enc(self):
         self.assertIsInstance(self.encode.pos_enc, Sinusoidal)
-
-    def test_bias(self):
-        self.assertEqual(self.bias, self.encode.bias)
 
     def test_dropout(self):
         self.assertEqual(self.dropout, self.encode.dropout)
@@ -664,7 +661,9 @@ class TestUsage(unittest.TestCase):
             return_value = self.out
         ) as forward:
             _ = self.encode(self.inp)
-            forward.assert_called_once_with(self.out)
+            self.assertEqual(1, forward.call_count)
+            actual = forward.call_args[0][0]
+            pt.testing.assert_close(actual, self.out * self.mod_dim ** 0.5)
 
     def test_drop_called(self):
         with patch.object(
@@ -741,6 +740,22 @@ class TestUsage(unittest.TestCase):
         actual, = self.encode(inp)
         expected = 7, 128, 32
         self.assertTupleEqual(expected, actual.shape)
+
+    def test_weight_sharing(self):
+        inp = pt.randint(
+            0,
+            self.vocab,
+            (7, self.context),
+            device='cpu',
+            dtype=pt.long
+        )
+        self.assertIs(self.encode.finalize.weight, self.encode.embed.weight)
+        _ = self.encode(inp)
+        self.assertIs(self.encode.finalize.weight, self.encode.embed.weight)
+        pt.testing.assert_close(
+            self.encode.embed.weight,
+            self.encode.finalize.weight
+        )
 
 
 if __name__ == '__main__':

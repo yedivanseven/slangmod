@@ -26,15 +26,15 @@ model.positions = "vanilla"
 
 model.context = 4096
    Positional encodings are never computed on-the-fly but are pre-computed and
-   cached up to that length. This is, therefore the maximum number of tokens
+   cached up to that length. This is, therefore, the maximum number of tokens
    that the model can handle.
 
    .. warning::
 
       If you chose "**learnable**" positional encodings, then the context
-      must *not* be longer than ``data.seq_len`` because we can only learn
-      positional encodings up to the length of the sequences that the model
-      sees during training.
+      must *not* be longer than :ref:`data.seq_len <seq_len>` because we can
+      only learn positional encodings up to the length of the sequences that
+      the model sees during training.
 
 model.n_heads = 8
    The number of attention heads to use.
@@ -42,16 +42,19 @@ model.n_heads = 8
 model.n_layers = 8
    The number of Transformer layers to stack.
 
+model.attn_bias = False
+   Whether to add bias to the in- and out-projections of the self-attention.
+
 model.dropout = 0.1
    Amount of `dropout <https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html#dropout>`_
    to apply at various places throughout the model.
 
-model.bias = True
-   Whether to add bias to the linear projections all across the model.
-
 model.norm_cls = "layer"
    Which type of norm to use between transformer (sub-)layers. The other choice
    besides the default of "layer" is "rms".
+
+model.norm_bias = True
+   Whether to add bias to the ``LayerNorm`` components (if they are used).
 
 model.norm_first = True
    Whether to normalize the *input* before each Transformer layer or the sum
@@ -90,6 +93,9 @@ model.feedforward.gate = "gelu"
    options are "**sigmoid**", "**elu**", "**relu**", "**swish**", "**mish**",
    but also "**none**", which result in a *bilinear* unit. This option is
    disregarded when using the "**vanilla**" feed-forward layer.
+
+model.feedforward.bias = False
+   Whether to use bias in the linear projections of the feedforward network.
 
 model.feedforward.factor = 4
    The width of the hidden layer in the feed-forward network expressed as a

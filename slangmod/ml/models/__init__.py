@@ -4,10 +4,8 @@ from .attention import SelfAttention
 from .layer import EncoderLayer
 from .encoder import Encoder
 from .positions import Learnable, Sinusoidal, Rotary
-from .reference import Reference
 
 __all__ = [
-    'Reference',
     'SelfAttention',
     'EncoderLayer',
     'Encoder',
