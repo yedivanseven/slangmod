@@ -53,6 +53,7 @@ class Style(ArgRepr):
         return self.template.format(prompt.strip().strip(self.strip))
 
 
+# ToDo: Try without spaces before EOS!
 # Provide a few meaningful example instances of Style ...
 space = Style('{} ')
 paragraph = Style('{} ' + config.tokens.eos_symbol)

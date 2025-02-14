@@ -27,7 +27,7 @@ class SelfAttention(Block):
     bias: bool, optional
         Whether to add a learnable bias vectors in the projections from
         input to query, key and value and the final out projection.
-        Defaults to ``True``.
+        Defaults to ``False``.
     dropout: float, optional
         Apply dropout to the attention weights with this probability during
         training. Defaults to 0.1
@@ -63,7 +63,7 @@ class SelfAttention(Block):
             self,
             mod_dim: int,
             n_heads: int,
-            bias: bool = True,
+            bias: bool = False,
             dropout: float = 0.1,
             pos_enc: Block = Identity(),
             device: Device | Devices | LiteralDevice = 'cpu',

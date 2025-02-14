@@ -7,6 +7,6 @@ __all__ = [
     'Evaluation'
 ]
 
-type Batch = tuple[tuple[Tensor, Tensor | None, Tensor | None, bool], Tensor]
+type Batch = tuple[tuple[Tensor], Tensor]
 type Batches = Iterator[Batch]
 type Evaluation = tuple[float, float, float, float, float]

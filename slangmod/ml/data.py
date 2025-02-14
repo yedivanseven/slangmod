@@ -1,7 +1,6 @@
 import math
 from collections.abc import Callable
 import torch as pt
-import torch.nn as ptn
 from swak.pt.types import Tensor, Dtype, Device
 from swak.pt.train import TestDataBase, TrainDataBase
 from swak.pt.misc import LazyCatDim0
@@ -47,12 +46,6 @@ class TestData(TestDataBase):
         self.seqs = seqs
         self.device = pt.device(device)
         self.dtype = dtype
-        # ToDo: Remove mask once the reference model is gone.
-        self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            self.seq_len,
-            device=self.device,
-            dtype=dtype
-        )
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
@@ -94,18 +87,14 @@ class TestData(TestDataBase):
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
         seqs = self.seqs[:n]
-        # ToDo: Return only sequences once the reference model is gone.
         return iter(
             (
-                # Source sequence, attention mask, and is_causal flag
+                # Source sequence.
                 (
                     seqs[batch * batch_size:(batch + 1) * batch_size, :-1].to(
                         self.device,
                         non_blocking=True
                     ),
-                    self.mask,
-                    None,  # unknown mask is None for testing
-                    True
                 ),
                 # Target sequence, shifted by one relative to the source
                 seqs[batch * batch_size:(batch + 1) * batch_size, 1:].to(
@@ -167,12 +156,6 @@ class TrainData(TrainDataBase):
         self.jitter = self.__valid(jitter)
         self.device = pt.device(device)
         self.dtype = dtype
-        # ToDo: Remove mask once the reference model is gone.
-        self.mask = ptn.Transformer.generate_square_subsequent_mask(
-            self.seq_len,
-            device=self.device,
-            dtype=dtype
-        )
 
     def __valid(self, jitter: int) -> int:
         """Make sure that the given value is sane."""
@@ -243,7 +226,6 @@ class TrainData(TrainDataBase):
         """
         n = self.n if max_n is None else min(max_n, self.n)
         batches = range(math.ceil(n / batch_size))
-        # ToDo: Return only sequences once the reference model is gone.
         return iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -255,9 +237,6 @@ class TrainData(TrainDataBase):
                         self.device,
                         non_blocking=True
                     ),
-                    self.mask,
-                    None,  # The unknown mask is None for training
-                    True
                 ),
                 # Target sequence, shifted by one relative to the source
                 self.seqs[
@@ -306,7 +285,6 @@ class TrainData(TrainDataBase):
         start = self._start
         n_batches = self.adjust_batches_for(batch_size, step_freq)
         batches = self._jumble(n_batches, device=self.seqs.device)
-        # ToDo: Return only sequences once the reference model is gone.
         return n_batches, iter(
             (
                 # Source sequence, attention mask, and is_causal flag
@@ -318,9 +296,6 @@ class TrainData(TrainDataBase):
                         self.device,
                         non_blocking=True
                     ),
-                    self.mask,
-                    None,  # The unknown mask is None for training
-                    True
                 ),
                 # Target sequence, shifted by one relative to the source
                 self.seqs[

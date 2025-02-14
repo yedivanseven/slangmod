@@ -1,4 +1,5 @@
 import warnings
+import math
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor, Tensors1T, Resettable
@@ -36,9 +37,6 @@ class Encoder(Resettable):
         tensor first thing. Typically, this would be an instance of
         ``Sinusoidal`` or ``Learnable`` positional encodings. Defaults to an
         instance of ``Identity``, which does nothing.
-    bias: bool, optional
-        Whether to apply bias in the final projection from the transformer
-        output onto the vocabulary size. Defaults to ``True``.
     dropout: float, optional
         Apply dropout to the sum of token embedding and positional encodings
         with this probability during training. Defaults to 0.1
@@ -72,7 +70,6 @@ class Encoder(Resettable):
             n_layers: int = 2,
             pad_id: int = 0,
             pos_enc: Resettable = Identity(),
-            bias: bool = True,
             dropout: float = 0.1,
             scale_grad_by_freq: bool = True,
             device: Device | Devices | LiteralDevice = 'cpu',
@@ -87,7 +84,6 @@ class Encoder(Resettable):
         ])
         self.pad_id = pad_id
         self.pos_enc = self.__check(pos_enc).to(device=device, dtype=dtype)
-        self.bias = bias
         self.dropout = dropout
         self.scale_grad_by_freq = scale_grad_by_freq
         self.embed = ptn.Embedding(
@@ -110,10 +106,12 @@ class Encoder(Resettable):
         self.finalize = ptn.Linear(
             in_features=self.mod_dim,
             out_features=vocab,
-            bias=bias,
+            bias=False,
             device=device,
             dtype=dtype
         )
+        # Share input and output token embedding weights
+        self.finalize.weight = self.embed.weight
 
     @staticmethod
     def __valid(n_layers: int) -> int:
@@ -141,14 +139,19 @@ class Encoder(Resettable):
         return self.layers[0].mod_dim
 
     @property
+    def scale(self):
+        """Square root of model dimension for scaling the input embeddings."""
+        return math.sqrt(self.mod_dim)
+
+    @property
     def device(self) -> Device:
-        """The device all weights, biases, activations, etc. reside on."""
-        return self.finalize.weight.device
+        """The device of all weights, biases, activations, etc. reside on."""
+        return self.embed.weight.device
 
     @property
     def dtype(self) -> Dtype:
         """The dtype of all weights, biases, activations, and parameters."""
-        return self.finalize.weight.dtype
+        return self.embed.weight.dtype
 
     @property
     def context(self) -> int:
@@ -220,7 +223,7 @@ class Encoder(Resettable):
             # Add repeated and reshaped src_mask to attn_mask if present
             mask = src_mask if attn_mask is None else attn_mask + src_mask
 
-        out = self.drop(self.pos_enc(self.embed(src)))
+        out = self.drop(self.pos_enc(self.embed(src) * self.scale))
         for layer in self.layers:
             out = layer(out, mask, is_causal)
         return self.finalize(self.norm(out)).transpose(-1, -2).contiguous(),
@@ -233,3 +236,5 @@ class Encoder(Resettable):
         self.pos_enc.reset_parameters()
         self.norm.reset_parameters()
         self.finalize.reset_parameters()
+        # Share input and output token embedding weights
+        self.finalize.weight = self.embed.weight

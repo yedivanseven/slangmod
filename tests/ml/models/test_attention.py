@@ -37,7 +37,7 @@ class TestDefaultAttributes(unittest.TestCase):
 
     def test_bias(self):
         self.assertIsInstance(self.attention.bias, bool)
-        self.assertTrue(self.attention.bias)
+        self.assertFalse(self.attention.bias)
 
     def test_has_dropout(self):
         self.assertTrue(hasattr(self.attention, 'dropout'))
@@ -82,10 +82,7 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertEqual(3 * self.mod_dim, self.attention.qkv.out_features)
         self.assertEqual('cpu', self.attention.qkv.weight.device.type)
         self.assertIs(self.attention.qkv.weight.dtype, pt.float)
-        self.assertTupleEqual(
-            (3 * self.mod_dim,),
-            self.attention.qkv.bias.shape
-        )
+        self.assertIsNone(self.attention.qkv.bias)
 
     def test_has_out(self):
         self.assertTrue(hasattr(self.attention, 'out'))
@@ -96,7 +93,7 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertEqual(self.mod_dim, self.attention.out.out_features)
         self.assertEqual('cpu', self.attention.out.weight.device.type)
         self.assertIs(self.attention.out.weight.dtype, pt.float)
-        self.assertTupleEqual((self.mod_dim,), self.attention.out.bias.shape)
+        self.assertIsNone(self.attention.out.bias)
 
     def test_has_head_dim(self):
         self.assertTrue(hasattr(self.attention, 'head_dim'))
@@ -171,7 +168,7 @@ class TestAttributes(unittest.TestCase):
     def setUp(self):
         self.mod_dim = 32
         self.n_heads = 4
-        self.bias = False
+        self.bias = True
         self.dropout = 0.2
         self.dtype = pt.double
         self.context = 1234
@@ -201,10 +198,10 @@ class TestAttributes(unittest.TestCase):
         self.assertIs(self.attention.pos_enc, self.pos_enc)
 
     def test_qkv(self):
-        self.assertIsNone(self.attention.qkv.bias)
+        self.assertTupleEqual((self.mod_dim,), self.attention.out.bias.shape)
 
     def test_out(self):
-        self.assertIsNone(self.attention.out.bias)
+        self.assertTupleEqual((self.mod_dim,), self.attention.out.bias.shape)
 
     def test_head_dim(self):
         self.assertEqual(self.head_dim, self.attention.head_dim)
