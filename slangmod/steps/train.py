@@ -1,6 +1,6 @@
 import torch as pt
 from numpy import ndarray
-from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit
+from swak.funcflow import Pipe, Fork, Route, Map, Filter, unit, identity
 from swak.pt.create import Create
 from swak.pt.types import Tensor, Module
 from swak.pt.misc import Cat, LazyCatDim0
@@ -10,7 +10,6 @@ from swak.funcflow.loggers import (
     SHORT_FMT,
     RAW_FMT
 )
-from swak.funcflow import identity
 from ..config import config
 from ..etl import trim_memory, Shuffle
 from ..ml import (
@@ -167,8 +166,8 @@ prepare_model = Pipe[[tuple[()]], Module](
     LOG_TERM.debug('Instantiating model.'),
     LOG_FILE.debug('Instantiating model.'),
     create_model,
-    LOG_TERM.debug('Compiling model.'),
-    LOG_FILE.debug('Compiling model.'),
+    LOG_TERM.debug('Compiling model.') if config.model.compile else identity,
+    LOG_FILE.debug('Compiling model.') if config.model.compile else identity,
     compile_model
 )
 
