@@ -37,6 +37,12 @@ class TestDefaultAttributes(unittest.TestCase):
     def test_dtype(self):
         self.assertIs(self.pos_enc.dtype, pt.float)
 
+    def test_has_scale(self):
+        self.assertTrue(hasattr(self.pos_enc, 'scale'))
+
+    def test_scale(self):
+        self.assertEqual(self.mod_dim ** 0.5, self.pos_enc.scale)
+
     def test_has_positional_encodings(self):
         self.assertTrue(hasattr(self.pos_enc, 'positional_encodings'))
 
@@ -125,6 +131,12 @@ class TestUsage(unittest.TestCase):
         actual = self.pos_enc(inp)
         pt.testing.assert_close(actual, self.pos_enc.positional_encodings)
 
+    def test_2d_scaled(self):
+        inp = pt.ones(self.context, self.mod_dim, device='cpu')
+        actual = self.pos_enc(inp)
+        expected = self.pos_enc.positional_encodings + self.mod_dim ** 0.5
+        pt.testing.assert_close(actual, expected)
+
     def test_2d_short(self):
         inp = pt.zeros(self.context - 4, self.mod_dim, device='cpu')
         actual = self.pos_enc(inp)
@@ -138,6 +150,12 @@ class TestUsage(unittest.TestCase):
         actual = self.pos_enc(inp)
         pt.testing.assert_close(actual, self.pos_enc.positional_encodings)
 
+    def test_3d_scaled(self):
+        inp = pt.ones(1, self.context, self.mod_dim, device='cpu')
+        actual = self.pos_enc(inp)
+        expected = self.pos_enc.positional_encodings + self.mod_dim ** 0.5
+        pt.testing.assert_close(actual, expected)
+
     def test_3d_short(self):
         inp = pt.zeros(1, self.context - 5, self.mod_dim, device='cpu')
         actual = self.pos_enc(inp)
@@ -150,6 +168,12 @@ class TestUsage(unittest.TestCase):
         inp = pt.zeros(3, 1, self.context, self.mod_dim, device='cpu')
         actual = self.pos_enc(inp)
         pt.testing.assert_close(actual[0], self.pos_enc.positional_encodings)
+
+    def test_4d_scaled(self):
+        inp = pt.ones(3, 1, self.context, self.mod_dim, device='cpu')
+        actual = self.pos_enc(inp)
+        expected = self.pos_enc.positional_encodings + self.mod_dim ** 0.5
+        pt.testing.assert_close(actual[0], expected)
 
     def test_4d_short(self):
         inp = pt.zeros(3, 1, self.context - 6, self.mod_dim, device='cpu')

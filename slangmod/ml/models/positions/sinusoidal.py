@@ -37,6 +37,15 @@ class Sinusoidal(Block):
         self.mod_dim = mod_dim
         self.context = context
         self.register_buffer(
+            'scale',
+            pt.tensor(
+                math.sqrt(self.mod_dim),
+                dtype=dtype,
+                device=device
+            ),
+            persistent=False
+        )
+        self.register_buffer(
             'positional_encodings',
             self._precomputed_encodings_for(device, dtype),
             False
@@ -104,7 +113,8 @@ class Sinusoidal(Block):
             The input sequence(s) with sinusoidal positional encodings added.
 
         """
-        return src + self.positional_encodings[:, :src.size(-2), :]
+        seq_len = src.size(-2)
+        return self.scale * src + self.positional_encodings[:, :seq_len, :]
 
     def reset_parameters(self) -> None:
         """Does nothing because there are no internal parameters to reset."""

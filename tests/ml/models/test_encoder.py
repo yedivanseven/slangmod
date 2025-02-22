@@ -151,12 +151,6 @@ class TestDefaultAttributes(unittest.TestCase):
         self.assertIsInstance(self.encode.mod_dim, int)
         self.assertEqual(self.mod_dim, self.encode.mod_dim)
 
-    def test_has_scale(self):
-        self.assertTrue(hasattr(self.encode, 'scale'))
-
-    def test_scale(self):
-        self.assertEqual(self.mod_dim ** 0.5, self.encode.scale)
-
     def test_has_context(self):
         self.assertTrue(hasattr(self.encode, 'context'))
 
@@ -663,7 +657,7 @@ class TestUsage(unittest.TestCase):
             _ = self.encode(self.inp)
             self.assertEqual(1, forward.call_count)
             actual = forward.call_args[0][0]
-            pt.testing.assert_close(actual, self.out * self.mod_dim ** 0.5)
+            pt.testing.assert_close(actual, self.out)
 
     def test_drop_called(self):
         with patch.object(

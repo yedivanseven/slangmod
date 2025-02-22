@@ -1,5 +1,4 @@
 import warnings
-import math
 import torch as pt
 import torch.nn as ptn
 from swak.pt.types import Device, Dtype, Tensor, Tensors1T, Resettable
@@ -139,11 +138,6 @@ class Encoder(Resettable):
         return self.layers[0].mod_dim
 
     @property
-    def scale(self):
-        """Square root of model dimension for scaling the input embeddings."""
-        return math.sqrt(self.mod_dim)
-
-    @property
     def device(self) -> Device:
         """The device of all weights, biases, activations, etc. reside on."""
         return self.embed.weight.device
@@ -223,7 +217,7 @@ class Encoder(Resettable):
             # Add repeated and reshaped src_mask to attn_mask if present
             mask = src_mask if attn_mask is None else attn_mask + src_mask
 
-        out = self.drop(self.pos_enc(self.embed(src) * self.scale))
+        out = self.drop(self.pos_enc(self.embed(src)))
         for layer in self.layers:
             out = layer(out, mask, is_causal)
         return self.finalize(self.norm(out)).transpose(-1, -2).contiguous(),
