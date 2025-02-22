@@ -114,6 +114,7 @@ class SelfAttention(Block):
         """The dimension of each attention head."""
         return self.mod_dim // self.n_heads
 
+    # ToDo: Make this scale a registered buffer!
     @property
     def scale(self) -> float:
         """The scaling factor for the per-head attention weights."""
