@@ -75,6 +75,15 @@ class SelfAttention(Block):
         self.bias = bias
         self.dropout = dropout
         self.pos_enc = pos_enc.to(device=device, dtype=dtype)
+        self.register_buffer(
+            'scale',
+            pt.tensor(
+                1.0 / math.sqrt(self.head_dim),
+                dtype=dtype,
+                device=device
+            ),
+            persistent=False
+        )
         self.qkv = ptn.Linear(
             mod_dim,
             3 * mod_dim,
@@ -113,12 +122,6 @@ class SelfAttention(Block):
     def head_dim(self) -> int:
         """The dimension of each attention head."""
         return self.mod_dim // self.n_heads
-
-    # ToDo: Make this scale a registered buffer!
-    @property
-    def scale(self) -> float:
-        """The scaling factor for the per-head attention weights."""
-        return 1.0 / math.sqrt(self.head_dim)
 
     @property
     def has_pos_enc(self) -> bool:
