@@ -99,9 +99,9 @@ train
    * **summary** A copy of your entire config and, once training finishes,
      the training history and validation results. Because these file are also
      in TOML format, you could simply copy and paste them to re-run with the
-     exact same setting.
-   * **convergence** CSV files with (training loss, learning rate) pairs written
-     every :ref:`cb-freq` times to monitor convergence.
+     exact same settings.
+   * **convergence** CSV files with (training loss, learning rate, gradient norm)
+     triples written every :ref:`cb-freq` times to monitor convergence.
 
 monitor
    While training is running, you can open another terminal and invoke:
