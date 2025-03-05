@@ -70,7 +70,7 @@ can thus be quickly coded up.
 * Finally, with the virtual environment you just created active, open a console
   and type
   ```shell
-  slagnmod -h
+  slangmod -h
   ```
   to check that everything works.
 
