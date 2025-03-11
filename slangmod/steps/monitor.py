@@ -4,6 +4,7 @@ from ..config import config
 __all__ = ['monitor']
 
 
+# ToDo: Put a horizontal line with gradient threshold
 def monitor() -> tuple[()]:
     template = (
         resources
