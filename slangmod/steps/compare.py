@@ -5,12 +5,15 @@ __all__ = ['compare']
 
 
 def compare() -> tuple[()]:
-    template = (
-        resources
-        .files(config.package)
-        .joinpath('gnuplot', 'compare.gp')
-        .read_text()
+    template = resources.files(
+        config.package
+    ).joinpath(
+        'gnuplot',
+        'compare.gp'
+    ).read_text()
+    script = template.format(
+        folder=config.folder,
+        subdir=config.files.monitor
     )
-    script = template.format(folder=config.folder, subdir=config.files.monitor)
     print(script)  # noqa: T201
     return ()

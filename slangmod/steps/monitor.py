@@ -8,7 +8,8 @@ def monitor() -> tuple[()]:
     template = resources.files(
         config.package
     ).joinpath(
-        'gnuplot', 'monitor.gp'
+        'gnuplot',
+        'monitor.gp'
     ).read_text()
     script = template.format(
         folder=config.folder,
