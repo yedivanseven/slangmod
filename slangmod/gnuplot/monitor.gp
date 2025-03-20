@@ -10,6 +10,7 @@ set y2tics
 set style line 1 lc rgbcolor "#2ca02c"
 set style line 2 lc rgbcolor "#1f77b4"
 set style line 3 lc rgbcolor "#d62728"
+set arrow from graph 0, first {clip} to graph 1, first {clip} nohead dashtype 2
 
 plot FILE using 0:1 with lines axes x1y1 ls 1 title "training loss", \
      FILE using 0:2 with lines axes x1y2 ls 2 title "learning rate", \
