@@ -25,7 +25,7 @@ class SelfAttention(Block):
         The number of attention heads. Must integer divide `mod_dim` and the
         result must still be and even number.
     bias: bool, optional
-        Whether to add a learnable bias vectors in the projections from
+        Whether to add learnable bias vectors in the projections from
         input to query, key and value and the final out projection.
         Defaults to ``False``.
     dropout: float, optional
