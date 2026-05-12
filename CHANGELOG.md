@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # [Unreleased]
 - Moved scaling of token embeddings from encoder into sinusoidal positional encodings
 - Bumped dependencies
+- Fixed norm in encode layer
 
 ## [0.1.4] - 2025-02-14
 - Split settings for layer-norm bias, feedforward bias, and attention bias
